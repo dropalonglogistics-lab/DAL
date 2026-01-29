@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { Lock, Mail, User, AlertCircle, LogOut } from 'lucide-react';
+import { login, signup, signOut } from './actions';
+import { Lock, Mail, User, AlertCircle, LogOut, CheckCircle2 } from 'lucide-react';
 import styles from './login.module.css';
 
 export default function LoginPage() {
@@ -13,6 +14,7 @@ export default function LoginPage() {
     const [isSignUp, setIsSignUp] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [successMsg, setSuccessMsg] = useState<string | null>(null);
     const [user, setUser] = useState<any>(null);
 
     const router = useRouter();
@@ -29,41 +31,36 @@ export default function LoginPage() {
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);
+            if (_event === 'SIGNED_IN') {
+                router.refresh();
+            }
         });
 
         return () => {
             subscription.unsubscribe();
         };
-    }, [supabase.auth]);
+    }, [supabase.auth, router]);
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
+        setSuccessMsg(null);
+
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('password', password);
+        if (isSignUp) formData.append('fullName', fullName);
 
         try {
             if (isSignUp) {
-                const { error } = await supabase.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        data: {
-                            full_name: fullName,
-                        },
-                    },
-                });
-                if (error) throw error;
-                alert('Check your email for the confirmation link!');
+                const result = await signup(formData);
+                if (result?.error) throw new Error(result.error);
+                setSuccessMsg('Verification email sent! Check your inbox.');
             } else {
-                const { error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                });
-                if (error) throw error;
-                // Router push is not strictly needed as state change will re-render profile view, 
-                // but nice to refresh or redir if needed. 
-                // For now, staying on page becomes "Profile Page".
-                router.refresh();
+                const result = await login(formData);
+                if (result?.error) throw new Error(result.error);
+                // login action redirects to home, so we don't need much here
             }
         } catch (err: any) {
             setError(err.message);
@@ -73,8 +70,7 @@ export default function LoginPage() {
     };
 
     const handleSignOut = async () => {
-        await supabase.auth.signOut();
-        router.refresh();
+        await signOut();
     };
 
     // Profile View
@@ -121,6 +117,13 @@ export default function LoginPage() {
                     <div className={styles.error}>
                         <AlertCircle size={16} />
                         <span>{error}</span>
+                    </div>
+                )}
+
+                {successMsg && (
+                    <div className={styles.success}>
+                        <CheckCircle2 size={16} />
+                        <span>{successMsg}</span>
                     </div>
                 )}
 
