@@ -1,0 +1,38 @@
+.container {
+    padding: 40px 0;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.header p {
+    color: var(--text-secondary);
+}
+
+.alertList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 80px;
+    /* Space for FAB */
+}
+
+.emptyState {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    background-color: var(--card-bg);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--border);
+}

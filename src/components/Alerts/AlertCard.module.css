@@ -1,0 +1,58 @@
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    border-left-width: 4px;
+}
+
+.critical {
+    border-left-color: var(--color-error);
+}
+
+.warning {
+    border-left-color: var(--color-warning);
+}
+
+.info {
+    border-left-color: var(--color-primary);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.typeBadge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    text-transform: capitalize;
+    font-size: 0.9rem;
+}
+
+.time {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.description {
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}

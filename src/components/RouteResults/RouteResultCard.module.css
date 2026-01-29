@@ -1,0 +1,131 @@
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border-color: var(--color-primary);
+}
+
+.recommended {
+    border: 2px solid var(--color-success);
+}
+
+.badge {
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background-color: var(--color-success);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.fare {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.timeWrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.time {
+    font-weight: 500;
+}
+
+.traffic {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.trafficDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.clear .trafficDot {
+    background-color: var(--color-success);
+}
+
+.moderate .trafficDot {
+    background-color: var(--color-warning);
+}
+
+.heavy .trafficDot {
+    background-color: var(--color-error);
+}
+
+.warnings {
+    background-color: rgba(245, 158, 11, 0.1);
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+}
+
+.warningItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #B45309;
+    /* Dark Amber */
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.detailsBtn {
+    width: 100%;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.detailsBtn:hover {
+    background-color: var(--background);
+}
