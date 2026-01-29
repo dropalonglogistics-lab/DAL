@@ -100,12 +100,16 @@ export default function Navbar() {
 
                     {user ? (
                         <div className={styles.userMenu}>
+                            <Link href="/profile" className={styles.avatar} title="View Profile">
+                                {user.user_metadata?.avatar_url ? (
+                                    <img src={user.user_metadata.avatar_url} alt="Avatar" className={styles.avatarImage} />
+                                ) : (
+                                    user.email?.charAt(0).toUpperCase()
+                                )}
+                            </Link>
                             <button onClick={handleSignOut} className={styles.iconBtn} aria-label="Sign Out" title="Sign Out">
                                 <LogOut size={20} />
                             </button>
-                            <div className={styles.avatar}>
-                                {user.email?.charAt(0).toUpperCase()}
-                            </div>
                         </div>
                     ) : (
                         <Link href="/login" className={styles.loginBtn}>
@@ -134,15 +138,19 @@ export default function Navbar() {
                     <Link href="/community" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
                         Community
                     </Link>
-                    {!user && (
+                    {user ? (
+                        <>
+                            <Link href="/profile" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
+                                Profile
+                            </Link>
+                            <button className={styles.mobileNavLink} onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }} style={{ textAlign: 'left', width: '100%', border: 'none', background: 'none', cursor: 'pointer' }}>
+                                Sign Out
+                            </button>
+                        </>
+                    ) : (
                         <Link href="/login" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
                             Sign In
                         </Link>
-                    )}
-                    {user && (
-                        <button className={styles.mobileNavLink} onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }} style={{ textAlign: 'left' }}>
-                            Sign Out
-                        </button>
                     )}
                 </div>
             )}

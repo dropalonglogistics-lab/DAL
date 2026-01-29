@@ -107,6 +107,14 @@
     justify-content: center;
     font-weight: 700;
     font-size: 0.9rem;
+    overflow: hidden;
+    color: white;
+}
+
+.avatarImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .mobileMenuBtn {
