@@ -115,6 +115,62 @@
     font-weight: 800;
     overflow: hidden;
     border: 4px solid var(--border);
+    position: relative;
+    cursor: pointer;
+}
+
+.avatarOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+    cursor: pointer;
+}
+
+.avatarDisplay:hover .avatarOverlay {
+    opacity: 1;
+}
+
+.fileInput {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.avatarInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.uploadHint {
+    font-size: 0.8rem;
+    color: var(--color-primary);
+    margin-top: 4px;
+    font-weight: 600;
+}
+
+.progressBar {
+    width: 100%;
+    height: 4px;
+    background-color: var(--border);
+    border-radius: 2px;
+    margin-top: 20px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background-color: var(--color-success);
+    transition: width 0.3s ease-out;
 }
 
 .avatarImage {

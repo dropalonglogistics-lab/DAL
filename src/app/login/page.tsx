@@ -24,15 +24,16 @@ export default function LoginPage() {
         // Check for active session
         const checkUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
+            if (user) {
+                router.push('/profile');
+            }
         };
         checkUser();
 
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-            if (_event === 'SIGNED_IN') {
-                router.refresh();
+            if (session?.user) {
+                router.push('/profile');
             }
         });
 
@@ -60,7 +61,7 @@ export default function LoginPage() {
             } else {
                 const result = await login(formData);
                 if (result?.error) throw new Error(result.error);
-                // login action redirects to home, so we don't need much here
+                // login action redirects to /profile
             }
         } catch (err: any) {
             setError(err.message);
@@ -68,39 +69,6 @@ export default function LoginPage() {
             setLoading(false);
         }
     };
-
-    const handleSignOut = async () => {
-        await signOut();
-    };
-
-    // Profile View
-    if (user) {
-        return (
-            <div className={styles.container}>
-                <div className={styles.card}>
-                    <div className={styles.header}>
-                        <div className={styles.avatarLarge}>
-                            {user.email?.charAt(0).toUpperCase()}
-                        </div>
-                        <h1 className={styles.title}>Your Profile</h1>
-                        <p className={styles.subtitle}>{user.user_metadata?.full_name || 'User'}</p>
-                    </div>
-
-                    <div className={styles.profileDetails}>
-                        <div className={styles.detailRow}>
-                            <Mail size={18} className={styles.iconStatic} />
-                            <span>{user.email}</span>
-                        </div>
-                    </div>
-
-                    <button onClick={handleSignOut} className={styles.signOutBtn}>
-                        <LogOut size={18} />
-                        Sign Out
-                    </button>
-                </div>
-            </div>
-        );
-    }
 
     // Login/Signup View
     return (

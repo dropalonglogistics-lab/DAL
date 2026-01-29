@@ -13,6 +13,9 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const [uploadProgress, setUploadProgress] = useState(0)
+
     const supabase = createClient()
     const router = useRouter()
 
@@ -33,6 +36,7 @@ export default function ProfilePage() {
 
             if (data) {
                 setProfile(data)
+                setPreviewUrl(data.avatar_url)
             }
             setLoading(false)
         }
@@ -40,23 +44,66 @@ export default function ProfilePage() {
         loadProfile()
     }, [supabase, router])
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            const url = URL.createObjectURL(file)
+            setPreviewUrl(url)
+        }
+    }
+
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
         setSaving(true)
         setMessage(null)
+        setUploadProgress(10)
 
-        const formData = new FormData(e.currentTarget)
-        const result = await updateProfile(formData)
+        try {
+            const formData = new FormData(e.currentTarget)
+            const file = formData.get('avatarFile') as File
+            let avatarUrl = profile?.avatar_url
 
-        if (result?.error) {
-            setMessage({ type: 'error', text: result.error })
-        } else {
-            setMessage({ type: 'success', text: 'Profile updated successfully!' })
-            // Update local state to show change in avatar immediately
-            const newAvatar = formData.get('avatarUrl') as string
-            if (newAvatar) setProfile({ ...profile, avatar_url: newAvatar })
+            // 1. Handle File Upload if a new file is selected
+            if (file && file.size > 0) {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) throw new Error('Not authenticated')
+
+                const fileExt = file.name.split('.').pop()
+                const fileName = `${user.id}/${Math.random()}.${fileExt}`
+                const filePath = fileName
+
+                setUploadProgress(30)
+                const { error: uploadError, data } = await supabase.storage
+                    .from('avatars')
+                    .upload(filePath, file, { upsert: true })
+
+                if (uploadError) throw uploadError
+
+                setUploadProgress(60)
+                const { data: { publicUrl } } = supabase.storage
+                    .from('avatars')
+                    .getPublicUrl(filePath)
+
+                avatarUrl = publicUrl
+                formData.set('avatarUrl', avatarUrl)
+            }
+
+            setUploadProgress(80)
+            // 2. Update Database Profile
+            const result = await updateProfile(formData)
+
+            if (result?.error) {
+                setMessage({ type: 'error', text: result.error })
+            } else {
+                setMessage({ type: 'success', text: 'Profile updated successfully!' })
+                setProfile({ ...profile, avatar_url: avatarUrl })
+            }
+        } catch (err: any) {
+            setMessage({ type: 'error', text: err.message || 'An unexpected error occurred' })
+        } finally {
+            setSaving(false)
+            setUploadProgress(0)
         }
-        setSaving(false)
     }
 
     if (loading) {
@@ -76,29 +123,40 @@ export default function ProfilePage() {
                 <p className={styles.subtitle}>Manage your personal information and preferences.</p>
             </div>
 
-            <div className={styles.card}>
+            <div className={`${styles.card} animate-fade-in-up`}>
                 {message && (
-                    <div className={`${styles.message} ${styles[message.type]}`}>
+                    <div className={`${styles.message} ${styles[message.type]} animate-fade-in`}>
                         {message.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
                         {message.text}
                     </div>
                 )}
 
-                <div className={styles.avatarSection}>
-                    <div className={styles.avatarDisplay}>
-                        {profile?.avatar_url ? (
-                            <img src={profile.avatar_url} alt="Profile" className={styles.avatarImage} />
-                        ) : (
-                            profile?.full_name?.charAt(0).toUpperCase() || profile?.email?.charAt(0).toUpperCase()
-                        )}
-                    </div>
-                    <div>
-                        <h3 style={{ margin: 0 }}>{profile?.full_name || 'User'}</h3>
-                        <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>{profile?.email}</p>
-                    </div>
-                </div>
-
                 <form onSubmit={handleSubmit}>
+                    <div className={styles.avatarSection}>
+                        <div className={styles.avatarDisplay}>
+                            {previewUrl ? (
+                                <img src={previewUrl} alt="Preview" className={styles.avatarImage} />
+                            ) : (
+                                profile?.full_name?.charAt(0).toUpperCase() || profile?.email?.charAt(0).toUpperCase()
+                            )}
+                            <label className={styles.avatarOverlay}>
+                                <Camera size={24} />
+                                <input
+                                    type="file"
+                                    name="avatarFile"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className={styles.fileInput}
+                                />
+                            </label>
+                        </div>
+                        <div className={styles.avatarInfo}>
+                            <h3 style={{ margin: 0 }}>{profile?.full_name || 'User'}</h3>
+                            <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>{profile?.email}</p>
+                            <p className={styles.uploadHint}>Click the icon to change your photo</p>
+                        </div>
+                    </div>
+
                     <div className={styles.section}>
                         <div className={styles.sectionTitle}>
                             <User size={20} /> Personal Details
@@ -112,6 +170,7 @@ export default function ProfilePage() {
                                     defaultValue={profile?.full_name || ''}
                                     className={styles.input}
                                     required
+                                    placeholder="e.g. John Doe"
                                 />
                             </div>
                             <div className={styles.formGroup}>
@@ -128,7 +187,7 @@ export default function ProfilePage() {
 
                     <div className={styles.section}>
                         <div className={styles.sectionTitle}>
-                            <MapPin size={20} /> Location & Identity
+                            <MapPin size={20} /> Location Information
                         </div>
                         <div className={styles.grid}>
                             <div className={`${styles.formGroup} ${styles.fullWidth}`}>
@@ -141,16 +200,7 @@ export default function ProfilePage() {
                                     placeholder="Street, City, Country"
                                 />
                             </div>
-                            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                                <label className={styles.label}>Profile Picture URL</label>
-                                <input
-                                    type="url"
-                                    name="avatarUrl"
-                                    defaultValue={profile?.avatar_url || ''}
-                                    className={styles.input}
-                                    placeholder="https://example.com/photo.jpg"
-                                />
-                            </div>
+                            <input type="hidden" name="avatarUrl" defaultValue={profile?.avatar_url || ''} />
                         </div>
                     </div>
 
@@ -159,10 +209,19 @@ export default function ProfilePage() {
                             <LogOut size={18} /> Sign Out
                         </button>
                         <button type="submit" disabled={saving} className={styles.saveBtn}>
-                            {saving ? 'Saving...' : 'Save Changes'}
+                            {saving ? (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <div className="spinner-small"></div> Saving...
+                                </span>
+                            ) : 'Save Changes'}
                         </button>
                     </div>
                 </form>
+                {saving && uploadProgress > 0 && (
+                    <div className={styles.progressBar}>
+                        <div className={styles.progressFill} style={{ width: `${uploadProgress}%` }}></div>
+                    </div>
+                )}
             </div>
         </div>
     )
