@@ -1,4 +1,7 @@
-import { Clock, AlertTriangle, ChevronRight } from 'lucide-react';
+'use client';
+
+import { useState } from 'react';
+import { Clock, AlertTriangle, ChevronRight, MapPin, CreditCard, Info } from 'lucide-react';
 import styles from './RouteResultCard.module.css';
 
 interface RouteResultProps {
@@ -18,8 +21,15 @@ export default function RouteResultCard({
     warnings,
     isRecommended
 }: RouteResultProps) {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const toggleExpand = () => setIsExpanded(!isExpanded);
+
     return (
-        <div className={`${styles.card} ${isRecommended ? styles.recommended : ''}`}>
+        <div
+            className={`${styles.card} ${isRecommended ? styles.recommended : ''} ${isExpanded ? styles.expanded : ''}`}
+            onClick={toggleExpand}
+        >
             {isRecommended && <div className={styles.badge}>Recommended</div>}
 
             <div className={styles.header}>
@@ -39,6 +49,32 @@ export default function RouteResultCard({
                 </div>
             </div>
 
+            {isExpanded && (
+                <div className={styles.detailsSection}>
+                    <div className={styles.detailItem}>
+                        <MapPin size={16} className={styles.detailIcon} />
+                        <div>
+                            <strong>Route Path</strong>
+                            <p>Direct road transit via major PH arteries.</p>
+                        </div>
+                    </div>
+                    <div className={styles.detailItem}>
+                        <CreditCard size={16} className={styles.detailIcon} />
+                        <div>
+                            <strong>Estimated Cost</strong>
+                            <p>Standard fare: {fare}</p>
+                        </div>
+                    </div>
+                    <div className={styles.detailItem}>
+                        <Info size={16} className={styles.detailIcon} />
+                        <div>
+                            <strong>Instructions</strong>
+                            <p>Wait at designated bus stops or flag down transit.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {warnings && warnings.length > 0 && (
                 <div className={styles.warnings}>
                     {warnings.map((warning, idx) => (
@@ -50,9 +86,9 @@ export default function RouteResultCard({
                 </div>
             )}
 
-            <button className={styles.detailsBtn}>
-                View Details
-                <ChevronRight size={16} />
+            <button className={styles.detailsBtn} onClick={(e) => e.stopPropagation()}>
+                {isExpanded ? 'Hide Details' : 'View Details'}
+                <ChevronRight size={16} style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
             </button>
         </div>
     );

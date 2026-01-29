@@ -27,8 +27,8 @@ export default async function Home({ searchParams }: HomeProps) {
         <div className={styles.pageContainer}>
             <section className={styles.searchSection}>
                 <div className={styles.heroText}>
-                    <h1>Move Smarter in Your City</h1>
-                    <p>Real-time routing for Taxi, Keke, and Bus.</p>
+                    <h1>Move Smarter in Port Harcourt</h1>
+                    <p>Real-time road transit routing for Taxi, Keke, and Bus.</p>
                 </div>
                 <RouteSearch />
                 {/* Debug Info for now */}
@@ -57,7 +57,7 @@ export default async function Home({ searchParams }: HomeProps) {
                         ))
                     ) : (
                         <div className={styles.emptyState}>
-                            <p>No routes found. Try &quot;Wuse Zone 4&quot; to &quot;Central Area&quot;.</p>
+                            <p>No routes found. Try &quot;Rumuokoro&quot; to &quot;Mile 1&quot;.</p>
                         </div>
                     )}
                 </div>
