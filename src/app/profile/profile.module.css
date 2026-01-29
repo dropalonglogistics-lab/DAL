@@ -1,8 +1,14 @@
 .container {
     max-width: 800px;
-    margin: 40px auto;
-    padding: 0 20px;
+    margin: 20px auto;
+    padding: 0 16px;
     animation: fadeIn 0.5s ease-out;
+}
+
+@media (min-width: 768px) {
+    .container {
+        margin: 40px auto;
+    }
 }
 
 @keyframes fadeIn {
@@ -18,23 +24,43 @@
 }
 
 .title {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 800;
     margin-bottom: 8px;
     color: var(--color-primary);
 }
 
+@media (min-width: 768px) {
+    .title {
+        font-size: 2rem;
+    }
+}
+
 .subtitle {
     color: var(--text-secondary);
-    margin-bottom: 32px;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+}
+
+@media (min-width: 768px) {
+    .subtitle {
+        margin-bottom: 32px;
+        font-size: 1rem;
+    }
 }
 
 .card {
     background-color: var(--card-bg);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
-    padding: 32px;
+    padding: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 768px) {
+    .card {
+        padding: 32px;
+    }
 }
 
 .section {
@@ -42,12 +68,18 @@
 }
 
 .sectionTitle {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 700;
     margin-bottom: 16px;
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+@media (min-width: 768px) {
+    .sectionTitle {
+        font-size: 1.25rem;
+    }
 }
 
 .grid {
@@ -85,6 +117,7 @@
     background-color: var(--background);
     font-size: 1rem;
     transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
 }
 
 .input:focus {
@@ -95,28 +128,39 @@
 
 .avatarSection {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 24px;
+    text-align: center;
+    gap: 20px;
     margin-bottom: 32px;
     padding-bottom: 32px;
     border-bottom: 1px solid var(--border);
 }
 
+@media (min-width: 640px) {
+    .avatarSection {
+        flex-direction: row;
+        text-align: left;
+        gap: 24px;
+    }
+}
+
 .avatarDisplay {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     background-color: var(--color-primary);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 800;
     overflow: hidden;
     border: 4px solid var(--border);
     position: relative;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .avatarOverlay {
@@ -181,11 +225,19 @@
 
 .actions {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column-reverse;
+    gap: 16px;
     margin-top: 32px;
     padding-top: 24px;
     border-top: 1px solid var(--border);
+}
+
+@media (min-width: 640px) {
+    .actions {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
 }
 
 .saveBtn {
@@ -197,6 +249,13 @@
     border: none;
     cursor: pointer;
     transition: transform 0.2s, background-color 0.2s;
+    width: 100%;
+}
+
+@media (min-width: 640px) {
+    .saveBtn {
+        width: auto;
+    }
 }
 
 .saveBtn:hover:not(:disabled) {
@@ -219,8 +278,16 @@
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     transition: background-color 0.2s;
+    width: 100%;
+}
+
+@media (min-width: 640px) {
+    .signOutBtn {
+        width: auto;
+    }
 }
 
 .signOutBtn:hover {
