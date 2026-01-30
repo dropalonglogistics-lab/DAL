@@ -60,7 +60,7 @@ export default async function Home({ searchParams }: HomeProps) {
             <section className={styles.searchSection}>
                 <div className={styles.heroText}>
                     <h1>Move Smarter in Port Harcourt</h1>
-                    <p>Intelligent road transit routing. No manual vehicle selection needed.</p>
+                    <p>Intelligent road transit routing. No manual vehicle selection needed. <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>(v1.0.5)</span></p>
                 </div>
 
                 <div className={styles.shortcuts}>

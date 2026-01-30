@@ -49,6 +49,9 @@ export default function RouteResultCard({
         }
     }
 
+    // Final safety check
+    const finalItinerary = Array.isArray(itinerary) ? itinerary : [];
+
     return (
         <div
             className={`${styles.card} ${isRecommended ? styles.recommended : ''} ${isExpanded ? styles.expanded : ''}`}
@@ -81,13 +84,13 @@ export default function RouteResultCard({
 
             {isExpanded && (
                 <div className={styles.detailsSection}>
-                    {itinerary && Array.isArray(itinerary) && itinerary.length > 0 ? (
+                    {finalItinerary && finalItinerary.length > 0 ? (
                         <div className={styles.itinerary}>
                             <div className={styles.itineraryHeader}>
                                 <Navigation size={18} />
                                 <strong>Precise Directions & Stops</strong>
                             </div>
-                            {itinerary.map((step, idx) => (
+                            {finalItinerary.map((step, idx) => (
                                 <div key={idx} className={`${styles.step} ${step.type === 'switch' ? styles.stepSwitch : ''}`}>
                                     <div className={styles.stepDot}></div>
                                     <div className={styles.stepContent}>
