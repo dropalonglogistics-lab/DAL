@@ -197,8 +197,17 @@
     gap: 16px;
 }
 
-.itineraryLine {
-    position: relative;
+.itineraryHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: var(--color-primary);
+}
+
+.itineraryHeader strong {
+    font-size: 0.9rem;
+    color: var(--text-primary);
 }
 
 .step {
@@ -227,6 +236,14 @@
 .stepContent {
     display: flex;
     flex-direction: column;
+    flex: 1;
+}
+
+.stepHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 }
 
 .stepLocation {
@@ -241,14 +258,14 @@
     margin: 2px 0;
 }
 
-.stepVehicle {
-    font-size: 0.75rem;
+.stepVehicleBadge {
+    font-size: 0.65rem;
     font-weight: 700;
     color: var(--color-primary);
+    background-color: rgba(67, 97, 238, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
     text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 4px;
 }
 
 .fareRange {

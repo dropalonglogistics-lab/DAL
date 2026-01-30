@@ -18,10 +18,30 @@ export default async function Home({ searchParams }: HomeProps) {
 
     let query = supabase.from('routes').select('*');
 
-    if (origin) query = query.ilike('origin', `%${origin}%`);
-    if (destination) query = query.ilike('destination', `%${destination}%`);
+    const cleanOrigin = origin.trim();
+    const cleanDest = destination.trim();
 
-    const { data: routes, error } = await query;
+    if (cleanOrigin && cleanDest) {
+        // If both provided, try to find a direct match in either direction
+        query = query.or(`origin.ilike.%${cleanOrigin}%,destination.ilike.%${cleanDest}%,origin.ilike.%${cleanDest}%,destination.ilike.%${cleanOrigin}%`);
+    } else if (cleanOrigin || cleanDest) {
+        const term = cleanOrigin || cleanDest;
+        query = query.or(`origin.ilike.%${term}%,destination.ilike.%${term}%`);
+    }
+
+    let { data: routes, error } = await query;
+
+    // Reliability: If search returns nothing, show everything as "Recommended"
+    const isShowingSearch = !!(cleanOrigin || cleanDest);
+    let resultsTitle = isShowingSearch ? `Search results for "${cleanDest || cleanOrigin}"` : 'Recommended for You';
+
+    if (!routes || routes.length === 0) {
+        const { data: allRoutes } = await supabase.from('routes').select('*').limit(10);
+        routes = allRoutes;
+        if (isShowingSearch) {
+            resultsTitle = `No exact match for your search. Showing all available routes:`;
+        }
+    }
 
     // Fetch alerts for "Highlights"
     const { data: alerts } = await supabase
@@ -44,7 +64,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 </div>
 
                 <div className={styles.shortcuts}>
-                    <Link href="/?search=true" className={styles.shortcutCard}>
+                    <Link href="#search" className={styles.shortcutCard}>
                         <Search size={24} />
                         <span className={styles.shortcutLabel}>Find Route</span>
                     </Link>
@@ -112,8 +132,11 @@ export default async function Home({ searchParams }: HomeProps) {
 
             <section className={styles.resultsSection}>
                 <div className={styles.sectionHeader}>
-                    <h2>Recommended for You</h2>
-                    <span className={styles.subtext}>AI Optimized</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <h2>{resultsTitle}</h2>
+                        {isShowingSearch && routes && <span className={styles.resultsCount}>{routes.length} found</span>}
+                    </div>
+                    <span className={styles.subtext}>{isShowingSearch ? 'Smart Search' : 'AI Optimized'}</span>
                 </div>
 
                 <div className={styles.resultsGrid}>

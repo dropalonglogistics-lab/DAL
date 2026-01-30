@@ -31,12 +31,23 @@ export default function RouteResultCard({
     warnings,
     isRecommended,
     vehicleType,
-    itinerary,
+    itinerary: initialItinerary,
     fareRange
 }: RouteResultProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const toggleExpand = () => setIsExpanded(!isExpanded);
+
+    // Robust parsing for itinerary
+    let itinerary = initialItinerary;
+    if (typeof initialItinerary === 'string') {
+        try {
+            itinerary = JSON.parse(initialItinerary);
+        } catch (e) {
+            console.error("Failed to parse itinerary JSON", e);
+            itinerary = [];
+        }
+    }
 
     return (
         <div
@@ -70,30 +81,31 @@ export default function RouteResultCard({
 
             {isExpanded && (
                 <div className={styles.detailsSection}>
-                    {itinerary && itinerary.length > 0 ? (
+                    {itinerary && Array.isArray(itinerary) && itinerary.length > 0 ? (
                         <div className={styles.itinerary}>
-                            <strong>Itinerary & Switches</strong>
+                            <div className={styles.itineraryHeader}>
+                                <Navigation size={18} />
+                                <strong>Precise Directions & Stops</strong>
+                            </div>
                             {itinerary.map((step, idx) => (
                                 <div key={idx} className={`${styles.step} ${step.type === 'switch' ? styles.stepSwitch : ''}`}>
                                     <div className={styles.stepDot}></div>
                                     <div className={styles.stepContent}>
-                                        <span className={styles.stepLocation}>{step.location}</span>
+                                        <div className={styles.stepHeader}>
+                                            <span className={styles.stepLocation}>{step.location}</span>
+                                            {step.vehicle && <span className={styles.stepVehicleBadge}>{step.vehicle}</span>}
+                                        </div>
                                         <p className={styles.stepInstruction}>{step.instruction}</p>
-                                        {step.vehicle && (
-                                            <span className={styles.stepVehicle}>
-                                                <Navigation size={12} /> {step.vehicle}
-                                            </span>
-                                        )}
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
                         <div className={styles.detailItem}>
-                            <MapPin size={16} className={styles.detailIcon} />
+                            <Info size={16} className={styles.detailIcon} />
                             <div>
-                                <strong>Route Path</strong>
-                                <p>Direct road transit via major PH arteries.</p>
+                                <strong>Direct Route Intelligence</strong>
+                                <p>This is a standard road path. Follow the vehicle and fare details above for the best experience.</p>
                             </div>
                         </div>
                     )}
@@ -101,8 +113,8 @@ export default function RouteResultCard({
                     <div className={styles.detailItem}>
                         <CreditCard size={16} className={styles.detailIcon} />
                         <div>
-                            <strong>Estimated Cost</strong>
-                            <p>{fareRange ? `Range: ${fareRange}` : `Standard fare: ${fare}`}</p>
+                            <strong>Fare Intelligence</strong>
+                            <p>{fareRange ? `Verified Range: ${fareRange}` : `Standard fare observed at ${fare}`}</p>
                         </div>
                     </div>
                 </div>

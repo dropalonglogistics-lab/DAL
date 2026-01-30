@@ -18,16 +18,20 @@ export default function RouteSearch() {
         setDestination(searchParams.get('destination') || '');
     }, [searchParams]);
 
-    const handleSearch = () => {
+    const handleSearch = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         const params = new URLSearchParams();
-        if (origin) params.set('origin', origin);
-        if (destination) params.set('destination', destination);
+        const trimmedOrigin = origin.trim();
+        const trimmedDestination = destination.trim();
+
+        if (trimmedOrigin) params.set('origin', trimmedOrigin);
+        if (trimmedDestination) params.set('destination', trimmedDestination);
 
         router.push(`/?${params.toString()}`);
     };
 
     return (
-        <div className={styles.container}>
+        <form id="search" className={styles.container} onSubmit={handleSearch}>
             <h2 className={styles.title}>Where to?</h2>
 
             <div className={styles.inputGroup}>
@@ -63,10 +67,10 @@ export default function RouteSearch() {
             </div>
 
 
-            <button className={styles.searchBtn} onClick={handleSearch}>
+            <button type="submit" className={styles.searchBtn}>
                 <Search size={20} />
                 Find Best Route
             </button>
-        </div>
+        </form>
     );
 }
