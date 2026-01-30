@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { Moon, Sun, Menu, User, Map, AlertTriangle, Users, Lock, LogOut } from 'lucide-react';
+import { Moon, Sun, Menu, User, Map, AlertTriangle, Users, Lock, LogOut, Navigation } from 'lucide-react';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
