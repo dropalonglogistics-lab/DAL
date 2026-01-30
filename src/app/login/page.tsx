@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { login, signup, signOut } from './actions';
@@ -133,6 +134,12 @@ export default function LoginPage() {
                             className={styles.input}
                         />
                     </div>
+
+                    {!isSignUp && (
+                        <div className={styles.forgotPasswordLink}>
+                            <Link href="/forgot-password">Forgot Password?</Link>
+                        </div>
+                    )}
 
                     <button type="submit" className={styles.submitBtn} disabled={loading}>
                         {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Sign In')}

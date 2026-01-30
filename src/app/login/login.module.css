@@ -144,6 +144,22 @@
     color: var(--text-secondary);
 }
 
+.forgotPasswordLink {
+    text-align: right;
+    margin-top: -8px;
+    margin-bottom: 8px;
+}
+
+.forgotPasswordLink a {
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.forgotPasswordLink a:hover {
+    text-decoration: underline;
+}
+
 .toggleBtn {
     background: none;
     border: none;
