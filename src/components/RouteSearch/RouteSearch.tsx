@@ -30,6 +30,12 @@ export default function RouteSearch() {
         router.push(`/?${params.toString()}`);
     };
 
+    const handleClear = () => {
+        setOrigin('');
+        setDestination('');
+        router.push('/');
+    };
+
     return (
         <form id="search" className={styles.container} onSubmit={handleSearch}>
             <h2 className={styles.title}>Where to?</h2>
@@ -67,10 +73,17 @@ export default function RouteSearch() {
             </div>
 
 
-            <button type="submit" className={styles.searchBtn}>
-                <Search size={20} />
-                Find Best Route
-            </button>
+            <div className={styles.buttonGroup}>
+                <button type="submit" className={styles.searchBtn}>
+                    <Search size={20} />
+                    Find Best Route
+                </button>
+                {(origin || destination) && (
+                    <button type="button" className={styles.clearBtn} onClick={handleClear}>
+                        Reset Search
+                    </button>
+                )}
+            </div>
         </form>
     );
 }

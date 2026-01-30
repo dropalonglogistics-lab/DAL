@@ -5,6 +5,8 @@ import RouteResultCard from '@/components/RouteResults/RouteResultCard';
 import { createClient } from '@/utils/supabase/server';
 import styles from './page.module.css';
 
+export const dynamic = 'force-dynamic';
+
 interface HomeProps {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
