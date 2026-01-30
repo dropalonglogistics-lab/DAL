@@ -38,10 +38,28 @@
     margin-bottom: 8px;
 }
 
+.titleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .title {
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--text-primary);
+}
+
+.vehicleBadge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    background-color: rgba(67, 97, 238, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    width: fit-content;
 }
 
 .fare {
@@ -168,6 +186,75 @@
     font-size: 0.95rem;
     color: var(--text-primary);
     margin: 2px 0 0 0;
+}
+
+.itinerary {
+    margin: 12px 0;
+    padding-left: 12px;
+    border-left: 2px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.itineraryLine {
+    position: relative;
+}
+
+.step {
+    display: flex;
+    gap: 12px;
+    position: relative;
+}
+
+.stepDot {
+    position: absolute;
+    left: -19px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--card-bg);
+    border: 2px solid var(--color-primary);
+    top: 4px;
+    z-index: 1;
+}
+
+.stepSwitch .stepDot {
+    border-color: var(--color-warning);
+    background-color: var(--color-warning);
+}
+
+.stepContent {
+    display: flex;
+    flex-direction: column;
+}
+
+.stepLocation {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stepInstruction {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 2px 0;
+}
+
+.stepVehicle {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.fareRange {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
 }
 
 @keyframes fadeIn {

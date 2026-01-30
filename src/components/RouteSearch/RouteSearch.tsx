@@ -11,21 +11,17 @@ export default function RouteSearch() {
 
     const [origin, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
-    const [vehicle, setVehicle] = useState('taxi');
 
     useEffect(() => {
         // Sync state with URL params on mount/update
         setOrigin(searchParams.get('origin') || '');
         setDestination(searchParams.get('destination') || '');
-        const vehicleParam = searchParams.get('vehicle');
-        if (vehicleParam) setVehicle(vehicleParam);
     }, [searchParams]);
 
     const handleSearch = () => {
         const params = new URLSearchParams();
         if (origin) params.set('origin', origin);
         if (destination) params.set('destination', destination);
-        if (vehicle) params.set('vehicle', vehicle);
 
         router.push(`/?${params.toString()}`);
     };
@@ -66,26 +62,6 @@ export default function RouteSearch() {
                 />
             </div>
 
-            <div className={styles.vehicleSelector}>
-                <button
-                    className={`${styles.vehicleBtn} ${vehicle === 'taxi' ? styles.active : ''}`}
-                    onClick={() => setVehicle('taxi')}
-                >
-                    Taxi
-                </button>
-                <button
-                    className={`${styles.vehicleBtn} ${vehicle === 'keke' ? styles.active : ''}`}
-                    onClick={() => setVehicle('keke')}
-                >
-                    Keke
-                </button>
-                <button
-                    className={`${styles.vehicleBtn} ${vehicle === 'bus' ? styles.active : ''}`}
-                    onClick={() => setVehicle('bus')}
-                >
-                    Bus
-                </button>
-            </div>
 
             <button className={styles.searchBtn} onClick={handleSearch}>
                 <Search size={20} />

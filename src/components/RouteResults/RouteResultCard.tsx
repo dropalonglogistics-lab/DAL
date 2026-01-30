@@ -1,8 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, AlertTriangle, ChevronRight, MapPin, CreditCard, Info } from 'lucide-react';
+import { Clock, AlertTriangle, ChevronRight, MapPin, CreditCard, Info, Navigation } from 'lucide-react';
 import styles from './RouteResultCard.module.css';
+
+interface ItineraryStep {
+    type: 'start' | 'stop' | 'switch' | 'end';
+    location: string;
+    instruction: string;
+    vehicle?: string;
+}
 
 interface RouteResultProps {
     title: string;
@@ -11,6 +18,9 @@ interface RouteResultProps {
     traffic: 'clear' | 'moderate' | 'heavy';
     warnings?: string[];
     isRecommended?: boolean;
+    vehicleType?: string;
+    itinerary?: ItineraryStep[];
+    fareRange?: string;
 }
 
 export default function RouteResultCard({
@@ -19,7 +29,10 @@ export default function RouteResultCard({
     fare,
     traffic,
     warnings,
-    isRecommended
+    isRecommended,
+    vehicleType,
+    itinerary,
+    fareRange
 }: RouteResultProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -33,8 +46,14 @@ export default function RouteResultCard({
             {isRecommended && <div className={styles.badge}>Recommended</div>}
 
             <div className={styles.header}>
-                <h3 className={styles.title}>{title}</h3>
-                <span className={styles.fare}>{fare}</span>
+                <div className={styles.titleGroup}>
+                    <h3 className={styles.title}>{title}</h3>
+                    {vehicleType && <span className={styles.vehicleBadge}>{vehicleType}</span>}
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                    <span className={styles.fare}>{fare}</span>
+                    {fareRange && <div className={styles.fareRange}>{fareRange}</div>}
+                </div>
             </div>
 
             <div className={styles.meta}>
@@ -51,25 +70,39 @@ export default function RouteResultCard({
 
             {isExpanded && (
                 <div className={styles.detailsSection}>
-                    <div className={styles.detailItem}>
-                        <MapPin size={16} className={styles.detailIcon} />
-                        <div>
-                            <strong>Route Path</strong>
-                            <p>Direct road transit via major PH arteries.</p>
+                    {itinerary && itinerary.length > 0 ? (
+                        <div className={styles.itinerary}>
+                            <strong>Itinerary & Switches</strong>
+                            {itinerary.map((step, idx) => (
+                                <div key={idx} className={`${styles.step} ${step.type === 'switch' ? styles.stepSwitch : ''}`}>
+                                    <div className={styles.stepDot}></div>
+                                    <div className={styles.stepContent}>
+                                        <span className={styles.stepLocation}>{step.location}</span>
+                                        <p className={styles.stepInstruction}>{step.instruction}</p>
+                                        {step.vehicle && (
+                                            <span className={styles.stepVehicle}>
+                                                <Navigation size={12} /> {step.vehicle}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    </div>
+                    ) : (
+                        <div className={styles.detailItem}>
+                            <MapPin size={16} className={styles.detailIcon} />
+                            <div>
+                                <strong>Route Path</strong>
+                                <p>Direct road transit via major PH arteries.</p>
+                            </div>
+                        </div>
+                    )}
+
                     <div className={styles.detailItem}>
                         <CreditCard size={16} className={styles.detailIcon} />
                         <div>
                             <strong>Estimated Cost</strong>
-                            <p>Standard fare: {fare}</p>
-                        </div>
-                    </div>
-                    <div className={styles.detailItem}>
-                        <Info size={16} className={styles.detailIcon} />
-                        <div>
-                            <strong>Instructions</strong>
-                            <p>Wait at designated bus stops or flag down transit.</p>
+                            <p>{fareRange ? `Range: ${fareRange}` : `Standard fare: ${fare}`}</p>
                         </div>
                     </div>
                 </div>
@@ -86,7 +119,7 @@ export default function RouteResultCard({
                 </div>
             )}
 
-            <button className={styles.detailsBtn} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.detailsBtn} onClick={(e) => { e.stopPropagation(); toggleExpand(); }}>
                 {isExpanded ? 'Hide Details' : 'View Details'}
                 <ChevronRight size={16} style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
             </button>

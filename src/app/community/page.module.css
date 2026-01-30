@@ -40,17 +40,18 @@
     font-size: 1.25rem;
     color: var(--text-secondary);
     line-height: 1.6;
+    margin-bottom: 24px;
 }
 
 .statsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 24px;
 }
 
 .statCard {
     background-color: var(--card-bg);
-    padding: 32px;
+    padding: 24px;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
     text-align: center;
@@ -64,10 +65,10 @@
 
 .statValue {
     display: block;
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 800;
     color: var(--color-primary);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .statLabel {
@@ -75,7 +76,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
 }
 
 .section {
@@ -103,7 +104,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 24px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border);
 }
 
@@ -114,18 +115,18 @@
 .userInfo {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
 }
 
 .rank {
     font-weight: 800;
     color: var(--text-secondary);
-    width: 24px;
+    width: 20px;
 }
 
 .avatar {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     background-color: var(--background);
     border-radius: 50%;
     display: flex;
@@ -134,15 +135,119 @@
     font-weight: 700;
     color: var(--color-primary);
     border: 2px solid var(--border);
+    font-size: 0.8rem;
 }
 
 .userName {
     font-weight: 600;
+    font-size: 0.95rem;
 }
 
 .userPoints {
     font-weight: 700;
     color: var(--color-success);
+    font-size: 0.9rem;
+}
+
+.heroActions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.primaryBtn {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.primaryBtn:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-2px);
+}
+
+.secondaryBtn {
+    background-color: transparent;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    padding: 10px 24px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    transition: all 0.2s;
+}
+
+.secondaryBtn:hover {
+    background-color: rgba(15, 42, 68, 0.05);
+}
+
+.mainGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+}
+
+@media (min-width: 1024px) {
+    .mainGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.suggestionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.suggestionCard {
+    background-color: var(--card-bg);
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+}
+
+.suggestionCard:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.suggestionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.suggestionBadge {
+    font-size: 0.75rem;
+    background-color: var(--background);
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.proTips {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-style: italic;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.suggestionFooter {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 600;
 }
 
 .cta {
@@ -168,6 +273,11 @@
     font-size: 1.1rem;
 }
 
+.ctaButtons {
+    display: flex;
+    gap: 16px;
+}
+
 .ctaButton {
     background-color: var(--color-success);
     color: white;
@@ -188,11 +298,20 @@
         font-size: 2.25rem;
     }
 
+    .heroActions {
+        flex-direction: column;
+    }
+
     .statValue {
         font-size: 2rem;
     }
 
     .cta {
         padding: 32px 20px;
+    }
+
+    .ctaButtons {
+        flex-direction: column;
+        width: 100%;
     }
 }

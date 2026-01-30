@@ -87,6 +87,10 @@ export default function Navbar() {
                         <Users size={18} />
                         Community
                     </Link>
+                    <Link href="/suggest-route" className={`${styles.navLink} ${styles.suggestLink}`}>
+                        <Navigation size={18} />
+                        Suggest Route
+                    </Link>
                     <button className={`${styles.navLink} ${styles.premium}`} disabled>
                         <Lock size={14} />
                         Premium
@@ -137,6 +141,9 @@ export default function Navbar() {
                     </Link>
                     <Link href="/community" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
                         Community
+                    </Link>
+                    <Link href="/suggest-route" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
+                        Suggest Route
                     </Link>
                     {user ? (
                         <>
