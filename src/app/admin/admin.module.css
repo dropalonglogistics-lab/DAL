@@ -81,9 +81,15 @@
 .title {
     font-size: 1.8rem;
     font-weight: 800;
-    margin-bottom: 32px;
+    margin-bottom: 8px;
     color: var(--text-primary);
     letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
 }
 
 .statsGrid {
