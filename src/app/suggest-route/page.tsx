@@ -26,10 +26,24 @@ export default function SuggestRoutePage() {
             setMessage({ type: 'error', text: result.error })
             setLoading(false)
         } else {
-            setMessage({ type: 'success', text: view === 'route' ? 'Thank you! Your route suggestion has been shared.' : 'Report submitted successfully. Stay safe!' })
-            setTimeout(() => {
-                router.push(view === 'route' ? '/community' : '/alerts')
-            }, 2000)
+            const successText = view === 'route'
+                ? 'Thank you! Your route suggestion has been shared.'
+                : 'Report submitted successfully. Stay safe!'
+
+            setMessage({
+                type: 'success',
+                text: result.isGuest
+                    ? `${successText} Why not sign up to track your contributions?`
+                    : successText
+            })
+
+            if (!result.isGuest) {
+                setTimeout(() => {
+                    router.push(view === 'route' ? '/community' : '/alerts')
+                }, 2000)
+            } else {
+                setLoading(false) // Keep them on the page to see the CTA
+            }
         }
     }
 
@@ -72,6 +86,15 @@ export default function SuggestRoutePage() {
                 )}
 
                 <form onSubmit={handleSubmit} className={styles.form}>
+                    {message?.type === 'success' && !loading && (
+                        <div className={styles.guestCTA}>
+                            <p>Join the community to get more out of DAL!</p>
+                            <div className={styles.ctaButtons}>
+                                <Link href="/auth/signup" className={styles.ctaBtnPrimary}>Join DAL</Link>
+                                <Link href="/login" className={styles.ctaBtnSecondary}>Login</Link>
+                            </div>
+                        </div>
+                    )}
                     {view === 'route' ? (
                         <>
                             <div className={styles.row}>

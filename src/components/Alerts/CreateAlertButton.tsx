@@ -14,12 +14,7 @@ export default function CreateAlertButton() {
     const router = useRouter();
     const supabase = createClient();
 
-    const handleOpen = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            router.push('/login');
-            return;
-        }
+    const handleOpen = () => {
         setIsOpen(true);
     };
 
@@ -29,10 +24,10 @@ export default function CreateAlertButton() {
 
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('Not authenticated');
+            const userId = user?.id || null;
 
             const { error } = await supabase.from('alerts').insert({
-                user_id: user.id,
+                user_id: userId,
                 type,
                 description,
                 latitude: 9.0765, // Hardcoded for MVP (Abuja)
@@ -44,7 +39,12 @@ export default function CreateAlertButton() {
             setIsOpen(false);
             setDescription('');
             router.refresh();
-            alert('Alert posted successfully!');
+
+            if (!userId) {
+                alert('Alert posted successfully! Consider signing up to track your contributions.');
+            } else {
+                alert('Alert posted successfully!');
+            }
         } catch (err: any) {
             alert(err.message);
         } finally {

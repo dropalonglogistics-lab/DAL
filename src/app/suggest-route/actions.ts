@@ -8,16 +8,13 @@ export async function suggestRoute(formData: FormData) {
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        return { error: 'You must be logged in to suggest a route.' }
-    }
+    const userId = user?.id || null
 
     const type = formData.get('type') as 'route' | 'incident'
 
     if (type === 'incident') {
         const incidentData = {
-            user_id: user.id,
+            user_id: userId,
             type: formData.get('incidentType') as string,
             description: formData.get('description') as string,
             location_text: formData.get('location') as string,
@@ -26,7 +23,7 @@ export async function suggestRoute(formData: FormData) {
         const { error } = await supabase
             .from('alerts')
             .insert([{
-                user_id: user.id,
+                user_id: userId,
                 type: incidentData.type,
                 description: `${incidentData.location_text}: ${incidentData.description}`,
             }])
@@ -42,12 +39,11 @@ export async function suggestRoute(formData: FormData) {
     }
 
     const routeData: any = {
-        user_id: user.id,
+        user_id: userId,
         origin: formData.get('origin') as string,
         destination: formData.get('destination') as string,
         vehicle_type: formData.get('vehicleType') as string,
-        fare_min: parseFloat(formData.get('fareMin') as string) || null,
-        fare_max: parseFloat(formData.get('fareMax') as string) || null,
+        price_estimated: parseFloat(formData.get('fareMax') as string) || null, // Mapping to correct column
         duration_minutes: parseInt(formData.get('durationMinutes') as string) || null,
         pro_tips: formData.get('proTips') as string,
     }
@@ -93,5 +89,5 @@ export async function suggestRoute(formData: FormData) {
 
     revalidatePath('/')
     revalidatePath('/community')
-    return { success: true }
+    return { success: true, isGuest: !userId }
 }
