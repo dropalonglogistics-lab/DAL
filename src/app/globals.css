@@ -31,9 +31,10 @@
     --foreground: #F1F5F9;
     --card-bg: #161E2F;
     --text-primary: #F8FAFC;
-    --text-secondary: #A1B1C7;
-    --border: #3F4E65;
+    --text-secondary: #94A3B8;
+    --border: #334155;
     --glass-bg: rgba(11, 17, 32, 0.82);
+    --color-shadow: rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -43,9 +44,10 @@ body.dark-mode {
   --foreground: #F1F5F9;
   --card-bg: #161E2F;
   --text-primary: #F8FAFC;
-  --text-secondary: #A1B1C7;
-  --border: #3F4E65;
+  --text-secondary: #94A3B8;
+  --border: #334155;
   --glass-bg: rgba(11, 17, 32, 0.82);
+  --color-shadow: rgba(0, 0, 0, 0.3);
 }
 
 body.light-mode {

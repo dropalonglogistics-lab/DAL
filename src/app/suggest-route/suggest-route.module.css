@@ -181,6 +181,11 @@
     transform: translateY(-50%);
     color: var(--text-secondary);
     pointer-events: none;
+    transition: color 0.2s;
+}
+
+:global(.dark-mode) .inputIcon {
+    color: #94A3B8;
 }
 
 .inputWithIcon {
@@ -242,10 +247,19 @@
 .ctaBtnPrimary {
     background-color: var(--color-success);
     color: white;
-    padding: 10px 20px;
+    padding: 10px 24px;
     border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: 0.9rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+:global(.dark-mode) .ctaBtnPrimary {
+    background-color: #22C55E;
+    color: #052E16;
+    /* High contrast */
 }
 
 .ctaBtnSecondary {
@@ -259,8 +273,13 @@
 }
 
 .ctaBtnPrimary:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+    background-color: #15803d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+:global(.dark-mode) .ctaBtnPrimary:hover {
+    background-color: #16A34A;
 }
 
 .ctaBtnSecondary:hover {

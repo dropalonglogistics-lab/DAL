@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { Moon, Sun, Menu, User, Map, AlertTriangle, Users, Lock, LogOut, Navigation } from 'lucide-react';
+import { Moon, Sun, Menu, User, Map, AlertTriangle, Users, Lock, LogOut, Navigation, Shield } from 'lucide-react';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [user, setUser] = useState<any>(null);
+    const [profile, setProfile] = useState<any>(null);
     const router = useRouter();
     const supabase = createClient();
 
@@ -21,31 +22,47 @@ export default function Navbar() {
 
         const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
         darkModeMediaQuery.addEventListener('change', handleChange);
-        // Cleanup for dark mode listener
-        // This was missing in the original code, adding it here for completeness
-        // The provided edit only adds the auth part to this useEffect,
-        // but the dark mode listener cleanup should also be there.
-        // However, the instruction is to make the change faithfully,
-        // so I'll stick to the provided edit's structure for the useEffect.
 
-        // Check Auth Session
-        const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
+        // Check Auth Session & Profile
+        const loadInitialData = async () => {
+            const { data: { user: authUser } } = await supabase.auth.getUser();
+            setUser(authUser);
+            if (authUser) {
+                const { data: userProfile } = await supabase
+                    .from('profiles')
+                    .select('is_admin')
+                    .eq('id', authUser.id)
+                    .single();
+                setProfile(userProfile);
+            }
         };
-        getUser();
+        loadInitialData();
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-            if (_event === 'SIGNED_OUT') router.refresh();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
+            if (currentUser) {
+                const { data: userProfile } = await supabase
+                    .from('profiles')
+                    .select('is_admin')
+                    .eq('id', currentUser.id)
+                    .single();
+                setProfile(userProfile);
+            } else {
+                setProfile(null);
+            }
+            if (_event === 'SIGNED_OUT') {
+                setProfile(null);
+                router.refresh();
+            }
         });
 
         return () => {
-            darkModeMediaQuery.removeEventListener('change', handleChange); // Added cleanup for dark mode
+            darkModeMediaQuery.removeEventListener('change', handleChange);
             subscription.unsubscribe();
         };
-    }, [supabase.auth, router]); // Added router to dependencies
+    }, [supabase, router]);
 
     useEffect(() => {
         if (isDarkMode) {
@@ -95,6 +112,12 @@ export default function Navbar() {
                         <Lock size={14} />
                         Premium
                     </button>
+                    {profile?.is_admin && (
+                        <Link href="/admin" className={`${styles.navLink} ${styles.adminLink}`}>
+                            <Shield size={18} />
+                            Admin
+                        </Link>
+                    )}
                 </div>
 
                 <div className={styles.actions}>
@@ -145,6 +168,11 @@ export default function Navbar() {
                     <Link href="/suggest-route" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
                         Suggest Route
                     </Link>
+                    {profile?.is_admin && (
+                        <Link href="/admin" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'var(--color-warning)' }}>
+                            Admin Portal
+                        </Link>
+                    )}
                     {user ? (
                         <>
                             <Link href="/profile" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>

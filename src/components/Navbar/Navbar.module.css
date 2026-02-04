@@ -82,6 +82,15 @@
     opacity: 0.6;
 }
 
+.adminLink {
+    color: var(--color-warning) !important;
+    font-weight: 700;
+}
+
+.adminLink:hover {
+    color: #fbbf24 !important;
+}
+
 .actions {
     display: flex;
     align-items: center;
