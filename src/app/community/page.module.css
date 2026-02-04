@@ -36,6 +36,13 @@
     background-clip: text;
 }
 
+:global(.dark-mode) .hero h1 {
+    background: linear-gradient(135deg, #60A5FA 0%, #34D399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
 .hero p {
     font-size: 1.25rem;
     color: var(--text-secondary);
@@ -65,10 +72,15 @@
 
 .statValue {
     display: block;
-    font-size: 2rem;
+    font-size: 2.25rem;
     font-weight: 800;
     color: var(--color-primary);
     margin-bottom: 4px;
+    letter-spacing: -0.02em;
+}
+
+:global(.dark-mode) .statValue {
+    color: #60A5FA;
 }
 
 .statLabel {
@@ -225,13 +237,20 @@
 }
 
 .suggestionBadge {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     background-color: var(--background);
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
     text-transform: uppercase;
     font-weight: 700;
     color: var(--color-primary);
+    border: 1px solid var(--border);
+}
+
+:global(.dark-mode) .suggestionBadge {
+    background-color: rgba(67, 97, 238, 0.1);
+    color: #93C5FD;
+    border-color: rgba(67, 97, 238, 0.3);
 }
 
 .proTips {
@@ -253,13 +272,21 @@
 .cta {
     background: linear-gradient(135deg, var(--color-primary) 0%, #1e3a5a 100%);
     color: white;
-    padding: 48px;
+    padding: 64px 48px;
     border-radius: var(--radius-lg);
     text-align: center;
     display: flex;
     flex-direction: column;
     gap: 24px;
     align-items: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:global(.dark-mode) .cta {
+    background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+    border-color: var(--border);
 }
 
 .cta h2 {

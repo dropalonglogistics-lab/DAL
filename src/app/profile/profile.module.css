@@ -106,8 +106,14 @@
 
 .label {
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+:global(.dark-mode) .label {
+    color: #94A3B8;
 }
 
 .input {
@@ -214,6 +220,7 @@
 .progressFill {
     height: 100%;
     background-color: var(--color-success);
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
     transition: width 0.3s ease-out;
 }
 
@@ -291,7 +298,16 @@
 }
 
 .signOutBtn:hover {
-    background-color: rgba(239, 68, 68, 0.05);
+    background-color: rgba(239, 68, 68, 0.08);
+}
+
+:global(.dark-mode) .signOutBtn {
+    border-color: #F87171;
+    color: #F87171;
+}
+
+:global(.dark-mode) .signOutBtn:hover {
+    background-color: rgba(248, 113, 113, 0.1);
 }
 
 .message {

@@ -31,8 +31,9 @@
     --foreground: #F1F5F9;
     --card-bg: #161E2F;
     --text-primary: #F8FAFC;
-    --text-secondary: #CBD5E1;
-    --border: #334155;
+    --text-secondary: #A1B1C7;
+    --border: #3F4E65;
+    --glass-bg: rgba(11, 17, 32, 0.82);
   }
 }
 
@@ -42,8 +43,9 @@ body.dark-mode {
   --foreground: #F1F5F9;
   --card-bg: #161E2F;
   --text-primary: #F8FAFC;
-  --text-secondary: #CBD5E1;
-  --border: #334155;
+  --text-secondary: #A1B1C7;
+  --border: #3F4E65;
+  --glass-bg: rgba(11, 17, 32, 0.82);
 }
 
 body.light-mode {
