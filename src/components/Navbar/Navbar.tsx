@@ -121,8 +121,14 @@ export default function Navbar() {
                 </div>
 
                 <div className={styles.actions}>
-                    <button onClick={toggleTheme} className={styles.iconBtn} aria-label="Toggle Theme">
-                        {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                    <button
+                        onClick={toggleTheme}
+                        className={`${styles.iconBtn} ${styles.themeToggle}`}
+                        aria-label="Toggle Theme"
+                    >
+                        <div className={styles.iconWrapper}>
+                            {isDarkMode ? <Sun size={20} className={styles.sunIcon} /> : <Moon size={20} className={styles.moonIcon} />}
+                        </div>
                     </button>
 
                     {user ? (
@@ -145,7 +151,7 @@ export default function Navbar() {
                     )}
 
                     <button
-                        className={styles.mobileMenuBtn}
+                        className={`${styles.mobileMenuBtn} ${isMobileMenuOpen ? styles.active : ''}`}
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     >
                         <Menu size={24} />
@@ -154,41 +160,39 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Menu */}
-            {isMobileMenuOpen && (
-                <div className={styles.mobileMenu}>
-                    <Link href="/" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
-                        Route Search
+            <div className={`${styles.mobileMenu} ${isMobileMenuOpen ? styles.open : ''}`}>
+                <Link href="/" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
+                    Route Search
+                </Link>
+                <Link href="/alerts" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
+                    Alerts
+                </Link>
+                <Link href="/community" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
+                    Community
+                </Link>
+                <Link href="/suggest-route" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
+                    Suggest Route
+                </Link>
+                {profile?.is_admin && (
+                    <Link href="/admin" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'var(--color-warning)' }}>
+                        Admin Portal
                     </Link>
-                    <Link href="/alerts" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
-                        Alerts
-                    </Link>
-                    <Link href="/community" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
-                        Community
-                    </Link>
-                    <Link href="/suggest-route" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
-                        Suggest Route
-                    </Link>
-                    {profile?.is_admin && (
-                        <Link href="/admin" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'var(--color-warning)' }}>
-                            Admin Portal
+                )}
+                {user ? (
+                    <>
+                        <Link href="/profile" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
+                            Profile
                         </Link>
-                    )}
-                    {user ? (
-                        <>
-                            <Link href="/profile" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
-                                Profile
-                            </Link>
-                            <button className={styles.mobileNavLink} onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }} style={{ textAlign: 'left', width: '100%', border: 'none', background: 'none', cursor: 'pointer' }}>
-                                Sign Out
-                            </button>
-                        </>
-                    ) : (
-                        <Link href="/login" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
-                            Sign In
-                        </Link>
-                    )}
-                </div>
-            )}
+                        <button className={styles.mobileNavLink} onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }} style={{ textAlign: 'left', width: '100%', border: 'none', background: 'none', cursor: 'pointer' }}>
+                            Sign Out
+                        </button>
+                    </>
+                ) : (
+                    <Link href="/login" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
+                        Sign In
+                    </Link>
+                )}
+            </div>
         </nav>
     );
 }

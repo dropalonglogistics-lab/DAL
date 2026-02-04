@@ -1,11 +1,9 @@
-'use client'
-// Wait, actions should be 'use server' if they are server actions.
-// But I need to check the user's admin status inside the action for security.
+'use server'
+
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export async function promoteToAdmin(formData: FormData) {
-    'use server'
 
     const userId = formData.get('userId') as string
     const supabase = await createClient()

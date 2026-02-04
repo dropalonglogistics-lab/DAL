@@ -31,11 +31,23 @@ export default async function CommunityPage() {
         { name: 'Michael T.', points: 1650, rank: 5 },
     ];
 
+    const getAvatarColor = (name: string) => {
+        const colors = [
+            '#4361EE', '#3A0CA3', '#7209B7', '#B5179E',
+            '#F72585', '#4CC9F0', '#4895EF', '#480CA8'
+        ];
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return colors[Math.abs(hash) % colors.length];
+    };
+
     return (
         <div className={styles.container}>
             {/* Hero Section */}
             <section className={styles.hero}>
-                <h1>Community Hub</h1>
+                <h1 className={styles.heroTitle}>Community Hub</h1>
                 <p>
                     Join thousands of commuters making Port Harcourt movement smarter and safer through
                     real-time reporting and cooperative route verification.
@@ -54,6 +66,7 @@ export default async function CommunityPage() {
             <div className={styles.statsGrid}>
                 {stats.map((stat, index) => (
                     <div key={index} className={styles.statCard}>
+                        <div className={styles.statIcon}>{stat.icon}</div>
                         <span className={styles.statValue}>{stat.value}</span>
                         <span className={styles.statLabel}>{stat.label}</span>
                     </div>
@@ -68,18 +81,24 @@ export default async function CommunityPage() {
                         Top Contributors
                     </h2>
                     <div className={styles.leaderboard}>
-                        {contributors.map((user, index) => (
-                            <div key={index} className={styles.leaderboardItem}>
-                                <div className={styles.userInfo}>
-                                    <span className={styles.rank}>#{user.rank}</span>
-                                    <div className={styles.avatar}>
-                                        {user.name.charAt(0)}
+                        {contributors.map((user, index) => {
+                            const avatarColor = getAvatarColor(user.name);
+                            return (
+                                <div key={index} className={styles.leaderboardItem}>
+                                    <div className={styles.userInfo}>
+                                        <span className={styles.rank}>#{user.rank}</span>
+                                        <div
+                                            className={styles.avatar}
+                                            style={{ backgroundColor: avatarColor, color: 'white', borderColor: 'transparent' }}
+                                        >
+                                            {user.name.charAt(0)}
+                                        </div>
+                                        <span className={styles.userName}>{user.name}</span>
                                     </div>
-                                    <span className={styles.userName}>{user.name}</span>
+                                    <span className={styles.userPoints}>{user.points} pts</span>
                                 </div>
-                                <span className={styles.userPoints}>{user.points} pts</span>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -91,16 +110,19 @@ export default async function CommunityPage() {
                     </h2>
                     <div className={styles.suggestionsList}>
                         {suggestions && suggestions.length > 0 ? (
-                            suggestions.map((route) => (
+                            suggestions.map((route, idx) => (
                                 <div key={route.id} className={styles.suggestionCard}>
                                     <div className={styles.suggestionHeader}>
-                                        <strong>{route.origin} → {route.destination}</strong>
+                                        <div className={styles.routeInfo}>
+                                            <strong>{route.origin} → {route.destination}</strong>
+                                            {idx === 0 && <span className={styles.trendingTag}>Trending</span>}
+                                        </div>
                                         <span className={styles.suggestionBadge}>{route.vehicle_type}</span>
                                     </div>
                                     <p className={styles.proTips}>&quot;{route.pro_tips}&quot;</p>
                                     <div className={styles.suggestionFooter}>
                                         <span>By {(route.profiles as any)?.full_name || 'Anonymous'}</span>
-                                        <span>₦{route.price_estimated}</span>
+                                        <span className={styles.priceTag}>₦{route.price_estimated}</span>
                                     </div>
                                 </div>
                             ))

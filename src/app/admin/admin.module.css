@@ -13,6 +13,7 @@
     padding: 24px;
     display: none;
     /* Mobile first */
+    transition: transform var(--transition-normal);
 }
 
 @media (min-width: 1024px) {
@@ -29,10 +30,14 @@
     margin-bottom: 32px;
 }
 
+:global(.dark-mode) .sidebarHeader h2 {
+    color: #60A5FA;
+}
+
 .nav {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 .navItem {
@@ -43,18 +48,34 @@
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     font-weight: 600;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
 }
 
 .navItem:hover {
     background-color: var(--background);
     color: var(--color-primary);
+    transform: translateX(4px);
+}
+
+:global(.dark-mode) .navItem:hover {
+    color: #60A5FA;
+    background-color: rgba(96, 165, 250, 0.1);
+}
+
+.navActive {
+    background-color: var(--color-primary);
+    color: white !important;
+}
+
+:global(.dark-mode) .navActive {
+    background-color: #3B82F6;
 }
 
 .content {
     flex: 1;
     padding: 24px;
     overflow-y: auto;
+    animation: fadeIn var(--transition-normal);
 }
 
 .title {
@@ -62,6 +83,7 @@
     font-weight: 800;
     margin-bottom: 32px;
     color: var(--text-primary);
+    letter-spacing: -0.02em;
 }
 
 .statsGrid {
@@ -78,18 +100,28 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+}
+
+.statCard:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
 }
 
 .statLabel {
     color: var(--text-secondary);
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .statValue {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 800;
     color: var(--color-primary);
+    letter-spacing: -0.04em;
 }
 
 :global(.dark-mode) .statValue {
@@ -99,9 +131,104 @@
 @media (max-width: 1023px) {
     .layout {
         flex-direction: column;
+        margin-top: 0;
     }
 
     .content {
-        padding: 16px;
+        padding: 20px 16px;
     }
+}
+
+.tableContainer {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-top: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.table th {
+    background-color: var(--background);
+    padding: 16px 24px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--border);
+}
+
+.table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.userName {
+    font-weight: 700;
+}
+
+.userEmail {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badgeAdmin {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.badgeUser {
+    background-color: rgba(22, 163, 74, 0.1);
+    color: var(--color-success);
+    border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.promoteBtn {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all var(--transition-fast);
+}
+
+.promoteBtn:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+}
+
+:global(.dark-mode) .promoteBtn {
+    background-color: #3B82F6;
+}
+
+.emptyState {
+    padding: 48px;
+    text-align: center;
+    color: var(--text-secondary);
 }
