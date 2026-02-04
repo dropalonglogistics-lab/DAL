@@ -115,6 +115,13 @@
     box-shadow: var(--shadow-lg);
 }
 
+.statHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
 .statLabel {
     color: var(--text-secondary);
     font-size: 0.9rem;

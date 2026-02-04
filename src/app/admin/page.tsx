@@ -23,8 +23,8 @@ export default async function AdminDashboard() {
 
             <div className={styles.statsGrid}>
                 {stats.map((stat, index) => (
-                    <div key={index} className={statCardStyle(index)}>
-                        <div className={styles.statHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div key={index} className={styles.statCard}>
+                        <div className={styles.statHeader}>
                             <span className={styles.statLabel}>{stat.label}</span>
                             {stat.icon}
                         </div>
@@ -45,6 +45,4 @@ export default async function AdminDashboard() {
     )
 }
 
-function statCardStyle(index: number) {
-    return styles.statCard
-}
+
