@@ -14,7 +14,7 @@ export default function AlertCard({ type, description, time, location, confidenc
         switch (type.toLowerCase()) {
             case 'checkpoint': return <ShieldAlert size={20} />;
             case 'traffic': return <AlertTriangle size={20} />;
-            case 'accident': return <AlertTriangle size={20} color="var(--color-error)" />;
+            case 'accident': return <AlertTriangle size={20} className={styles.errorIcon} />;
             default: return <AlertTriangle size={20} />;
         }
     };

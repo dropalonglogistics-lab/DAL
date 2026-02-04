@@ -27,22 +27,22 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0F172A;
-    --foreground: #F8FAFC;
-    --card-bg: #1E293B;
-    --text-primary: #F1F5F9;
-    --text-secondary: #94A3B8;
+    --background: #0B1120;
+    --foreground: #F1F5F9;
+    --card-bg: #161E2F;
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
     --border: #334155;
   }
 }
 
 /* Class-based Dark Mode Override */
 body.dark-mode {
-  --background: #0F172A;
-  --foreground: #F8FAFC;
-  --card-bg: #1E293B;
-  --text-primary: #F1F5F9;
-  --text-secondary: #94A3B8;
+  --background: #0B1120;
+  --foreground: #F1F5F9;
+  --card-bg: #161E2F;
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
   --border: #334155;
 }
 
