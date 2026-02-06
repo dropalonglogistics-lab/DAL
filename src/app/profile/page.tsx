@@ -26,43 +26,50 @@ export default function ProfilePage() {
 
     useEffect(() => {
         async function loadProfile() {
-            const { data: { user } } = await supabase.auth.getUser()
+            try {
+                const { data: { user } } = await supabase.auth.getUser()
 
-            if (!user) {
-                router.push('/login')
-                return
-            }
-
-            let { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single()
-
-            // If profile doesn't exist (or fetch error), try to create it based on auth data
-            // (Keeping existing creation logic...)
-            if (!data) {
-                const { data: newProfile } = await supabase.from('profiles').insert([{
-                    id: user.id,
-                    email: user.email,
-                    full_name: user.user_metadata?.full_name || '',
-                    avatar_url: user.user_metadata?.avatar_url || '',
-                    is_admin: false
-                }]).select().single()
-                if (newProfile) data = newProfile
-            }
-
-            if (data) {
-                setProfile(data)
-                setPreviewUrl(data.avatar_url)
-
-                // Pre-fetch admin stats if user is admin
-                if (data.is_admin) {
-                    const stats = await fetchAdminStats()
-                    setAdminStats(stats)
+                if (!user) {
+                    router.push('/login')
+                    return
                 }
+
+                let { data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single()
+
+                if (!data) {
+                    const { data: newProfile } = await supabase.from('profiles').insert([{
+                        id: user.id,
+                        email: user.email,
+                        full_name: user.user_metadata?.full_name || '',
+                        avatar_url: user.user_metadata?.avatar_url || '',
+                        is_admin: false
+                    }]).select().single()
+                    if (newProfile) data = newProfile
+                }
+
+                if (data) {
+                    setProfile(data)
+                    setPreviewUrl(data.avatar_url)
+
+                    if (data.is_admin) {
+                        try {
+                            const stats = await fetchAdminStats()
+                            setAdminStats(stats)
+                        } catch (err) {
+                            console.error("Failed to fetch admin stats:", err)
+                        }
+                    }
+                }
+            } catch (err: any) {
+                console.error("Profile load error:", err)
+                setMessage({ type: 'error', text: 'Error loading profile: ' + (err.message || 'Unknown error') })
+            } finally {
+                setLoading(false)
             }
-            setLoading(false)
         }
 
         loadProfile()
