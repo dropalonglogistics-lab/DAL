@@ -83,9 +83,9 @@ export default function LoginPage() {
         <div className={styles.container}>
             <div className={`${styles.card} ${isSuccess ? styles.successExit : ''}`}>
                 <div className={styles.header}>
-                    <h1 className={styles.title}>{isSignUp ? 'Join DAL' : 'Welcome to DAL'}</h1>
+                    <h1 className={styles.title}>{isSignUp ? 'Create Your Account' : 'Welcome to Drop Along'}</h1>
                     <p className={styles.subtitle}>
-                        {isSignUp ? 'Create an account to start moving smarter' : 'Sign in to access your road intelligence'}
+                        {isSignUp ? 'Join the community moving Port Harcourt smarter' : 'Sign into your intelligent road transit dashboard'}
                     </p>
                 </div>
 
@@ -153,13 +153,13 @@ export default function LoginPage() {
                             <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                 <div className="spinner-small"></div> Processing...
                             </span>
-                        ) : (isSignUp ? 'Create Free Account' : 'Sign into Dashboard')}
+                        ) : (isSignUp ? 'Create Account' : 'Access Dashboard')}
                     </button>
                 </form>
 
                 <div className={styles.footer}>
                     <p>
-                        {isSignUp ? 'Member already?' : 'New to DAL?'}
+                        {isSignUp ? 'Member already?' : 'New to Drop Along?'}
                         <button
                             onClick={() => setIsSignUp(!isSignUp)}
                             className={styles.toggleBtn}
