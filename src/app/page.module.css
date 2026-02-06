@@ -76,7 +76,8 @@
     font-weight: 600;
     color: var(--color-success);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
+    font-size: 0.75rem;
     display: flex;
     align-items: center;
 }
@@ -126,8 +127,10 @@
     gap: 12px;
     text-decoration: none;
     color: var(--text-primary);
-    transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, box-shadow 0.3s;
     text-align: center;
+    position: relative;
+    overflow: hidden;
 }
 
 .shortcutCard:hover {
@@ -161,10 +164,16 @@
 .highlightCard {
     background-color: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 16px;
+    border-radius: var(--radius-lg);
+    padding: 20px;
     display: flex;
-    gap: 12px;
+    gap: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.highlightCard:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
 }
 
 .highlightIcon {
