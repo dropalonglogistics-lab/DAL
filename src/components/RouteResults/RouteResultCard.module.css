@@ -6,13 +6,23 @@
     position: relative;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    box-shadow: 0 4px 6px var(--color-shadow);
+    box-shadow: var(--shadow-md);
+}
+
+:global(.light-mode) .card {
+    background-color: #FFFFFF;
+    border-color: rgba(15, 23, 42, 0.04);
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
 }
 
 .card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4.5px);
     border-color: var(--color-gold);
-    box-shadow: 0 10px 30px var(--color-shadow);
+    box-shadow: var(--shadow-lg);
+}
+
+:global(.light-mode) .card:hover {
+    box-shadow: 0 15px 45px rgba(15, 23, 42, 0.08);
 }
 
 .recommended {

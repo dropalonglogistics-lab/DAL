@@ -1,34 +1,46 @@
 .container {
-    background-color: #0A0A0A;
-    border: 1px solid #262626;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 24px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-md);
     max-width: 520px;
     margin: 0 auto;
+}
+
+:global(.light-mode) .container {
+    background-color: #FFFFFF;
+    border-color: rgba(15, 23, 42, 0.05);
+    box-shadow: 0 10px 40px rgba(15, 23, 42, 0.06);
 }
 
 .title {
     font-size: 1.25rem;
     font-weight: 700;
     margin-bottom: 20px;
-    color: white;
+    color: var(--text-primary);
 }
 
 .inputGroup {
     display: flex;
     align-items: center;
-    background-color: #111111;
-    border: 1px solid #262626;
+    background-color: var(--background);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: 12px 16px;
     transition: all 0.2s;
 }
 
+:global(.light-mode) .inputGroup {
+    background-color: #F8FAFC;
+    border-color: #E2E8F0;
+}
+
 .inputGroup:focus-within {
     border-color: var(--color-gold);
-    background-color: #161616;
-    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    background-color: var(--card-bg);
+    box-shadow: 0 0 0 4px rgba(133, 102, 18, 0.08);
+    /* Sophisticated Antique Gold glow */
 }
 
 .iconWrapper.icon {

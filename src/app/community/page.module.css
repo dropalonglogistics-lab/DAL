@@ -28,11 +28,17 @@
 
 .hero h1 {
     font-size: 3rem;
-    font-weight: 800;
+    font-weight: 900;
     margin-bottom: 16px;
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-success) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+:global(.light-mode) .hero h1 {
+    background: linear-gradient(135deg, #0F172A 0%, var(--color-gold) 100%);
+    -webkit-background-clip: text;
     background-clip: text;
 }
 
@@ -85,10 +91,14 @@
 .statValue {
     display: block;
     font-size: 2.25rem;
-    font-weight: 800;
-    color: var(--color-primary);
+    font-weight: 900;
+    color: var(--text-primary);
     margin-bottom: 4px;
     letter-spacing: -0.02em;
+}
+
+:global(.light-mode) .statValue {
+    color: #0F172A;
 }
 
 :global(.dark-mode) .statValue {

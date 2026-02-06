@@ -81,83 +81,50 @@
 }
 
 .title {
-    font-size: 2rem;
+    font-size: 2.25rem;
     font-weight: 800;
-    color: white;
+    color: var(--text-primary);
     margin-bottom: 8px;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
+}
+
+:global(.light-mode) .title {
+    color: #0F172A;
+    /* Deep Obsidian */
 }
 
 .subtitle {
     color: var(--text-secondary);
-    font-size: 0.95rem;
-    letter-spacing: 0.01em;
-}
-
-.form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.inputGroup {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    transition: color 0.2s;
-    pointer-events: none;
-}
-
-.input {
-    width: 100%;
-    padding: 14px 16px 14px 44px;
-    background-color: var(--background);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
     font-size: 1rem;
-    color: var(--text-primary);
-    outline: none;
-    transition: all 0.2s ease;
+    letter-spacing: 0.01em;
+    font-weight: 500;
 }
 
-.input:focus {
-    border-color: var(--color-gold);
-    background-color: var(--card-bg);
-    box-shadow: 0 0 0 4px rgba(243, 210, 113, 0.1);
-}
-
-.input:focus+.icon {
-    color: var(--color-gold);
+:global(.light-mode) .subtitle {
+    color: #475569;
+    /* Slate Gray */
+    font-weight: 600;
 }
 
 .submitBtn {
     margin-top: 12px;
-    background-color: var(--color-gold);
-    color: #050505;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    color: #FFFFFF;
     padding: 14px;
     border: none;
     border-radius: var(--radius-md);
     font-size: 1.05rem;
     font-weight: 800;
-    /* Extra bold for visibility */
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 4px 15px var(--color-shadow);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .submitBtn:hover:not(:disabled) {
-    background-color: var(--color-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(212, 175, 55, 0.3);
+    transform: translateY(-1.5px);
+    filter: brightness(1.1);
+    box-shadow: 0 8px 24px var(--color-shadow);
 }
 
 .submitBtn:active:not(:disabled) {

@@ -57,7 +57,11 @@
     font-size: 1.5rem;
     font-weight: 800;
     margin-bottom: 8px;
-    color: var(--color-primary);
+    color: var(--text-primary);
+}
+
+:global(.light-mode) .title {
+    color: #0F172A;
 }
 
 @media (min-width: 768px) {
@@ -133,8 +137,12 @@
     font-weight: 800;
     margin-bottom: 8px;
     color: var(--color-gold);
-    /* Using the new bright gold */
     letter-spacing: -0.02em;
+}
+
+:global(.light-mode) .formGroup.title {
+    color: var(--color-gold);
+    /* Keep gold but ensure it's Antique Gold */
 }
 
 .formGroup {
@@ -292,15 +300,16 @@
 }
 
 .saveBtn {
-    background-color: var(--color-success);
+    background: linear-gradient(135deg, var(--color-success) 0%, #15803d 100%);
     color: white;
     padding: 12px 32px;
     border-radius: var(--radius-md);
-    font-weight: 700;
+    font-weight: 800;
     border: none;
     cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
+    transition: all 0.2s;
     width: 100%;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
 }
 
 @media (min-width: 640px) {

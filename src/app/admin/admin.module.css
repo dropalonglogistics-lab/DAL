@@ -26,8 +26,12 @@
 .sidebarHeader h2 {
     font-size: 1.2rem;
     font-weight: 800;
-    color: var(--color-primary);
+    color: var(--text-primary);
     margin-bottom: 32px;
+}
+
+:global(.light-mode) .sidebarHeader h2 {
+    color: #0F172A;
 }
 
 :global(.dark-mode) .sidebarHeader h2 {
@@ -138,8 +142,12 @@
 .statValue {
     font-size: 2.5rem;
     font-weight: 800;
-    color: var(--color-primary);
+    color: var(--text-primary);
     letter-spacing: -0.04em;
+}
+
+:global(.light-mode) .statValue {
+    color: #0F172A;
 }
 
 :global(.dark-mode) .statValue {
@@ -229,23 +237,24 @@
 }
 
 .promoteBtn {
-    background-color: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
     color: white;
     border: none;
     padding: 6px 12px;
     border-radius: var(--radius-sm);
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 4px;
     transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
 }
 
 .promoteBtn:hover {
-    background-color: var(--color-primary-hover);
     transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
 .demoteBtn {

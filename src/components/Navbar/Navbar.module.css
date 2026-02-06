@@ -12,19 +12,26 @@
 }
 
 :global(.light-mode) .navbar {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-bottom: 1px solid rgba(15, 23, 42, 0.1);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
 }
 
-:global(.light-mode) .navLink,
-:global(.light-mode) .iconBtn,
-:global(.light-mode) .mobileMenuBtn {
+:global(.light-mode) .navLink {
     color: var(--text-primary);
+    font-weight: 600;
+}
+
+:global(.light-mode) .navLink:hover {
+    color: var(--color-gold);
 }
 
 :global(.light-mode) .logo {
     color: var(--color-gold);
+    font-weight: 900;
+    letter-spacing: -0.02em;
 }
 
 .navContainer {
