@@ -81,8 +81,8 @@ export default function LoginPage() {
     // Login/Signup View
     return (
         <div className={styles.container}>
-            <div className={`${styles.card} ${isSuccess ? styles.successExit : ''}`}>
-                <div className={styles.header}>
+            <div className={`${styles.card} ${isSuccess ? styles.successExit : ''}`} key={isSignUp ? 'signup' : 'login'}>
+                <div className={`${styles.header} ${styles.staggerEntry}`}>
                     <h1 className={styles.title}>{isSignUp ? 'Create Your Account' : 'Welcome to Drop Along'}</h1>
                     <p className={styles.subtitle}>
                         {isSignUp ? 'Join the community moving Port Harcourt smarter' : 'Sign into your intelligent road transit dashboard'}
@@ -90,14 +90,14 @@ export default function LoginPage() {
                 </div>
 
                 {error && (
-                    <div className={styles.error}>
+                    <div className={`${styles.error} ${styles.staggerEntry}`}>
                         <AlertCircle size={20} />
                         <span>{error}</span>
                     </div>
                 )}
 
                 {successMsg && (
-                    <div className={styles.success}>
+                    <div className={`${styles.success} ${styles.staggerEntry}`}>
                         <CheckCircle2 size={20} />
                         <span>{successMsg}</span>
                     </div>
@@ -105,7 +105,7 @@ export default function LoginPage() {
 
                 <form onSubmit={handleAuth} className={styles.form}>
                     {isSignUp && (
-                        <div className={styles.inputGroup}>
+                        <div className={`${styles.inputGroup} ${styles.staggerEntry} ${styles.delay_1}`}>
                             <input
                                 type="text"
                                 placeholder="Full Name"
@@ -118,7 +118,7 @@ export default function LoginPage() {
                         </div>
                     )}
 
-                    <div className={styles.inputGroup}>
+                    <div className={`${styles.inputGroup} ${styles.staggerEntry} ${isSignUp ? styles.delay_2 : styles.delay_1}`}>
                         <input
                             type="email"
                             placeholder="Email address"
@@ -130,7 +130,7 @@ export default function LoginPage() {
                         <Mail className={styles.icon} size={20} />
                     </div>
 
-                    <div className={styles.inputGroup}>
+                    <div className={`${styles.inputGroup} ${styles.staggerEntry} ${isSignUp ? styles.delay_3 : styles.delay_2}`}>
                         <input
                             type="password"
                             placeholder="Password"
@@ -143,12 +143,12 @@ export default function LoginPage() {
                     </div>
 
                     {!isSignUp && (
-                        <div className={styles.forgotPasswordLink}>
+                        <div className={`${styles.forgotPasswordLink} ${styles.staggerEntry} ${styles.delay_3}`}>
                             <Link href="/forgot-password">Trouble signing in?</Link>
                         </div>
                     )}
 
-                    <button type="submit" className={styles.submitBtn} disabled={loading}>
+                    <button type="submit" className={`${styles.submitBtn} ${styles.staggerEntry} ${isSignUp ? styles.delay_4 : styles.delay_4}`} disabled={loading}>
                         {loading ? (
                             <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                 <div className="spinner-small"></div> Processing...
@@ -157,7 +157,7 @@ export default function LoginPage() {
                     </button>
                 </form>
 
-                <div className={styles.footer}>
+                <div className={`${styles.footer} ${styles.staggerEntry} ${styles.delay_5}`}>
                     <p>
                         {isSignUp ? 'Member already?' : 'New to Drop Along?'}
                         <button

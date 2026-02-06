@@ -3,37 +3,58 @@
     align-items: center;
     justify-content: center;
     min-height: 85vh;
-    padding: 20px;
-    background: radial-gradient(circle at top right, rgba(161, 125, 22, 0.05), transparent),
-        radial-gradient(circle at bottom left, rgba(161, 125, 22, 0.02), transparent);
+    padding: 24px;
+    background:
+        radial-gradient(at 0% 0%, rgba(161, 125, 22, 0.08) 0, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(15, 23, 42, 0.05) 0, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(161, 125, 22, 0.04) 0, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(34, 197, 94, 0.04) 0, transparent 50%),
+        var(--background);
+    position: relative;
 }
 
 :global(.dark-mode) .container {
-    background: radial-gradient(circle at top right, rgba(243, 210, 113, 0.05), transparent),
-        radial-gradient(circle at bottom left, rgba(243, 210, 113, 0.02), transparent);
+    background:
+        radial-gradient(at 0% 0%, rgba(243, 210, 113, 0.05) 0, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(15, 23, 42, 0.4) 0, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(5, 5, 5, 1) 0, transparent 100%),
+        var(--background);
 }
 
 .card {
-    background-color: var(--card-bg);
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     padding: 48px 40px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
     width: 100%;
     max-width: 440px;
-    box-shadow: 0 20px 50px var(--color-shadow);
-    animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 10px 40px -4px var(--color-shadow),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    animation: authCardEntry 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
 }
 
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+:global(.dark-mode) .card {
+    border-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(17, 17, 17, 0.8);
+    inset: 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+@keyframes authCardEntry {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.98);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .header {
@@ -83,13 +104,14 @@
 .title {
     font-size: 2.25rem;
     font-weight: 800;
-    color: var(--text-primary);
+    color: #0F172A;
     margin-bottom: 8px;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
 }
 
-:global(.light-mode) .title {
-    color: #0F172A !important;
+:global(.dark-mode) .title {
+    color: #FFFFFF;
 }
 
 .subtitle {
@@ -97,6 +119,7 @@
     font-size: 1rem;
     letter-spacing: 0.01em;
     font-weight: 500;
+    line-height: 1.5;
 }
 
 :global(.light-mode) .subtitle {
@@ -109,25 +132,25 @@
     margin-top: 12px;
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
     color: #FFFFFF;
-    padding: 14px;
+    padding: 16px;
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: 12px;
     font-size: 1.05rem;
     font-weight: 800;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 4px 15px var(--color-shadow);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .submitBtn:hover:not(:disabled) {
-    transform: translateY(-1.5px);
+    transform: translateY(-2px);
     filter: brightness(1.1);
     box-shadow: 0 8px 24px var(--color-shadow);
 }
 
 .submitBtn:active:not(:disabled) {
-    transform: translateY(0);
+    transform: translateY(0) scale(0.97);
 }
 
 .submitBtn:disabled {
@@ -226,6 +249,93 @@
 .toggleBtn:hover {
     color: var(--color-primary-hover);
     text-decoration: underline;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.inputGroup {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.input {
+    width: 100%;
+    padding: 14px 16px 14px 44px;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 1rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.input:focus {
+    border-color: var(--color-gold);
+    background-color: var(--card-bg);
+    box-shadow: 0 0 0 4px rgba(161, 125, 22, 0.15);
+    transform: translateY(-1px);
+}
+
+.input:focus+.icon {
+    color: var(--color-gold);
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Staggered Animations */
+.staggerEntry {
+    opacity: 0;
+    animation: authFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes authFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.delay_1 {
+    animation-delay: 0.1s;
+}
+
+.delay_2 {
+    animation-delay: 0.15s;
+}
+
+.delay_3 {
+    animation-delay: 0.2s;
+}
+
+.delay_4 {
+    animation-delay: 0.25s;
+}
+
+.delay_5 {
+    animation-delay: 0.3s;
 }
 
 /* Profile Styles */
