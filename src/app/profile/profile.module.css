@@ -331,6 +331,47 @@
     border: 1px solid var(--color-success);
 }
 
+.toggleContainer {
+    display: flex;
+    background-color: var(--background);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    gap: 4px;
+}
+
+.toggleBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toggleBtn:hover {
+    color: var(--text-primary);
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.toggleBtn.active {
+    background-color: var(--card-bg);
+    color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+    font-weight: 700;
+}
+
+:global(.dark-mode) .toggleBtn.active {
+    background-color: #334155;
+    color: white;
+}
+
 .adminBadge {
     background-color: var(--color-warning);
     color: #fff;

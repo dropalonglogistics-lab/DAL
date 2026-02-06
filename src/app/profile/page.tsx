@@ -8,6 +8,9 @@ import { updateProfile } from './actions'
 import { signOut } from '../login/actions'
 import styles from './profile.module.css'
 
+import { fetchAdminStats } from '@/components/Admin/actions'
+import AdminStats from '@/components/Admin/AdminStats'
+
 export default function ProfilePage() {
     const [profile, setProfile] = useState<any>(null)
     const [loading, setLoading] = useState(true)
@@ -15,6 +18,8 @@ export default function ProfilePage() {
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [uploadProgress, setUploadProgress] = useState(0)
+    const [viewMode, setViewMode] = useState<'profile' | 'admin'>('profile')
+    const [adminStats, setAdminStats] = useState<any>(null)
 
     const supabase = createClient()
     const router = useRouter()
@@ -35,31 +40,27 @@ export default function ProfilePage() {
                 .single()
 
             // If profile doesn't exist (or fetch error), try to create it based on auth data
+            // (Keeping existing creation logic...)
             if (!data) {
-                console.log("Profile not found, creating default profile...")
-                const { data: newProfile, error: createError } = await supabase
-                    .from('profiles')
-                    .insert([{
-                        id: user.id,
-                        email: user.email,
-                        full_name: user.user_metadata?.full_name || '',
-                        avatar_url: user.user_metadata?.avatar_url || '',
-                        is_admin: false
-                    }])
-                    .select()
-                    .single()
-
-                if (newProfile) {
-                    data = newProfile
-                } else {
-                    console.error("Error creating profile:", createError)
-                    setMessage({ type: 'error', text: 'Failed to load or create profile. Please try refreshing.' })
-                }
+                const { data: newProfile } = await supabase.from('profiles').insert([{
+                    id: user.id,
+                    email: user.email,
+                    full_name: user.user_metadata?.full_name || '',
+                    avatar_url: user.user_metadata?.avatar_url || '',
+                    is_admin: false
+                }]).select().single()
+                if (newProfile) data = newProfile
             }
 
             if (data) {
                 setProfile(data)
                 setPreviewUrl(data.avatar_url)
+
+                // Pre-fetch admin stats if user is admin
+                if (data.is_admin) {
+                    const stats = await fetchAdminStats()
+                    setAdminStats(stats)
+                }
             }
             setLoading(false)
         }
@@ -142,8 +143,31 @@ export default function ProfilePage() {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <h1 className={styles.title}>Your Profile</h1>
-                <p className={styles.subtitle}>Manage your personal information and preferences.</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                    <div>
+                        <h1 className={styles.title}>{viewMode === 'admin' ? 'Admin Dashboard' : 'Your Profile'}</h1>
+                        <p className={styles.subtitle}>{viewMode === 'admin' ? 'System overview and statistics.' : 'Manage your personal information.'}</p>
+                    </div>
+
+                    {profile?.is_admin && (
+                        <div className={styles.toggleContainer}>
+                            <button
+                                type="button"
+                                className={`${styles.toggleBtn} ${viewMode === 'profile' ? styles.active : ''}`}
+                                onClick={() => setViewMode('profile')}
+                            >
+                                <User size={18} /> Profile
+                            </button>
+                            <button
+                                type="button"
+                                className={`${styles.toggleBtn} ${viewMode === 'admin' ? styles.active : ''}`}
+                                onClick={() => setViewMode('admin')}
+                            >
+                                <Shield size={18} /> Admin
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className={`${styles.card} animate-fade-in-up`}>
@@ -154,37 +178,19 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit}>
-                    <div className={styles.avatarSection}>
-                        <div className={styles.avatarDisplay}>
-                            {previewUrl ? (
-                                <img src={previewUrl} alt="Preview" className={styles.avatarImage} />
-                            ) : (
-                                profile?.full_name?.charAt(0).toUpperCase() || profile?.email?.charAt(0).toUpperCase()
-                            )}
-                            <label className={styles.avatarOverlay}>
-                                <Camera size={24} />
-                                <input
-                                    type="file"
-                                    name="avatarFile"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                    className={styles.fileInput}
-                                />
-                            </label>
+                {viewMode === 'admin' && adminStats ? (
+                    <div className="animate-fade-in">
+                        <div style={{ marginBottom: '32px' }}>
+                            <AdminStats
+                                userCount={adminStats.userCount}
+                                alertCount={adminStats.alertCount}
+                                routeCount={adminStats.routeCount}
+                            />
                         </div>
-                        <div className={styles.avatarInfo}>
-                            <h3 style={{ margin: 0 }}>{profile?.full_name || 'User'}</h3>
-                            <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>{profile?.email}</p>
-                            {profile?.is_admin && <span className={styles.adminBadge}>Administrator</span>}
-                            <p className={styles.uploadHint}>Click the icon to change your photo</p>
-                        </div>
-                    </div>
 
-                    {profile?.is_admin && (
                         <div className={styles.adminSection}>
                             <div className={styles.sectionTitle}>
-                                <Shield size={20} color="var(--color-warning)" /> Admin Controls
+                                <Shield size={20} color="var(--color-warning)" /> Quick Actions
                             </div>
                             <div className={styles.adminGrid}>
                                 <a href="/admin" className={styles.adminCard}>
@@ -192,8 +198,8 @@ export default function ProfilePage() {
                                         <LayoutDashboard size={20} />
                                     </div>
                                     <div className={styles.adminCardContent}>
-                                        <h4>Dashboard Overview</h4>
-                                        <p>View system stats and reports</p>
+                                        <h4>Full Dashboard</h4>
+                                        <p>Go to main admin portal</p>
                                     </div>
                                 </a>
                                 <a href="/admin/users" className={styles.adminCard}>
@@ -207,68 +213,99 @@ export default function ProfilePage() {
                                 </a>
                             </div>
                         </div>
-                    )}
-
-                    <div className={styles.section}>
-                        <div className={styles.sectionTitle}>
-                            <User size={20} /> Personal Details
-                        </div>
-                        <div className={styles.grid}>
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>Full Name</label>
-                                <input
-                                    type="text"
-                                    name="fullName"
-                                    defaultValue={profile?.full_name || ''}
-                                    className={styles.input}
-                                    required
-                                    placeholder="e.g. John Doe"
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>Date of Birth</label>
-                                <input
-                                    type="date"
-                                    name="dob"
-                                    defaultValue={profile?.date_of_birth || ''}
-                                    className={styles.input}
-                                />
-                            </div>
-                        </div>
                     </div>
-
-                    <div className={styles.section}>
-                        <div className={styles.sectionTitle}>
-                            <MapPin size={20} /> Location Information
-                        </div>
-                        <div className={styles.grid}>
-                            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                                <label className={styles.label}>Home Address</label>
-                                <input
-                                    type="text"
-                                    name="address"
-                                    defaultValue={profile?.address || ''}
-                                    className={styles.input}
-                                    placeholder="Street, City, Country"
-                                />
+                ) : (
+                    <form onSubmit={handleSubmit}>
+                        {/* Avatar Section */}
+                        <div className={styles.avatarSection}>
+                            <div className={styles.avatarDisplay}>
+                                {previewUrl ? (
+                                    <img src={previewUrl} alt="Preview" className={styles.avatarImage} />
+                                ) : (
+                                    profile?.full_name?.charAt(0).toUpperCase() || profile?.email?.charAt(0).toUpperCase()
+                                )}
+                                <label className={styles.avatarOverlay}>
+                                    <Camera size={24} />
+                                    <input
+                                        type="file"
+                                        name="avatarFile"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className={styles.fileInput}
+                                    />
+                                </label>
                             </div>
-                            <input type="hidden" name="avatarUrl" defaultValue={profile?.avatar_url || ''} />
+                            <div className={styles.avatarInfo}>
+                                <h3 style={{ margin: 0 }}>{profile?.full_name || 'User'}</h3>
+                                <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>{profile?.email}</p>
+                                {profile?.is_admin && <span className={styles.adminBadge}>Administrator</span>}
+                                <p className={styles.uploadHint}>Click the icon to change your photo</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className={styles.actions}>
-                        <button type="button" onClick={() => signOut()} className={styles.signOutBtn}>
-                            <LogOut size={18} /> Sign Out
-                        </button>
-                        <button type="submit" disabled={saving} className={styles.saveBtn}>
-                            {saving ? (
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <div className="spinner-small"></div> Saving...
-                                </span>
-                            ) : 'Save Changes'}
-                        </button>
-                    </div>
-                </form>
+                        {/* Personal Details Form */}
+                        <div className={styles.section}>
+                            <div className={styles.sectionTitle}>
+                                <User size={20} /> Personal Details
+                            </div>
+                            <div className={styles.grid}>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Full Name</label>
+                                    <input
+                                        type="text"
+                                        name="fullName"
+                                        defaultValue={profile?.full_name || ''}
+                                        className={styles.input}
+                                        required
+                                        placeholder="e.g. John Doe"
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Date of Birth</label>
+                                    <input
+                                        type="date"
+                                        name="dob"
+                                        defaultValue={profile?.date_of_birth || ''}
+                                        className={styles.input}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={styles.section}>
+                            <div className={styles.sectionTitle}>
+                                <MapPin size={20} /> Location Information
+                            </div>
+                            <div className={styles.grid}>
+                                <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                                    <label className={styles.label}>Home Address</label>
+                                    <input
+                                        type="text"
+                                        name="address"
+                                        defaultValue={profile?.address || ''}
+                                        className={styles.input}
+                                        placeholder="Street, City, Country"
+                                    />
+                                </div>
+                                <input type="hidden" name="avatarUrl" defaultValue={profile?.avatar_url || ''} />
+                            </div>
+                        </div>
+
+                        <div className={styles.actions}>
+                            <button type="button" onClick={() => signOut()} className={styles.signOutBtn}>
+                                <LogOut size={18} /> Sign Out
+                            </button>
+                            <button type="submit" disabled={saving} className={styles.saveBtn}>
+                                {saving ? (
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div className="spinner-small"></div> Saving...
+                                    </span>
+                                ) : 'Save Changes'}
+                            </button>
+                        </div>
+                    </form>
+                )}
+
                 {saving && uploadProgress > 0 && (
                     <div className={styles.progressBar}>
                         <div className={styles.progressFill} style={{ width: `${uploadProgress}%` }}></div>
