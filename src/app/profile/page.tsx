@@ -34,21 +34,30 @@ export default function ProfilePage() {
                     return
                 }
 
-                let { data, error } = await supabase
+                let { data, error: fetchError } = await supabase
                     .from('profiles')
                     .select('*')
                     .eq('id', user.id)
                     .single()
 
+                if (fetchError && fetchError.code !== 'PGRST116') {
+                    throw new Error(`Fetch error: ${fetchError.message} (${fetchError.code})`)
+                }
+
                 if (!data) {
-                    const { data: newProfile } = await supabase.from('profiles').insert([{
+                    console.log("Profile not found, attempting to create...")
+                    const { data: newProfile, error: insertError } = await supabase.from('profiles').insert([{
                         id: user.id,
                         email: user.email,
                         full_name: user.user_metadata?.full_name || '',
                         avatar_url: user.user_metadata?.avatar_url || '',
                         is_admin: false
                     }]).select().single()
-                    if (newProfile) data = newProfile
+
+                    if (insertError) {
+                        throw new Error(`Profile creation failed. This usually happens if the "profiles" table is missing Row Level Security (RLS) policies for INSERT. Error: ${insertError.message}`)
+                    }
+                    data = newProfile
                 }
 
                 if (data) {
@@ -142,6 +151,28 @@ export default function ProfilePage() {
             <div className={styles.container}>
                 <div className={styles.card} style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div className="spinner"></div>
+                </div>
+            </div>
+        )
+    }
+
+    // Special Error View for Missing Database Column
+    if (message?.text.includes('PGRST204') || message?.text.includes('is_admin')) {
+        return (
+            <div className={styles.container}>
+                <div className={styles.card} style={{ background: '#FFF7ED', border: '2px solid #F97316' }}>
+                    <h2 style={{ color: '#EA580C', marginTop: 0 }}>⚠️ Database Update Required</h2>
+                    <p>Your profile could not be loaded because the <code>is_admin</code> column is missing from your database.</p>
+                    <p><strong>Please run this SQL in your Supabase Dashboard:</strong></p>
+                    <pre style={{ background: '#1E293B', color: '#F8FAFC', padding: '15px', borderRadius: '8px', overflowX: 'auto', marginBottom: '20px' }}>
+                        {`ALTER TABLE profiles 
+ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
+
+NOTIFY pgrst, 'reload schema';`}
+                    </pre>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button onClick={() => window.location.reload()} className={styles.saveBtn}>I've run the SQL, Reload Page</button>
+                    </div>
                 </div>
             </div>
         )
