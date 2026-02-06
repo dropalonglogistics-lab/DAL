@@ -132,36 +132,44 @@ export default async function Home({ searchParams }: HomeProps) {
                 </div>
             </section>
 
-            <section className={styles.resultsSection}>
-                <div className={styles.sectionHeader}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <h2>{resultsTitle}</h2>
-                        {isShowingSearch && routes && <span className={styles.resultsCount}>{routes.length} found</span>}
-                    </div>
-                    <span className={styles.subtext}>{isShowingSearch ? 'Smart Search' : 'AI Optimized'}</span>
-                </div>
-
-                <div className={styles.resultsGrid}>
-                    {routes && routes.length > 0 ? (
-                        routes.map((route) => (
-                            <RouteResultCard
-                                key={route.id}
-                                title={`${route.origin} → ${route.destination}`}
-                                time={`${route.duration_minutes} min`}
-                                fare={`₦${route.price_estimated}`}
-                                fareRange={route.fare_min && route.fare_max ? `₦${route.fare_min} - ₦${route.fare_max}` : undefined}
-                                traffic="clear"
-                                isRecommended={true}
-                                vehicleType={route.vehicle_type}
-                                itinerary={route.itinerary}
-                            />
-                        ))
-                    ) : (
-                        <div className={styles.emptyState}>
-                            <p>Enter your destination to see recommended routes and vehicles.</p>
+            <section className={styles.resultsSection} id="search-results">
+                {isShowingSearch ? (
+                    <>
+                        <div className={styles.sectionHeader}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <h2>{resultsTitle}</h2>
+                                {routes && <span className={styles.resultsCount}>{routes.length} found</span>}
+                            </div>
+                            <span className={styles.subtext}>Smart Search</span>
                         </div>
-                    )}
-                </div>
+
+                        <div className={styles.resultsGrid}>
+                            {routes && routes.length > 0 ? (
+                                routes.map((route) => (
+                                    <RouteResultCard
+                                        key={route.id}
+                                        title={`${route.origin} → ${route.destination}`}
+                                        time={`${route.duration_minutes} min`}
+                                        fare={`₦${route.price_estimated}`}
+                                        fareRange={route.fare_min && route.fare_max ? `₦${route.fare_min} - ₦${route.fare_max}` : undefined}
+                                        traffic="clear"
+                                        isRecommended={true}
+                                        vehicleType={route.vehicle_type}
+                                        itinerary={route.itinerary}
+                                    />
+                                ))
+                            ) : (
+                                <div className={styles.emptyState}>
+                                    <p>No exact routes found. Try adjusting your search.</p>
+                                </div>
+                            )}
+                        </div>
+                    </>
+                ) : (
+                    <div style={{ padding: '0px 24px 24px 24px' }}>
+                        {/* Start Search State - Routes are hidden by default */}
+                    </div>
+                )}
             </section>
         </div>
     );
