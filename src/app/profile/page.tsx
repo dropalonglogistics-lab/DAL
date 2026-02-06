@@ -209,11 +209,30 @@ export default function ProfilePage() {
     if (loading) {
         return (
             <div className={styles.container}>
-                <div className={styles.card} style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ textAlign: 'center' }}>
-                        <div className="spinner" style={{ margin: '0 auto 20px' }}></div>
-                        <p style={{ color: 'var(--text-secondary)' }}>Loading your profile intelligence...</p>
-                        <p style={{ fontSize: '0.8rem', opacity: 0.5, marginTop: '10px' }}>Checking database connection...</p>
+                <div className={styles.header}>
+                    <div className={`${styles.skeleton} ${styles.skeletonTitle}`} />
+                    <div className={`${styles.skeleton} ${styles.skeletonText}`} />
+                </div>
+                <div className={styles.card}>
+                    <div className={styles.avatarSection}>
+                        <div className={`${styles.skeleton} ${styles.skeletonCircle}`} />
+                        <div className={styles.avatarInfo}>
+                            <div className={`${styles.skeleton} ${styles.skeletonTitle}`} />
+                            <div className={`${styles.skeleton} ${styles.skeletonText}`} />
+                        </div>
+                    </div>
+                    <div className={styles.section} style={{ marginTop: '32px' }}>
+                        <div className={`${styles.skeleton} ${styles.skeletonLabel}`} style={{ width: '120px' }} />
+                        <div className={styles.grid}>
+                            <div className={styles.formGroup}>
+                                <div className={`${styles.skeleton} ${styles.skeletonLabel}`} />
+                                <div className={`${styles.skeleton} ${styles.skeletonField}`} />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <div className={`${styles.skeleton} ${styles.skeletonLabel}`} />
+                                <div className={`${styles.skeleton} ${styles.skeletonField}`} />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -294,7 +313,7 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            <div className={`${styles.card} animate-fade-in-up`}>
+            <div className={`${styles.card} ${styles.animateFadeUp}`}>
                 {message && (
                     <div className={`${styles.message} ${styles[message.type]} animate-fade-in`}>
                         {message.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
@@ -368,7 +387,7 @@ export default function ProfilePage() {
                         </div>
 
                         {/* Personal Details Form */}
-                        <div className={styles.section}>
+                        <div className={`${styles.section} ${styles.animateFadeUp}`} style={{ animationDelay: '0.1s' }}>
                             <div className={styles.sectionTitle}>
                                 <User size={20} /> Personal Details
                             </div>
@@ -396,7 +415,7 @@ export default function ProfilePage() {
                             </div>
                         </div>
 
-                        <div className={styles.section}>
+                        <div className={`${styles.section} ${styles.animateFadeUp}`} style={{ animationDelay: '0.2s' }}>
                             <div className={styles.sectionTitle}>
                                 <MapPin size={20} /> Location Information
                             </div>

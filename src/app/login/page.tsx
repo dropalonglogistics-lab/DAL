@@ -16,6 +16,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMsg, setSuccessMsg] = useState<string | null>(null);
+    const [isSuccess, setIsSuccess] = useState(false);
     const [user, setUser] = useState<any>(null);
 
     const router = useRouter();
@@ -25,7 +26,7 @@ export default function LoginPage() {
         // Check for active session
         const checkUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
+            if (user && !isSuccess) {
                 router.push('/profile');
             }
         };
@@ -33,7 +34,7 @@ export default function LoginPage() {
 
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (session?.user) {
+            if (session?.user && !isSuccess) {
                 router.push('/profile');
             }
         });
@@ -41,7 +42,7 @@ export default function LoginPage() {
         return () => {
             subscription.unsubscribe();
         };
-    }, [supabase.auth, router]);
+    }, [supabase.auth, router, isSuccess]);
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -62,11 +63,17 @@ export default function LoginPage() {
             } else {
                 const result = await login(formData);
                 if (result?.error) throw new Error(result.error);
-                // login action redirects to /profile
+
+                // Show success state and redirect
+                setIsSuccess(true);
+                setSuccessMsg('Access granted. Entry secured.');
+
+                setTimeout(() => {
+                    router.push('/profile');
+                }, 1000);
             }
         } catch (err: any) {
             setError(err.message);
-        } finally {
             setLoading(false);
         }
     };
@@ -74,7 +81,7 @@ export default function LoginPage() {
     // Login/Signup View
     return (
         <div className={styles.container}>
-            <div className={styles.card}>
+            <div className={`${styles.card} ${isSuccess ? styles.successExit : ''}`}>
                 <div className={styles.header}>
                     <h1 className={styles.title}>{isSignUp ? 'Join DAL' : 'Welcome to DAL'}</h1>
                     <p className={styles.subtitle}>
