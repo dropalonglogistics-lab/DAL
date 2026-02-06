@@ -76,22 +76,22 @@ export default function LoginPage() {
         <div className={styles.container}>
             <div className={styles.card}>
                 <div className={styles.header}>
-                    <h1 className={styles.title}>{isSignUp ? 'Create Account' : 'Welcome Back'}</h1>
+                    <h1 className={styles.title}>{isSignUp ? 'Join DAL' : 'Welcome to DAL'}</h1>
                     <p className={styles.subtitle}>
-                        {isSignUp ? 'Join the community moving your city.' : 'Sign in to access your routes and alerts.'}
+                        {isSignUp ? 'Create an account to start moving smarter' : 'Sign in to access your road intelligence'}
                     </p>
                 </div>
 
                 {error && (
                     <div className={styles.error}>
-                        <AlertCircle size={16} />
+                        <AlertCircle size={20} />
                         <span>{error}</span>
                     </div>
                 )}
 
                 {successMsg && (
                     <div className={styles.success}>
-                        <CheckCircle2 size={16} />
+                        <CheckCircle2 size={20} />
                         <span>{successMsg}</span>
                     </div>
                 )}
@@ -99,7 +99,6 @@ export default function LoginPage() {
                 <form onSubmit={handleAuth} className={styles.form}>
                     {isSignUp && (
                         <div className={styles.inputGroup}>
-                            <User className={styles.icon} size={20} />
                             <input
                                 type="text"
                                 placeholder="Full Name"
@@ -108,11 +107,11 @@ export default function LoginPage() {
                                 required={isSignUp}
                                 className={styles.input}
                             />
+                            <User className={styles.icon} size={20} />
                         </div>
                     )}
 
                     <div className={styles.inputGroup}>
-                        <Mail className={styles.icon} size={20} />
                         <input
                             type="email"
                             placeholder="Email address"
@@ -121,10 +120,10 @@ export default function LoginPage() {
                             required
                             className={styles.input}
                         />
+                        <Mail className={styles.icon} size={20} />
                     </div>
 
                     <div className={styles.inputGroup}>
-                        <Lock className={styles.icon} size={20} />
                         <input
                             type="password"
                             placeholder="Password"
@@ -133,27 +132,32 @@ export default function LoginPage() {
                             required
                             className={styles.input}
                         />
+                        <Lock className={styles.icon} size={20} />
                     </div>
 
                     {!isSignUp && (
                         <div className={styles.forgotPasswordLink}>
-                            <Link href="/forgot-password">Forgot Password?</Link>
+                            <Link href="/forgot-password">Trouble signing in?</Link>
                         </div>
                     )}
 
                     <button type="submit" className={styles.submitBtn} disabled={loading}>
-                        {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+                        {loading ? (
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                <div className="spinner-small"></div> Processing...
+                            </span>
+                        ) : (isSignUp ? 'Create Free Account' : 'Sign into Dashboard')}
                     </button>
                 </form>
 
                 <div className={styles.footer}>
                     <p>
-                        {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+                        {isSignUp ? 'Member already?' : 'New to DAL?'}
                         <button
                             onClick={() => setIsSignUp(!isSignUp)}
                             className={styles.toggleBtn}
                         >
-                            {isSignUp ? 'Sign In' : 'Sign Up'}
+                            {isSignUp ? 'Sign In' : 'Join Now'}
                         </button>
                     </p>
                 </div>

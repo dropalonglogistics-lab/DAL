@@ -1,34 +1,36 @@
 .card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border);
+    background-color: #0A0A0A;
+    border: 1px solid #262626;
     border-radius: var(--radius-lg);
     padding: 16px;
     position: relative;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
 }
 
 .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    border-color: var(--color-primary);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    border-color: rgba(212, 175, 55, 0.4);
 }
 
 .recommended {
-    border: 2px solid var(--color-success);
+    border: 2px solid var(--color-gold);
 }
 
 .badge {
     position: absolute;
-    top: -10px;
+    top: -12px;
     left: 16px;
-    background-color: var(--color-success);
-    color: white;
+    background-color: var(--color-gold);
+    color: #050505;
     font-size: 0.75rem;
-    font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 12px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 6px;
     text-transform: uppercase;
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+    letter-spacing: 0.05em;
 }
 
 .header {
@@ -45,27 +47,28 @@
 }
 
 .title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: white;
 }
 
 .vehicleBadge {
     display: inline-block;
     font-size: 0.7rem;
     font-weight: 700;
-    color: var(--color-primary);
-    background-color: rgba(67, 97, 238, 0.1);
+    color: var(--color-gold);
+    background-color: rgba(212, 175, 55, 0.1);
     padding: 2px 8px;
     border-radius: 4px;
     text-transform: uppercase;
     width: fit-content;
+    margin-top: 4px;
 }
 
 .fare {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--color-gold);
 }
 
 .meta {
@@ -83,7 +86,8 @@
 }
 
 .time {
-    font-weight: 500;
+    font-weight: 600;
+    color: white;
 }
 
 .traffic {
@@ -99,137 +103,140 @@
 }
 
 .clear .trafficDot {
-    background-color: var(--color-success);
+    background-color: #22C55E;
 }
 
 .moderate .trafficDot {
-    background-color: var(--color-warning);
+    background-color: #F59E0B;
 }
 
 .heavy .trafficDot {
-    background-color: var(--color-error);
+    background-color: #EF4444;
 }
 
 .warnings {
-    background-color: rgba(245, 158, 11, 0.1);
-    padding: 8px;
-    border-radius: var(--radius-sm);
+    background-color: rgba(245, 158, 11, 0.05);
+    padding: 8px 12px;
+    border-radius: 8px;
     margin-bottom: 12px;
+    border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 .warningItem {
     display: flex;
     align-items: center;
-    gap: 6px;
-    color: var(--color-warning);
+    gap: 8px;
+    color: #F59E0B;
     font-size: 0.8rem;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .detailsBtn {
     width: 100%;
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text-primary);
-    padding: 8px;
+    background-color: #111111;
+    border: 1px solid #262626;
+    color: white;
+    padding: 10px;
     border-radius: var(--radius-md);
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
 }
 
 .detailsBtn:hover {
-    background-color: var(--background);
+    background-color: #161616;
+    border-color: var(--color-gold);
 }
 
 .expanded {
-    border-color: var(--color-primary);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: var(--color-gold);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
 .detailsSection {
     margin: 16px 0;
     padding-top: 16px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid #262626;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
     animation: fadeIn 0.3s ease-out;
 }
 
 .detailItem {
     display: flex;
-    gap: 12px;
+    gap: 14px;
     align-items: flex-start;
 }
 
 .detailIcon {
-    color: var(--color-primary);
+    color: var(--color-gold);
     margin-top: 2px;
 }
 
 .detailItem strong {
     display: block;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
+    font-size: 0.75rem;
+    color: var(--color-gold);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
+    font-weight: 800;
 }
 
 .detailItem p {
-    font-size: 0.95rem;
-    color: var(--text-primary);
+    font-size: 1rem;
+    color: white;
     margin: 2px 0 0 0;
 }
 
 .itinerary {
-    margin: 12px 0;
-    padding-left: 12px;
-    border-left: 2px solid var(--border);
+    margin: 16px 0;
+    padding-left: 14px;
+    border-left: 2px dashed #262626;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
 }
 
 .itineraryHeader {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     margin-bottom: 12px;
-    color: var(--color-primary);
+    color: var(--color-gold);
 }
 
 .itineraryHeader strong {
-    font-size: 0.9rem;
-    color: var(--text-primary);
+    font-size: 0.95rem;
+    color: white;
 }
 
 .step {
     display: flex;
-    gap: 12px;
+    gap: 14px;
     position: relative;
 }
 
 .stepDot {
     position: absolute;
-    left: -19px;
+    left: -21px;
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background-color: var(--card-bg);
-    border: 2px solid var(--color-primary);
+    background-color: #050505;
+    border: 3px solid var(--color-gold);
     top: 4px;
     z-index: 1;
 }
 
 .stepSwitch .stepDot {
-    border-color: var(--color-warning);
-    background-color: var(--color-warning);
+    border-color: #F59E0B;
+    background-color: #F59E0B;
 }
 
 .stepContent {
@@ -246,31 +253,35 @@
 }
 
 .stepLocation {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: white;
 }
 
 .stepInstruction {
     font-size: 0.85rem;
     color: var(--text-secondary);
-    margin: 2px 0;
+    margin: 4px 0;
+    line-height: 1.4;
 }
 
 .stepVehicleBadge {
     font-size: 0.65rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    background-color: rgba(67, 97, 238, 0.1);
-    padding: 2px 6px;
+    font-weight: 800;
+    color: var(--color-gold);
+    background-color: rgba(212, 175, 55, 0.1);
+    padding: 2px 8px;
     border-radius: 4px;
     text-transform: uppercase;
+    width: fit-content;
+    margin-top: 4px;
 }
 
 .fareRange {
     font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-secondary);
+    font-weight: 600;
+    color: var(--color-gold);
+    opacity: 0.9;
 }
 
 @keyframes fadeIn {

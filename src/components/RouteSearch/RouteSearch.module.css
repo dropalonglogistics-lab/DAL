@@ -1,33 +1,34 @@
 .container {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border);
+    background-color: #0A0A0A;
+    border: 1px solid #262626;
     border-radius: var(--radius-lg);
     padding: 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    max-width: 480px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    max-width: 520px;
     margin: 0 auto;
 }
 
 .title {
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 20px;
-    color: var(--text-primary);
+    color: white;
 }
 
 .inputGroup {
     display: flex;
     align-items: center;
-    background-color: var(--background);
-    border: 1px solid var(--border);
+    background-color: #111111;
+    border: 1px solid #262626;
     border-radius: var(--radius-md);
     padding: 12px 16px;
-    transition: border-color 0.2s;
+    transition: all 0.2s;
 }
 
 .inputGroup:focus-within {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 2px rgba(15, 42, 68, 0.1);
+    border-color: var(--color-gold);
+    background-color: #161616;
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
 }
 
 .iconWrapper.icon {
@@ -51,14 +52,20 @@
     margin-right: 12px;
     display: flex;
     align-items: center;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+
+.inputGroup:focus-within .iconWrapper {
+    color: var(--color-gold);
 }
 
 .startIcon {
-    color: var(--color-primary);
+    color: var(--color-gold);
 }
 
 .endIcon {
-    color: var(--color-success);
+    color: var(--color-gold);
 }
 
 .input {
@@ -66,12 +73,12 @@
     background: none;
     width: 100%;
     font-size: 1rem;
-    color: var(--text-primary);
+    color: white;
     outline: none;
 }
 
 .input::placeholder {
-    color: var(--text-secondary);
+    color: #94A3B8;
 }
 
 .dots {
@@ -80,13 +87,12 @@
     align-items: flex-start;
     gap: 4px;
     padding: 4px 0 4px 22px;
-    /* align with icons */
 }
 
 .dot {
     width: 4px;
     height: 4px;
-    background-color: var(--border);
+    background-color: #262626;
     border-radius: 50%;
 }
 
@@ -99,24 +105,25 @@
 .vehicleBtn {
     flex: 1;
     padding: 10px;
-    border: 1px solid var(--border);
-    background-color: var(--background);
+    border: 1px solid #262626;
+    background-color: #111111;
     color: var(--text-secondary);
     border-radius: var(--radius-md);
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
     transition: all 0.2s;
 }
 
 .vehicleBtn:hover {
-    background-color: var(--border);
-    /* Slightly darker bg on hover */
+    background-color: #161616;
+    border-color: var(--color-gold);
 }
 
 .vehicleBtn.active {
-    background-color: var(--color-primary);
-    color: white;
-    border-color: var(--color-primary);
+    background-color: var(--color-gold);
+    color: #050505;
+    border-color: var(--color-gold);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
 }
 
 .buttonGroup {
@@ -130,20 +137,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    background-color: var(--color-success);
-    /* Green for primary action */
-    color: white;
+    gap: 10px;
+    background-color: var(--color-gold);
+    color: #050505;
     border: none;
     padding: 14px;
     border-radius: var(--radius-md);
     font-size: 1.05rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
 }
 
 .searchBtn:hover {
-    background-color: #15803d;
-    /* Darker green */
+    background-color: var(--color-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+}
+
+.searchBtn:active {
+    transform: translateY(0);
 }

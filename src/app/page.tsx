@@ -62,34 +62,37 @@ export default async function Home({ searchParams }: HomeProps) {
             <section className={styles.searchSection}>
                 <div className={styles.heroText}>
                     <h1>Move Smarter in Port Harcourt</h1>
-                    <p>Intelligent road transit routing. No manual vehicle selection needed. <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>(v1.0.5)</span></p>
+                    <p>Intelligent road transit routing. No manual vehicle selection needed.</p>
+                </div>
+
+                <div className={styles.mainSearchWrapper}>
+                    <RouteSearch />
                 </div>
 
                 <div className={styles.shortcuts}>
                     <Link href="#search" className={styles.shortcutCard}>
-                        <Search size={24} />
+                        <Search size={22} color="var(--color-gold)" />
                         <span className={styles.shortcutLabel}>Find Route</span>
                     </Link>
                     <Link href="/suggest-route" className={styles.shortcutCard}>
-                        <Navigation size={24} />
+                        <Navigation size={22} color="var(--color-gold)" />
                         <span className={styles.shortcutLabel}>Report/Suggest</span>
                     </Link>
                     <Link href="/community" className={styles.shortcutCard}>
-                        <Users size={24} />
+                        <Users size={22} color="var(--color-gold)" />
                         <span className={styles.shortcutLabel}>Community</span>
                     </Link>
                     <Link href="/alerts" className={styles.shortcutCard}>
-                        <Bell size={24} />
+                        <Bell size={22} color="var(--color-gold)" />
                         <span className={styles.shortcutLabel}>Live Alerts</span>
                     </Link>
                 </div>
-
-                <RouteSearch />
 
                 <div className={styles.highlightsSection}>
                     <div className={styles.sectionHeader}>
                         <h2>Live Road Intelligence</h2>
                     </div>
+                    {/* ... alerts logic ... */}
                     <div className={styles.highlightsGrid}>
                         {alerts && alerts.length > 0 && alerts.map((alert) => (
                             <div key={alert.id} className={styles.highlightCard}>

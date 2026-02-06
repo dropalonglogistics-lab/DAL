@@ -27,10 +27,14 @@
 .heroText h1 {
     font-size: 2.75rem;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     color: var(--text-primary);
     margin-bottom: 12px;
     line-height: 1.1;
+    background: linear-gradient(to right, var(--color-gold), #FFF);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .heroText p {
@@ -39,6 +43,12 @@
     max-width: 480px;
     margin: 0 auto;
     line-height: 1.6;
+    letter-spacing: -0.01em;
+}
+
+.mainSearchWrapper {
+    margin-top: 10px;
+    animation: slideUp 0.6s ease-out 0.1s backwards;
 }
 
 .resultsSection {
@@ -111,80 +121,93 @@
 
 .shortcuts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 24px 0;
+}
+
+@media (min-width: 480px) {
+    .shortcuts {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
 }
 
 .shortcutCard {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border);
+    background-color: #111111;
+    border: 1px solid #262626;
     border-radius: var(--radius-md);
-    padding: 20px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     text-decoration: none;
     color: var(--text-primary);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, box-shadow 0.3s;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     text-align: center;
-    position: relative;
-    overflow: hidden;
 }
 
 .shortcutCard:hover {
     transform: translateY(-4px);
-    border-color: var(--color-primary);
-    box-shadow: var(--shadow-md);
+    border-color: var(--color-gold);
+    background-color: #161616;
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.1);
 }
 
 .shortcutCard svg {
-    color: var(--color-primary);
+    color: var(--color-gold);
 }
 
 .shortcutLabel {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
+    letter-spacing: 0.02em;
 }
 
 .highlightsSection {
-    margin-top: 40px;
+    margin-top: 24px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
 .highlightsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+@media (min-width: 768px) {
+    .highlightsGrid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
 }
 
 .highlightCard {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border);
+    background-color: #111111;
+    border: 1px solid #262626;
     border-radius: var(--radius-lg);
-    padding: 20px;
+    padding: 16px;
     display: flex;
     gap: 16px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .highlightCard:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+    transform: translateX(4px);
+    border-color: rgba(212, 175, 55, 0.3);
 }
 
 .highlightIcon {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
-    background-color: rgba(67, 97, 238, 0.1);
+    border-radius: 12px;
+    background-color: rgba(212, 175, 55, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-primary);
+    color: var(--color-gold);
     flex-shrink: 0;
 }
 
@@ -208,8 +231,9 @@
 
 .highlightTime {
     font-size: 0.75rem;
-    color: var(--text-secondary);
-    opacity: 0.7;
+    color: var(--color-gold);
+    font-weight: 600;
+    opacity: 0.8;
     margin-top: 4px;
 }
 

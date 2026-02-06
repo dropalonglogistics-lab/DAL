@@ -1,10 +1,13 @@
 :root {
-  /* Primary Colors */
-  --color-primary: #0F2A44;
-  --color-primary-hover: #153a5c;
+  /* Primary Colors - Gold & Black & White */
+  --color-primary: #D4AF37;
+  /* Metallic Gold */
+  --color-primary-hover: #B8860B;
+  /* Dark Goldenrod */
+  --color-gold: #D4AF37;
 
   /* Accent Colors */
-  --color-success: #16A34A;
+  --color-success: #22C55E;
   /* Emerald */
   --color-warning: #F59E0B;
   /* Amber */
@@ -12,11 +15,11 @@
   /* Red - only for critical errors */
 
   /* Light Mode Defaults */
-  --background: #F8FAFC;
-  --foreground: #0F172A;
-  --card-bg: #FFFFFF;
-  --text-primary: #0F172A;
-  --text-secondary: #64748B;
+  --background: #FFFFFF;
+  --foreground: #050505;
+  --card-bg: #FDFDFD;
+  --text-primary: #050505;
+  --text-secondary: #4B5563;
   --border: #E5E7EB;
 
   --spacing-unit: 8px;
@@ -33,9 +36,7 @@
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-:root {
   --color-shadow: rgba(0, 0, 0, 0.05);
 }
 
@@ -54,22 +55,22 @@
 
 /* Class-based Dark Mode Override */
 body.dark-mode {
-  --background: #0B1120;
-  --foreground: #F1F5F9;
-  --card-bg: #161E2F;
+  --background: #050505;
+  --foreground: #F8FAFC;
+  --card-bg: #111111;
   --text-primary: #F8FAFC;
   --text-secondary: #94A3B8;
-  --border: #334155;
-  --glass-bg: rgba(11, 17, 32, 0.82);
-  --color-shadow: rgba(0, 0, 0, 0.3);
+  --border: #262626;
+  --glass-bg: rgba(5, 5, 5, 0.82);
+  --color-shadow: rgba(0, 0, 0, 0.4);
 }
 
 body.light-mode {
-  --background: #F8FAFC;
-  --foreground: #0F172A;
-  --card-bg: #FFFFFF;
-  --text-primary: #0F172A;
-  --text-secondary: #64748B;
+  --background: #FFFFFF;
+  --foreground: #050505;
+  --card-bg: #FDFDFD;
+  --text-primary: #050505;
+  --text-secondary: #4B5563;
   --border: #E5E7EB;
 }
 
