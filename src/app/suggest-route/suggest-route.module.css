@@ -1,8 +1,15 @@
 .container {
-    max-width: 600px;
-    margin: 20px auto;
-    padding: 0 16px;
-    animation: fadeIn 0.5s ease-out;
+    display: flex;
+    flex-direction: column;
+    min-height: 85vh;
+    padding: 24px;
+    background:
+        radial-gradient(at 0% 0%, rgba(161, 125, 22, 0.08) 0, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(15, 23, 42, 0.05) 0, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(161, 125, 22, 0.04) 0, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(34, 197, 94, 0.04) 0, transparent 50%),
+        var(--background);
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (min-width: 768px) {
@@ -34,16 +41,33 @@
 }
 
 .card {
-    background-color: var(--card-bg);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    padding: 24px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 32px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 10px 40px -4px var(--color-shadow),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    animation: authCardEntry 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
 }
 
-@media (min-width: 768px) {
-    .card {
-        padding: 32px;
+@keyframes authCardEntry {
+    from {
+        opacity: 0;
+        transform: scale(0.98) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
     }
 }
 
@@ -226,10 +250,10 @@
 .select:focus,
 .inputWithIcon:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: var(--color-gold);
     background-color: var(--card-bg);
-    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-    transform: translateX(4px);
+    box-shadow: 0 0 0 4px rgba(161, 125, 22, 0.15);
+    transform: translateY(-1px);
 }
 
 .inputWrapper:focus-within .inputIcon {
@@ -310,4 +334,76 @@
 .ctaBtnSecondary:hover {
     background-color: rgba(15, 42, 68, 0.05);
     transform: translateY(-1px);
+}
+
+.submitBtn {
+    margin-top: 12px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    color: #FFFFFF;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 15px var(--color-shadow);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.submitBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--color-shadow);
+    filter: brightness(1.05);
+}
+
+.submitBtn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Stagger Animations */
+.staggerEntry {
+    opacity: 0;
+    animation: authFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes authFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.delay_1 {
+    animation-delay: 0.1s;
+}
+
+.delay_2 {
+    animation-delay: 0.2s;
+}
+
+.delay_3 {
+    animation-delay: 0.3s;
+}
+
+.delay_4 {
+    animation-delay: 0.4s;
+}
+
+.delay_5 {
+    animation-delay: 0.5s;
+}
+
+.delay_6 {
+    animation-delay: 0.6s;
 }

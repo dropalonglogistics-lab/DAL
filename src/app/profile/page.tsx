@@ -304,7 +304,7 @@ export default function ProfilePage() {
 
     return (
         <div className={styles.container}>
-            <div className={styles.header}>
+            <div className={`${styles.header} ${styles.staggerEntry} ${styles.delay_1}`}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                     <div>
                         <h1 className={styles.title}>{viewMode === 'admin' ? 'Admin Dashboard' : 'Your Profile'}</h1>
@@ -332,7 +332,7 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            <div className={`${styles.card} ${styles.animateFadeUp}`}>
+            <div className={`${styles.card} ${styles.staggerEntry} ${styles.delay_2}`}>
                 {message && (
                     <div className={`${styles.message} ${styles[message.type]} animate-fade-in`}>
                         {message.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
@@ -379,7 +379,7 @@ export default function ProfilePage() {
                 ) : (
                     <form onSubmit={handleSubmit}>
                         {/* Avatar Section */}
-                        <div className={styles.avatarSection}>
+                        <div className={`${styles.avatarSection} ${styles.staggerEntry} ${styles.delay_3}`}>
                             <div className={styles.avatarDisplay}>
                                 {previewUrl ? (
                                     <img src={previewUrl} alt="Preview" className={styles.avatarImage} />
@@ -406,7 +406,7 @@ export default function ProfilePage() {
                         </div>
 
                         {/* Personal Details Form */}
-                        <div className={`${styles.section} ${styles.animateFadeUp}`} style={{ animationDelay: '0.1s' }}>
+                        <div className={`${styles.section} ${styles.staggerEntry} ${styles.delay_4}`}>
                             <div className={styles.sectionTitle}>
                                 <User size={20} /> Personal Details
                             </div>
@@ -434,7 +434,7 @@ export default function ProfilePage() {
                             </div>
                         </div>
 
-                        <div className={`${styles.section} ${styles.animateFadeUp}`} style={{ animationDelay: '0.2s' }}>
+                        <div className={`${styles.section} ${styles.staggerEntry} ${styles.delay_5}`}>
                             <div className={styles.sectionTitle}>
                                 <MapPin size={20} /> Location Information
                             </div>

@@ -53,7 +53,7 @@ export default function SuggestRoutePage() {
                 <ArrowLeft size={16} /> Back to Community
             </Link>
 
-            <div className={styles.header}>
+            <div className={`${styles.header} ${styles.staggerEntry} ${styles.delay_1}`}>
                 <h1 className={styles.title}>{view === 'route' ? 'Share your knowledge' : 'Report an incident'}</h1>
                 <p className={styles.subtitle}>
                     {view === 'route'
@@ -62,7 +62,7 @@ export default function SuggestRoutePage() {
                 </p>
             </div>
 
-            <div className={styles.toggleGroup}>
+            <div className={`${styles.toggleGroup} ${styles.staggerEntry} ${styles.delay_2}`}>
                 <button
                     className={`${styles.toggleBtn} ${view === 'route' ? styles.activeToggle : ''}`}
                     onClick={() => setView('route')}
@@ -77,7 +77,7 @@ export default function SuggestRoutePage() {
                 </button>
             </div>
 
-            <div className={`${styles.card} animate-fade-in-up`}>
+            <div className={`${styles.card} ${styles.staggerEntry} ${styles.delay_3}`}>
                 {message && (
                     <div className={`${styles.message} ${styles[message.type]} animate-fade-in`}>
                         {message.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
@@ -97,7 +97,7 @@ export default function SuggestRoutePage() {
                     )}
                     {view === 'route' ? (
                         <>
-                            <div className={styles.sectionHeader}>
+                            <div className={`${styles.sectionHeader} ${styles.staggerEntry} ${styles.delay_4}`}>
                                 <h2>Where are you going?</h2>
                             </div>
                             <div className={styles.row}>
@@ -129,7 +129,7 @@ export default function SuggestRoutePage() {
                                 </div>
                             </div>
 
-                            <div className={styles.sectionHeader}>
+                            <div className={`${styles.sectionHeader} ${styles.staggerEntry} ${styles.delay_5}`}>
                                 <h2>Route Details</h2>
                             </div>
 
@@ -172,7 +172,7 @@ export default function SuggestRoutePage() {
                                 </div>
                             </div>
 
-                            <div className={styles.sectionHeader}>
+                            <div className={`${styles.sectionHeader} ${styles.staggerEntry} ${styles.delay_6}`}>
                                 <h2>Directions</h2>
                             </div>
 
