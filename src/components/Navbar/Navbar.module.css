@@ -39,14 +39,15 @@
     align-items: center;
     gap: 8px;
     font-size: 0.95rem;
-    font-weight: 500;
-    opacity: 0.85;
+    font-weight: 600;
+    /* Increased from 500 for better visibility */
+    opacity: 1;
+    /* Removed transparency for 'bright' text */
     transition: all 0.2s ease;
-    color: white;
+    color: var(--text-primary);
 }
 
 .navLink:hover {
-    opacity: 1;
     color: var(--color-gold);
     transform: translateY(-1px);
 }

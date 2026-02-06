@@ -25,24 +25,30 @@
 }
 
 .heroText h1 {
-    font-size: 2.75rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
+    font-size: 3.2rem;
+    /* Even larger */
+    font-weight: 900;
+    /* Extra bold */
+    letter-spacing: -0.04em;
     color: var(--text-primary);
-    margin-bottom: 12px;
-    line-height: 1.1;
-    background: linear-gradient(to right, var(--color-gold), #FFF);
+    margin-bottom: 16px;
+    line-height: 1.05;
+    background: linear-gradient(135deg, var(--color-gold) 0%, #FFFFFF 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    /* Boost depth */
 }
 
 .heroText p {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     color: var(--text-secondary);
-    max-width: 480px;
+    max-width: 600px;
     margin: 0 auto;
     line-height: 1.6;
+    font-weight: 500;
+    /* Slightly bolder for visibility */
     letter-spacing: -0.01em;
 }
 

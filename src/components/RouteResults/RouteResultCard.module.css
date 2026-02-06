@@ -47,35 +47,40 @@
 }
 
 .title {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: white;
+    font-size: 1.2rem;
+    /* Slightly larger */
+    font-weight: 800;
+    /* Bolder */
+    color: var(--text-primary);
 }
 
 .vehicleBadge {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: var(--color-gold);
-    background-color: rgba(212, 175, 55, 0.1);
-    padding: 2px 8px;
-    border-radius: 4px;
+    background-color: rgba(243, 210, 113, 0.15);
+    /* Brighter gold tint */
+    padding: 3px 10px;
+    border-radius: 6px;
     text-transform: uppercase;
     width: fit-content;
     margin-top: 4px;
+    border: 1px solid rgba(243, 210, 113, 0.2);
 }
 
 .fare {
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     font-weight: 800;
     color: var(--color-gold);
+    text-shadow: 0 0 10px rgba(243, 210, 113, 0.2);
 }
 
 .meta {
     display: flex;
     gap: 16px;
     margin-bottom: 12px;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: var(--text-secondary);
 }
 
@@ -86,8 +91,8 @@
 }
 
 .time {
-    font-weight: 600;
-    color: white;
+    font-weight: 700;
+    color: var(--text-primary);
 }
 
 .traffic {

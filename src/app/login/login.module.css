@@ -115,11 +115,12 @@
 .input {
     width: 100%;
     padding: 14px 16px 14px 44px;
-    background-color: #111111;
+    background-color: #0F0F0F;
+    /* Slightly brighter for depth */
     border: 1px solid #262626;
     border-radius: var(--radius-md);
     font-size: 1rem;
-    color: white;
+    color: var(--text-primary);
     outline: none;
     transition: all 0.2s ease;
 }
@@ -127,7 +128,7 @@
 .input:focus {
     border-color: var(--color-gold);
     background-color: #161616;
-    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    box-shadow: 0 0 0 4px rgba(243, 210, 113, 0.1);
 }
 
 .input:focus+.icon {
@@ -141,11 +142,12 @@
     padding: 14px;
     border: none;
     border-radius: var(--radius-md);
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 1.05rem;
+    font-weight: 800;
+    /* Extra bold for visibility */
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
 }
 
 .submitBtn:hover:not(:disabled) {

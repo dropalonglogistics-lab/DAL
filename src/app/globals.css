@@ -56,13 +56,20 @@
 /* Class-based Dark Mode Override */
 body.dark-mode {
   --background: #050505;
-  --foreground: #F8FAFC;
+  --foreground: #FFFFFF;
+  /* Brighter foreground */
   --card-bg: #111111;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
+  --text-primary: #FFFFFF;
+  /* Pure white for maximum pop */
+  --text-secondary: #CBD5E1;
+  /* Lighter grey for better legibility */
+  --color-gold: #F3D271;
+  /* Brighter, more vibrant Gold */
+  --color-primary: #F3D271;
+  --color-primary-hover: #EAB308;
   --border: #262626;
-  --glass-bg: rgba(5, 5, 5, 0.82);
-  --color-shadow: rgba(0, 0, 0, 0.4);
+  --glass-bg: rgba(5, 5, 5, 0.85);
+  --color-shadow: rgba(0, 0, 0, 0.6);
 }
 
 body.light-mode {
@@ -91,6 +98,27 @@ body {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  /* Improved from default for better readability */
+  letter-spacing: -0.01em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 800;
+  /* Bold, premium headings */
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+p {
+  font-weight: 400;
+  color: var(--text-secondary);
 }
 
 :focus-visible {

@@ -98,6 +98,15 @@
     }
 }
 
+.formGroup.title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--color-gold);
+    /* Using the new bright gold */
+    letter-spacing: -0.02em;
+}
+
 .formGroup {
     display: flex;
     flex-direction: column;
@@ -105,15 +114,18 @@
 }
 
 .label {
-    font-weight: 600;
-    font-size: 0.85rem;
+    font-weight: 700;
+    /* Bolder for visibility */
+    font-size: 0.8rem;
     color: var(--text-secondary);
+    /* Using the new bright variables */
     text-transform: uppercase;
-    letter-spacing: 0.025em;
+    letter-spacing: 0.05em;
 }
 
 :global(.dark-mode) .label {
-    color: #94A3B8;
+    color: var(--text-secondary);
+    /* Already lightened in globals.css */
 }
 
 .input {
@@ -373,17 +385,17 @@
 }
 
 .adminBadge {
-    background-color: var(--color-warning);
-    color: #fff;
-    font-size: 0.75rem;
-    padding: 4px 8px;
+    background-color: var(--color-gold);
+    color: #050505;
+    font-size: 0.7rem;
+    padding: 2px 10px;
     border-radius: 999px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     margin-top: 8px;
     display: inline-block;
-    letter-spacing: 0.05em;
-    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    letter-spacing: 0.08em;
+    box-shadow: 0 0 15px rgba(243, 210, 113, 0.2);
 }
 
 .adminSection {
@@ -404,8 +416,8 @@
 }
 
 .adminCard {
-    background: linear-gradient(135deg, var(--card-bg) 0%, rgba(245, 158, 11, 0.05) 100%);
-    border: 1px solid rgba(245, 158, 11, 0.2);
+    background: linear-gradient(135deg, var(--card-bg) 0%, rgba(243, 210, 113, 0.05) 100%);
+    border: 1px solid rgba(243, 210, 113, 0.2);
     border-radius: var(--radius-md);
     padding: 20px;
     display: flex;
@@ -420,16 +432,17 @@
 
 .adminCard:hover {
     transform: translateY(-2px);
-    border-color: var(--color-warning);
-    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+    border-color: var(--color-gold);
+    background-color: rgba(243, 210, 113, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 .adminCardIcon {
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background-color: rgba(245, 158, 11, 0.1);
-    color: var(--color-warning);
+    background-color: rgba(243, 210, 113, 0.1);
+    color: var(--color-gold);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -437,12 +450,14 @@
 }
 
 .adminCardContent h4 {
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 1.05rem;
+    font-weight: 800;
     margin-bottom: 4px;
+    color: var(--text-primary);
 }
 
 .adminCardContent p {
     font-size: 0.85rem;
     color: var(--text-secondary);
+    font-weight: 500;
 }
