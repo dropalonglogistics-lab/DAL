@@ -28,22 +28,32 @@ export default function ProfilePage() {
         let isMounted = true
 
         async function loadProfile() {
-            console.log("[Profile] 🔍 Initialization started...")
+            const loadId = Math.random().toString(36).substring(7)
+            console.log(`[Profile:${loadId}] 🔍 Initialization started...`)
             setLoading(true)
 
             try {
-                const { data: { user } } = await supabase.auth.getUser()
-                console.log("[Profile] 👤 Auth User:", user?.email || "No user found")
+                // 1. Check Auth Session explicitly
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+                console.log(`[Profile:${loadId}] 🔑 Session Check:`, { active: !!session, error: sessionError?.message || "None" })
+
+                const { data: { user }, error: userError } = await supabase.auth.getUser()
+                console.log(`[Profile:${loadId}] 👤 Auth User:`, {
+                    email: user?.email || "No user found",
+                    id: user?.id || "N/A",
+                    error: userError?.message || "None"
+                })
 
                 if (!isMounted) return
 
                 if (!user) {
-                    console.log("[Profile] 🚀 Redirecting to login...")
+                    console.warn(`[Profile:${loadId}] 🚀 Redirecting to login (User missing)`)
                     router.push('/login')
                     return
                 }
 
-                console.log("[Profile] 📬 Querying database for ID:", user.id)
+                // 2. Query Profile
+                console.log(`[Profile:${loadId}] 📬 Querying DB...`)
                 let { data, error: fetchError } = await supabase
                     .from('profiles')
                     .select('*')
@@ -53,14 +63,15 @@ export default function ProfilePage() {
                 if (!isMounted) return
 
                 if (fetchError) {
-                    console.error("[Profile] ❌ Fetch Error:", fetchError)
+                    console.error(`[Profile:${loadId}] ❌ Fetch Error Code:`, fetchError.code)
                     if (fetchError.code !== 'PGRST116') {
-                        throw new Error(`Fetch error: ${fetchError.message} (${fetchError.code})`)
+                        throw new Error(`DB Error: ${fetchError.message} (${fetchError.code})`)
                     }
                 }
 
+                // 3. Auto-Create if missing
                 if (!data) {
-                    console.warn("[Profile] ⚠️ No profile found in DB. Attempting auto-creation...")
+                    console.warn(`[Profile:${loadId}] ⚠️ Record missing. Creating profile...`)
                     const { data: newProfile, error: insertError } = await supabase.from('profiles').insert([{
                         id: user.id,
                         email: user.email,
@@ -72,42 +83,41 @@ export default function ProfilePage() {
                     if (!isMounted) return
 
                     if (insertError) {
-                        console.error("[Profile] ❌ Creation Error:", insertError)
-                        throw new Error(`Profile creation failed. Error: ${insertError.message}`)
+                        console.error(`[Profile:${loadId}] ❌ Creation Error:`, insertError)
+                        throw new Error(`Creation failed: ${insertError.message}`)
                     }
-                    console.log("[Profile] ✅ Profile created successfully")
+                    console.log(`[Profile:${loadId}] ✅ Created successfully`)
                     data = newProfile
                 }
 
+                // 4. Final State Update
                 if (data && isMounted) {
-                    console.log("[Profile] ✨ Data loaded:", { email: data.email, is_admin: data.is_admin })
+                    console.log(`[Profile:${loadId}] ✨ SUCCESS. Rendering profile for`, data.email)
                     setProfile(data)
                     setPreviewUrl(data.avatar_url)
 
                     if (data.is_admin) {
                         try {
-                            console.log("[Profile] 📊 Loading admin stats...")
                             const stats = await fetchAdminStats()
-                            if (isMounted) {
-                                console.log("[Profile] ✅ Admin stats loaded")
-                                setAdminStats(stats)
-                            }
+                            if (isMounted) setAdminStats(stats)
                         } catch (err) {
-                            console.error("[Profile] ❌ Admin stats fetch failed:", err)
+                            console.error(`[Profile:${loadId}] ⚠️ Stats Error (Non-critical):`, err)
                         }
                     }
+                } else if (!data) {
+                    console.error(`[Profile:${loadId}] ❌ FINAL CHECK FAILED: data is null`)
                 }
             } catch (err: any) {
                 if (err.name === 'AbortError') {
-                    console.log("[Profile] 🛑 Request aborted by browser (benign)")
+                    console.log(`[Profile:${loadId}] 🛑 Aborted`)
                 } else {
-                    console.error("[Profile] 💥 Global Error:", err)
-                    if (isMounted) setMessage({ type: 'error', text: 'Error: ' + (err.message || 'Unknown error occurred') })
+                    console.error(`[Profile:${loadId}] 💥 CRASH:`, err)
+                    if (isMounted) setMessage({ type: 'error', text: 'Diagnostic Error: ' + (err.message || 'Unknown') })
                 }
             } finally {
                 if (isMounted) {
-                    console.log("[Profile] 🏁 Loading complete")
                     setLoading(false)
+                    console.log(`[Profile:${loadId}] 🏁 End of lifecycle`)
                 }
             }
         }
@@ -181,6 +191,21 @@ export default function ProfilePage() {
         }
     }
 
+    async function handleSync() {
+        console.log("[Profile] 🔄 MANUALLY TRIGGERED RE-SYNC")
+        setLoading(true)
+        setMessage(null)
+        try {
+            const { data, error } = await supabase.auth.refreshSession()
+            console.log("[Profile] 🔄 Session Refresh Result:", { success: !!data.session, error })
+            // Re-run the mounting effect logic
+            window.location.reload()
+        } catch (err) {
+            console.error("[Profile] ❌ Sync failed:", err)
+            setLoading(false)
+        }
+    }
+
     if (loading) {
         return (
             <div className={styles.container}>
@@ -188,6 +213,7 @@ export default function ProfilePage() {
                     <div style={{ textAlign: 'center' }}>
                         <div className="spinner" style={{ margin: '0 auto 20px' }}></div>
                         <p style={{ color: 'var(--text-secondary)' }}>Loading your profile intelligence...</p>
+                        <p style={{ fontSize: '0.8rem', opacity: 0.5, marginTop: '10px' }}>Checking database connection...</p>
                     </div>
                 </div>
             </div>
@@ -195,21 +221,20 @@ export default function ProfilePage() {
     }
 
     // Special Error View for Missing Database Column
-    if (message?.text.includes('PGRST204') || message?.text.includes('is_admin')) {
+    if (message?.text.includes('PGRST204') || message?.text.includes('is_admin') || message?.text.includes('DB Error')) {
         return (
             <div className={styles.container}>
                 <div className={styles.card} style={{ border: '2px solid var(--color-warning)', background: 'rgba(245, 158, 11, 0.05)' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
                         <AlertCircle size={32} color="var(--color-warning)" />
                         <div>
-                            <h2 style={{ marginTop: 0 }}>⚠️ Database Repair Required</h2>
-                            <p>Your profile is locked because the <code>is_admin</code> column is missing.</p>
-                            <p><strong>Run this in your Supabase SQL Editor:</strong></p>
-                            <pre style={{ background: '#1E293B', color: '#F8FAFC', padding: '15px', borderRadius: '8px', overflowX: 'auto', marginBottom: '16px' }}>
-                                {`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
-NOTIFY pgrst, 'reload schema';`}
-                            </pre>
-                            <button onClick={() => window.location.reload()} className={styles.saveBtn}>I've fixed it, Reload</button>
+                            <h2 style={{ marginTop: 0 }}>⚠️ Connection or Database Issue</h2>
+                            <p>{message.text}</p>
+                            <p><strong>Common Fix:</strong> Run the 'Sync Data' command or verify your database schema.</p>
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                                <button onClick={handleSync} className={styles.saveBtn}>Force Re-sync Session</button>
+                                <button onClick={() => window.location.reload()} className={styles.signOutBtn}>Reload Page</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -222,13 +247,18 @@ NOTIFY pgrst, 'reload schema';`}
             <div className={styles.container}>
                 <div className={styles.card} style={{ textAlign: 'center', padding: '60px 20px' }}>
                     <User size={48} color="var(--text-secondary)" style={{ marginBottom: '20px', opacity: 0.3 }} />
-                    <h2>No Profile Found</h2>
+                    <h2>Profile Data Not Found</h2>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
-                        We couldn't retrieve your profile data. This might be a connection issue.
+                        We found your account, but your profile details are taking too long to load or are currently hidden.
                     </p>
-                    <button onClick={() => window.location.reload()} className={styles.saveBtn}>
-                        Force Re-sync Data
-                    </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '300px', margin: '0 auto' }}>
+                        <button onClick={handleSync} className={styles.saveBtn}>
+                            Force Re-sync Data
+                        </button>
+                        <button onClick={() => window.location.reload()} className={styles.signOutBtn}>
+                            Refresh Browser
+                        </button>
+                    </div>
                 </div>
             </div>
         )
