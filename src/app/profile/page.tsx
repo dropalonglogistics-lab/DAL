@@ -161,7 +161,10 @@ export default function ProfilePage() {
         return (
             <div className={styles.container}>
                 <div className={styles.card} style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div className="spinner"></div>
+                    <div style={{ textAlign: 'center' }}>
+                        <div className="spinner" style={{ margin: '0 auto 20px' }}></div>
+                        <p style={{ color: 'var(--text-secondary)' }}>Loading your profile intelligence...</p>
+                    </div>
                 </div>
             </div>
         )
@@ -171,19 +174,37 @@ export default function ProfilePage() {
     if (message?.text.includes('PGRST204') || message?.text.includes('is_admin')) {
         return (
             <div className={styles.container}>
-                <div className={styles.card} style={{ background: '#FFF7ED', border: '2px solid #F97316' }}>
-                    <h2 style={{ color: '#EA580C', marginTop: 0 }}>⚠️ Database Update Required</h2>
-                    <p>Your profile could not be loaded because the <code>is_admin</code> column is missing from your database.</p>
-                    <p><strong>Please run this SQL in your Supabase Dashboard:</strong></p>
-                    <pre style={{ background: '#1E293B', color: '#F8FAFC', padding: '15px', borderRadius: '8px', overflowX: 'auto', marginBottom: '20px' }}>
-                        {`ALTER TABLE profiles 
-ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
-
+                <div className={styles.card} style={{ border: '2px solid var(--color-warning)', background: 'rgba(245, 158, 11, 0.05)' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                        <AlertCircle size={32} color="var(--color-warning)" />
+                        <div>
+                            <h2 style={{ marginTop: 0 }}>⚠️ Database Repair Required</h2>
+                            <p>Your profile is locked because the <code>is_admin</code> column is missing.</p>
+                            <p><strong>Run this in your Supabase SQL Editor:</strong></p>
+                            <pre style={{ background: '#1E293B', color: '#F8FAFC', padding: '15px', borderRadius: '8px', overflowX: 'auto', marginBottom: '16px' }}>
+                                {`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
 NOTIFY pgrst, 'reload schema';`}
-                    </pre>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <button onClick={() => window.location.reload()} className={styles.saveBtn}>I've run the SQL, Reload Page</button>
+                            </pre>
+                            <button onClick={() => window.location.reload()} className={styles.saveBtn}>I've fixed it, Reload</button>
+                        </div>
                     </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (!profile && !loading) {
+        return (
+            <div className={styles.container}>
+                <div className={styles.card} style={{ textAlign: 'center', padding: '60px 20px' }}>
+                    <User size={48} color="var(--text-secondary)" style={{ marginBottom: '20px', opacity: 0.3 }} />
+                    <h2>No Profile Found</h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
+                        We couldn't retrieve your profile data. This might be a connection issue.
+                    </p>
+                    <button onClick={() => window.location.reload()} className={styles.saveBtn}>
+                        Force Re-sync Data
+                    </button>
                 </div>
             </div>
         )
