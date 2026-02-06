@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import styles from '../admin.module.css'
-import { promoteToAdmin } from '../actions'
-import { UserCheck, Shield } from 'lucide-react'
+import { promoteToAdmin, demoteToUser } from '../actions'
+import { UserCheck, Shield, UserMinus } from 'lucide-react'
 
 export default async function UserManagement() {
     const supabase = await createClient()
@@ -9,6 +9,9 @@ export default async function UserManagement() {
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false })
+
+    // Get current user to prevent self-demotion
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
 
     return (
         <div className="animate-fade-in">
@@ -43,13 +46,22 @@ export default async function UserManagement() {
                                     )}
                                 </td>
                                 <td>
-                                    {!profile.is_admin && (
+                                    {!profile.is_admin ? (
                                         <form action={promoteToAdmin}>
                                             <input type="hidden" name="userId" value={profile.id} />
                                             <button type="submit" className={styles.promoteBtn}>
                                                 <UserCheck size={14} /> Make Admin
                                             </button>
                                         </form>
+                                    ) : (
+                                        currentUser?.id !== profile.id && (
+                                            <form action={demoteToUser}>
+                                                <input type="hidden" name="userId" value={profile.id} />
+                                                <button type="submit" className={styles.demoteBtn}>
+                                                    <UserMinus size={14} /> Revoke
+                                                </button>
+                                            </form>
+                                        )
                                     )}
                                 </td>
                             </tr>

@@ -236,6 +236,33 @@
     transform: translateY(-1px);
 }
 
+.demoteBtn {
+    background-color: var(--background);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all var(--transition-fast);
+}
+
+.demoteBtn:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-danger);
+    border-color: rgba(239, 68, 68, 0.2);
+    transform: translateY(-1px);
+}
+
+:global(.dark-mode) .demoteBtn:hover {
+    color: #F87171;
+    border-color: rgba(248, 113, 113, 0.2);
+}
+
 :global(.dark-mode) .promoteBtn {
     background-color: #3B82F6;
 }
