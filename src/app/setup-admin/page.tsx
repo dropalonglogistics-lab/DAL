@@ -111,7 +111,39 @@ NOTIFY pgrst, 'reload schema';`}
         .single()
 
     if (finalProfile?.is_admin) {
-        redirect('/admin')
+        return (
+            <div style={{ padding: '40px', maxWidth: '600px', margin: '0 auto', fontFamily: 'system-ui', textAlign: 'center' }}>
+                <h1 style={{ color: '#16A34A', fontSize: '3rem', marginBottom: '10px' }}>🎉 Success!</h1>
+                <h2 style={{ color: '#0F172A' }}>You are now an Admin.</h2>
+                <p style={{ fontSize: '1.2rem', color: '#64748B', marginBottom: '40px' }}>
+                    Your account <strong>{user.email}</strong> has been promoted.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    <a href="/admin" style={{
+                        background: '#0F172A',
+                        color: 'white',
+                        padding: '15px 30px',
+                        borderRadius: '8px',
+                        textDecoration: 'none',
+                        fontWeight: 'bold',
+                        fontSize: '1.1rem'
+                    }}>
+                        Go to Admin Dashboard
+                    </a>
+                    <a href="/profile" style={{
+                        background: '#F1F5F9',
+                        color: '#0F172A',
+                        padding: '15px 30px',
+                        borderRadius: '8px',
+                        textDecoration: 'none',
+                        fontWeight: 'bold'
+                    }}>
+                        Check My Profile
+                    </a>
+                </div>
+            </div>
+        )
     } else {
         return (
             <div style={{ padding: '40px', maxWidth: '600px', margin: '0 auto', fontFamily: 'system-ui' }}>
