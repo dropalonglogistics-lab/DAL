@@ -4,18 +4,23 @@
     justify-content: center;
     min-height: 85vh;
     padding: 20px;
-    background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.05), transparent),
-        radial-gradient(circle at bottom left, rgba(212, 175, 55, 0.02), transparent);
+    background: radial-gradient(circle at top right, rgba(161, 125, 22, 0.05), transparent),
+        radial-gradient(circle at bottom left, rgba(161, 125, 22, 0.02), transparent);
+}
+
+:global(.dark-mode) .container {
+    background: radial-gradient(circle at top right, rgba(243, 210, 113, 0.05), transparent),
+        radial-gradient(circle at bottom left, rgba(243, 210, 113, 0.02), transparent);
 }
 
 .card {
-    background-color: #0A0A0A;
+    background-color: var(--card-bg);
     padding: 48px 40px;
     border-radius: var(--radius-lg);
-    border: 1px solid #262626;
+    border: 1px solid var(--border);
     width: 100%;
     max-width: 440px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 50px var(--color-shadow);
     animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     position: relative;
     overflow: hidden;
@@ -115,9 +120,8 @@
 .input {
     width: 100%;
     padding: 14px 16px 14px 44px;
-    background-color: #0F0F0F;
-    /* Slightly brighter for depth */
-    border: 1px solid #262626;
+    background-color: var(--background);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     font-size: 1rem;
     color: var(--text-primary);
@@ -127,7 +131,7 @@
 
 .input:focus {
     border-color: var(--color-gold);
-    background-color: #161616;
+    background-color: var(--card-bg);
     box-shadow: 0 0 0 4px rgba(243, 210, 113, 0.1);
 }
 

@@ -73,12 +73,21 @@ body.dark-mode {
 }
 
 body.light-mode {
-  --background: #FFFFFF;
-  --foreground: #050505;
-  --card-bg: #FDFDFD;
-  --text-primary: #050505;
-  --text-secondary: #4B5563;
-  --border: #E5E7EB;
+  --background: #F8FAFC;
+  /* Soft slate-off-white for better depth */
+  --foreground: #0F172A;
+  /* Deep Obsidian */
+  --card-bg: #FFFFFF;
+  --text-primary: #0F172A;
+  /* Deep Obsidian for maximum readability */
+  --text-secondary: #475569;
+  /* Crisp Slate for clear secondary info */
+  --color-gold: #A17D16;
+  /* Denser, richer gold to stand out on light backgrounds */
+  --color-primary: #A17D16;
+  --color-primary-hover: #856612;
+  --border: #E2E8F0;
+  --color-shadow: rgba(15, 23, 42, 0.06);
 }
 
 * {
@@ -290,27 +299,26 @@ body.dark-mode .btn-ghost:hover {
   animation: fadeInUp 0.6s ease-out;
 }
 
-/* Skeleton Loading Animation */
-@keyframes skeleton-loading {
+@keyframes shimmer {
   0% {
-    background-color: var(--border);
-    opacity: 0.5;
-  }
-
-  50% {
-    background-color: var(--border);
-    opacity: 1;
+    background-position: -200% 0;
   }
 
   100% {
-    background-color: var(--border);
-    opacity: 0.5;
+    background-position: 200% 0;
   }
 }
 
 .skeleton {
-  animation: skeleton-loading 1.5s ease-in-out infinite;
+  background: linear-gradient(90deg, var(--border) 25%, var(--background) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
   border-radius: var(--radius-sm);
+}
+
+body.dark-mode .skeleton {
+  background: linear-gradient(90deg, #111 25%, #1a1a1a 50%, #111 75%);
+  background-size: 200% 100%;
 }
 
 /* Interaction Helpers */

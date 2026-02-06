@@ -1,17 +1,18 @@
 .card {
-    background-color: #0A0A0A;
-    border: 1px solid #262626;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 16px;
     position: relative;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    box-shadow: 0 4px 6px var(--color-shadow);
 }
 
 .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    border-color: rgba(212, 175, 55, 0.4);
+    border-color: var(--color-gold);
+    box-shadow: 0 10px 30px var(--color-shadow);
 }
 
 .recommended {
@@ -138,9 +139,9 @@
 
 .detailsBtn {
     width: 100%;
-    background-color: #111111;
-    border: 1px solid #262626;
-    color: white;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
     padding: 10px;
     border-radius: var(--radius-md);
     font-size: 0.9rem;
@@ -154,7 +155,7 @@
 }
 
 .detailsBtn:hover {
-    background-color: #161616;
+    background-color: var(--card-bg);
     border-color: var(--color-gold);
 }
 
@@ -195,14 +196,14 @@
 
 .detailItem p {
     font-size: 1rem;
-    color: white;
+    color: var(--text-primary);
     margin: 2px 0 0 0;
 }
 
 .itinerary {
     margin: 16px 0;
     padding-left: 14px;
-    border-left: 2px dashed #262626;
+    border-left: 2px dashed var(--border);
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -218,7 +219,7 @@
 
 .itineraryHeader strong {
     font-size: 0.95rem;
-    color: white;
+    color: var(--text-primary);
 }
 
 .step {
@@ -233,7 +234,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background-color: #050505;
+    background-color: var(--background);
     border: 3px solid var(--color-gold);
     top: 4px;
     z-index: 1;
@@ -260,7 +261,7 @@
 .stepLocation {
     font-size: 0.95rem;
     font-weight: 700;
-    color: white;
+    color: var(--text-primary);
 }
 
 .stepInstruction {

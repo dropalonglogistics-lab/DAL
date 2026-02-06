@@ -40,6 +40,10 @@
     transition: color 0.2s;
 }
 
+:global(.light-mode) .icon {
+    color: var(--text-secondary);
+}
+
 :global(.dark-mode) .icon {
     color: #94A3B8;
 }
