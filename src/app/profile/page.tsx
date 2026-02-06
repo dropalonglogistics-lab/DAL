@@ -106,13 +106,14 @@ export default function ProfilePage() {
                     }
                 } else if (!data) {
                     console.error(`[Profile:${loadId}] ❌ FINAL CHECK FAILED: data is null`)
+                    if (isMounted) setMessage({ type: 'error', text: 'Diagnostic: No profile record returned for ' + user.email })
                 }
             } catch (err: any) {
                 if (err.name === 'AbortError') {
                     console.log(`[Profile:${loadId}] 🛑 Aborted`)
                 } else {
                     console.error(`[Profile:${loadId}] 💥 CRASH:`, err)
-                    if (isMounted) setMessage({ type: 'error', text: 'Diagnostic Error: ' + (err.message || 'Unknown') })
+                    if (isMounted) setMessage({ type: 'error', text: 'Critical Error: ' + (err.message || 'Unknown. Check console.') })
                 }
             } finally {
                 if (isMounted) {
@@ -265,18 +266,36 @@ export default function ProfilePage() {
         return (
             <div className={styles.container}>
                 <div className={styles.card} style={{ textAlign: 'center', padding: '60px 20px' }}>
-                    <User size={48} color="var(--text-secondary)" style={{ marginBottom: '20px', opacity: 0.3 }} />
-                    <h2>Profile Data Not Found</h2>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
-                        We found your account, but your profile details are taking too long to load or are currently hidden.
-                    </p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '300px', margin: '0 auto' }}>
-                        <button onClick={handleSync} className={styles.saveBtn}>
-                            Force Re-sync Data
-                        </button>
-                        <button onClick={() => window.location.reload()} className={styles.signOutBtn}>
-                            Refresh Browser
-                        </button>
+                    <div className={styles.staggerEntry}>
+                        <User size={48} color="var(--text-secondary)" style={{ marginBottom: '20px', opacity: 0.3 }} />
+                        <h2>Profile Data Not Found</h2>
+                        <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                            We found your account, but your profile details are taking too long to load or are currently hidden.
+                        </p>
+
+                        {message && (
+                            <div style={{
+                                margin: '0 auto 24px auto',
+                                padding: '12px',
+                                background: 'rgba(239, 68, 68, 0.05)',
+                                border: '1px solid rgba(239, 68, 68, 0.2)',
+                                borderRadius: '8px',
+                                color: 'var(--color-error)',
+                                fontSize: '0.85rem',
+                                maxWidth: '400px'
+                            }}>
+                                <strong>Technical Detail:</strong> {message.text}
+                            </div>
+                        )}
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '300px', margin: '0 auto' }}>
+                            <button onClick={handleSync} className={styles.saveBtn}>
+                                Force Re-sync Data
+                            </button>
+                            <button onClick={() => window.location.reload()} className={styles.signOutBtn}>
+                                Refresh Browser
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
