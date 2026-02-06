@@ -28,16 +28,22 @@ export default function ProfilePage() {
         let isMounted = true
 
         async function loadProfile() {
+            console.log("[Profile] 🔍 Initialization started...")
+            setLoading(true)
+
             try {
                 const { data: { user } } = await supabase.auth.getUser()
+                console.log("[Profile] 👤 Auth User:", user?.email || "No user found")
 
                 if (!isMounted) return
 
                 if (!user) {
+                    console.log("[Profile] 🚀 Redirecting to login...")
                     router.push('/login')
                     return
                 }
 
+                console.log("[Profile] 📬 Querying database for ID:", user.id)
                 let { data, error: fetchError } = await supabase
                     .from('profiles')
                     .select('*')
@@ -46,11 +52,15 @@ export default function ProfilePage() {
 
                 if (!isMounted) return
 
-                if (fetchError && fetchError.code !== 'PGRST116') {
-                    throw new Error(`Fetch error: ${fetchError.message} (${fetchError.code})`)
+                if (fetchError) {
+                    console.error("[Profile] ❌ Fetch Error:", fetchError)
+                    if (fetchError.code !== 'PGRST116') {
+                        throw new Error(`Fetch error: ${fetchError.message} (${fetchError.code})`)
+                    }
                 }
 
                 if (!data) {
+                    console.warn("[Profile] ⚠️ No profile found in DB. Attempting auto-creation...")
                     const { data: newProfile, error: insertError } = await supabase.from('profiles').insert([{
                         id: user.id,
                         email: user.email,
@@ -62,38 +72,52 @@ export default function ProfilePage() {
                     if (!isMounted) return
 
                     if (insertError) {
+                        console.error("[Profile] ❌ Creation Error:", insertError)
                         throw new Error(`Profile creation failed. Error: ${insertError.message}`)
                     }
+                    console.log("[Profile] ✅ Profile created successfully")
                     data = newProfile
                 }
 
                 if (data && isMounted) {
+                    console.log("[Profile] ✨ Data loaded:", { email: data.email, is_admin: data.is_admin })
                     setProfile(data)
                     setPreviewUrl(data.avatar_url)
 
                     if (data.is_admin) {
                         try {
+                            console.log("[Profile] 📊 Loading admin stats...")
                             const stats = await fetchAdminStats()
-                            if (isMounted) setAdminStats(stats)
+                            if (isMounted) {
+                                console.log("[Profile] ✅ Admin stats loaded")
+                                setAdminStats(stats)
+                            }
                         } catch (err) {
-                            console.error("Failed to fetch admin stats:", err)
+                            console.error("[Profile] ❌ Admin stats fetch failed:", err)
                         }
                     }
                 }
             } catch (err: any) {
-                // Ignore benign abort errors
-                if (err.name === 'AbortError') return
-
-                console.error("Profile load error:", err)
-                if (isMounted) setMessage({ type: 'error', text: 'Error loading profile: ' + (err.message || 'Unknown error') })
+                if (err.name === 'AbortError') {
+                    console.log("[Profile] 🛑 Request aborted by browser (benign)")
+                } else {
+                    console.error("[Profile] 💥 Global Error:", err)
+                    if (isMounted) setMessage({ type: 'error', text: 'Error: ' + (err.message || 'Unknown error occurred') })
+                }
             } finally {
-                if (isMounted) setLoading(false)
+                if (isMounted) {
+                    console.log("[Profile] 🏁 Loading complete")
+                    setLoading(false)
+                }
             }
         }
 
         loadProfile()
-        return () => { isMounted = false }
-    }, [router])
+        return () => {
+            console.log("[Profile] 🧹 Unmounting component")
+            isMounted = false
+        }
+    }, [router, supabase])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
