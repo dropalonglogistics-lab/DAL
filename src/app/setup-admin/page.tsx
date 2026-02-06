@@ -81,7 +81,7 @@ ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
 
 NOTIFY pgrst, 'reload schema';`}
                         </pre>
-                        <p style={{ fontSize: '0.9em', color: '#666' }}>Go to Supabase -> SQL Editor -> New Query -> Paste & Run.</p>
+                        <p style={{ fontSize: '0.9em', color: '#666' }}>Go to Supabase &rarr; SQL Editor &rarr; New Query &rarr; Paste and Run.</p>
                     </div>
                 ) : (
                     <p>We tried to update your profile but encountered an error. This might be due to database permissions (RLS).</p>
