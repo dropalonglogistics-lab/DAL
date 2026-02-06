@@ -7,39 +7,99 @@ export default async function SetupAdminPage() {
 
     if (!user) {
         return (
-            <div style={{ padding: '40px', textAlign: 'center' }}>
-                <h1>Authentication Required</h1>
+            <div style={{ padding: '40px', maxWidth: '600px', margin: '0 auto', fontFamily: 'system-ui' }}>
+                <h1 style={{ color: '#0F172A' }}>Authentication Required</h1>
                 <p>Please login with <strong>ekechristopher56@gmail.com</strong> first.</p>
-                <a href="/login?next=/setup-admin" style={{ color: 'blue', textDecoration: 'underline' }}>Login here</a>
+                <a href="/login?next=/setup-admin" style={{ display: 'inline-block', marginTop: '10px', color: '#2563EB', textDecoration: 'underline' }}>Login here</a>
             </div>
         )
     }
 
-    if (user.email !== 'ekechristopher56@gmail.com') {
+    const targetEmail = 'ekechristopher56@gmail.com'
+    const isTargetUser = user.email?.toLowerCase().trim() === targetEmail.toLowerCase().trim()
+
+    if (!isTargetUser) {
         return (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'red' }}>
-                <h1>Unauthorized</h1>
+            <div style={{ padding: '40px', maxWidth: '600px', margin: '0 auto', fontFamily: 'system-ui', border: '1px solid #FECACA', borderRadius: '8px', background: '#FEF2F2' }}>
+                <h1 style={{ color: '#EF4444' }}>Unauthorized</h1>
                 <p>This recovery tool is only for the master admin account.</p>
-                <p>Current email: {user.email}</p>
+                <div style={{ background: '#fff', padding: '15px', borderRadius: '4px', marginTop: '10px' }}>
+                    <p style={{ margin: 0, fontSize: '0.9em', color: '#64748B' }}>Current Logged In User:</p>
+                    <p style={{ margin: '5px 0 0 0', fontWeight: 'bold' }}>{user.email}</p>
+                    <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: '#94A3B8' }}>ID: {user.id}</p>
+                </div>
             </div>
         )
     }
 
-    // Force update the specific user
-    const { error } = await supabase
+    // Attempt Force Update
+    console.log(`Attempting to promote user ${user.id} (${user.email})`)
+
+    const { data: profile, error: fetchError } = await supabase
         .from('profiles')
-        .update({ is_admin: true })
+        .select('*')
         .eq('id', user.id)
+        .single()
 
-    if (error) {
+    let updateError = null
+
+    // Create profile if missing
+    if (!profile) {
+        const { error: insertError } = await supabase
+            .from('profiles')
+            .insert([{
+                id: user.id,
+                email: user.email,
+                full_name: user.user_metadata?.full_name || 'Admin User',
+                is_admin: true // Set true on create
+            }])
+        updateError = insertError
+    } else {
+        // Update existing
+        const { error: e } = await supabase
+            .from('profiles')
+            .update({ is_admin: true })
+            .eq('id', user.id)
+        updateError = e
+    }
+
+    if (updateError) {
         return (
-            <div style={{ padding: '40px', color: 'red' }}>
-                <h1>Error Updating Profile</h1>
-                <pre>{JSON.stringify(error, null, 2)}</pre>
+            <div style={{ padding: '40px', maxWidth: '600px', margin: '0 auto', fontFamily: 'system-ui' }}>
+                <h1 style={{ color: '#EF4444' }}>Setup Failed</h1>
+                <p>We tried to update your profile but encountered an error. This might be due to database permissions (RLS).</p>
+                <div style={{ background: '#F1F5F9', padding: '15px', borderRadius: '4px', marginTop: '10px', overflowX: 'auto' }}>
+                    <pre style={{ margin: 0, fontSize: '0.85em' }}>{JSON.stringify(updateError, null, 2)}</pre>
+                </div>
+                <div style={{ marginTop: '20px' }}>
+                    <h3>Diagnostic Info:</h3>
+                    <ul>
+                        <li>Email Match: Yes</li>
+                        <li>User ID: {user.id}</li>
+                        <li>Profile Exists: {profile ? 'Yes' : 'No'}</li>
+                        {profile && <li>Current Admin Status: {String(profile.is_admin)}</li>}
+                    </ul>
+                </div>
             </div>
         )
     }
 
-    // Redirect to admin dashboard on success
-    redirect('/admin')
+    // Verification Fetch
+    const { data: finalProfile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single()
+
+    if (finalProfile?.is_admin) {
+        redirect('/admin')
+    } else {
+        return (
+            <div style={{ padding: '40px', maxWidth: '600px', margin: '0 auto', fontFamily: 'system-ui' }}>
+                <h1 style={{ color: '#F59E0B' }}>Update Verification Failed</h1>
+                <p>The update command ran without error, but the read-back verification says you are still not an admin.</p>
+                <p>This strongly suggests a database Row Level Security (RLS) policy is silently blocking the update.</p>
+            </div>
+        )
+    }
 }
