@@ -28,11 +28,34 @@ export default function ProfilePage() {
                 return
             }
 
-            const { data, error } = await supabase
+            let { data, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', user.id)
                 .single()
+
+            // If profile doesn't exist (or fetch error), try to create it based on auth data
+            if (!data) {
+                console.log("Profile not found, creating default profile...")
+                const { data: newProfile, error: createError } = await supabase
+                    .from('profiles')
+                    .insert([{
+                        id: user.id,
+                        email: user.email,
+                        full_name: user.user_metadata?.full_name || '',
+                        avatar_url: user.user_metadata?.avatar_url || '',
+                        is_admin: false
+                    }])
+                    .select()
+                    .single()
+
+                if (newProfile) {
+                    data = newProfile
+                } else {
+                    console.error("Error creating profile:", createError)
+                    setMessage({ type: 'error', text: 'Failed to load or create profile. Please try refreshing.' })
+                }
+            }
 
             if (data) {
                 setProfile(data)
