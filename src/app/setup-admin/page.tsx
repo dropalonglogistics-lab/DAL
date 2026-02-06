@@ -64,10 +64,29 @@ export default async function SetupAdminPage() {
     }
 
     if (updateError) {
+        const isMissingColumn = updateError.code === 'PGRST204' || updateError.message?.includes('is_admin')
+
         return (
             <div style={{ padding: '40px', maxWidth: '600px', margin: '0 auto', fontFamily: 'system-ui' }}>
                 <h1 style={{ color: '#EF4444' }}>Setup Failed</h1>
-                <p>We tried to update your profile but encountered an error. This might be due to database permissions (RLS).</p>
+
+                {isMissingColumn ? (
+                    <div style={{ background: '#FFF7ED', border: '1px solid #F97316', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+                        <h3 style={{ color: '#EA580C', marginTop: 0 }}>⚠️ Database Update Required</h3>
+                        <p>The <code>is_admin</code> column is missing from your database.</p>
+                        <p><strong>You must run this SQL in your Supabase Dashboard:</strong></p>
+                        <pre style={{ background: '#1E293B', color: '#F8FAFC', padding: '15px', borderRadius: '4px', overflowX: 'auto' }}>
+                            {`ALTER TABLE profiles 
+ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
+
+NOTIFY pgrst, 'reload schema';`}
+                        </pre>
+                        <p style={{ fontSize: '0.9em', color: '#666' }}>Go to Supabase -> SQL Editor -> New Query -> Paste & Run.</p>
+                    </div>
+                ) : (
+                    <p>We tried to update your profile but encountered an error. This might be due to database permissions (RLS).</p>
+                )}
+
                 <div style={{ background: '#F1F5F9', padding: '15px', borderRadius: '4px', marginTop: '10px', overflowX: 'auto' }}>
                     <pre style={{ margin: 0, fontSize: '0.85em' }}>{JSON.stringify(updateError, null, 2)}</pre>
                 </div>
