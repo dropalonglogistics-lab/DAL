@@ -21,13 +21,17 @@ export default function ProfilePage() {
     const [viewMode, setViewMode] = useState<'profile' | 'admin'>('profile')
     const [adminStats, setAdminStats] = useState<any>(null)
 
-    const supabase = createClient()
+    const supabase = useState(() => createClient())[0]
     const router = useRouter()
 
     useEffect(() => {
+        let isMounted = true
+
         async function loadProfile() {
             try {
                 const { data: { user } } = await supabase.auth.getUser()
+
+                if (!isMounted) return
 
                 if (!user) {
                     router.push('/login')
@@ -40,12 +44,13 @@ export default function ProfilePage() {
                     .eq('id', user.id)
                     .single()
 
+                if (!isMounted) return
+
                 if (fetchError && fetchError.code !== 'PGRST116') {
                     throw new Error(`Fetch error: ${fetchError.message} (${fetchError.code})`)
                 }
 
                 if (!data) {
-                    console.log("Profile not found, attempting to create...")
                     const { data: newProfile, error: insertError } = await supabase.from('profiles').insert([{
                         id: user.id,
                         email: user.email,
@@ -54,35 +59,41 @@ export default function ProfilePage() {
                         is_admin: false
                     }]).select().single()
 
+                    if (!isMounted) return
+
                     if (insertError) {
-                        throw new Error(`Profile creation failed. This usually happens if the "profiles" table is missing Row Level Security (RLS) policies for INSERT. Error: ${insertError.message}`)
+                        throw new Error(`Profile creation failed. Error: ${insertError.message}`)
                     }
                     data = newProfile
                 }
 
-                if (data) {
+                if (data && isMounted) {
                     setProfile(data)
                     setPreviewUrl(data.avatar_url)
 
                     if (data.is_admin) {
                         try {
                             const stats = await fetchAdminStats()
-                            setAdminStats(stats)
+                            if (isMounted) setAdminStats(stats)
                         } catch (err) {
                             console.error("Failed to fetch admin stats:", err)
                         }
                     }
                 }
             } catch (err: any) {
+                // Ignore benign abort errors
+                if (err.name === 'AbortError') return
+
                 console.error("Profile load error:", err)
-                setMessage({ type: 'error', text: 'Error loading profile: ' + (err.message || 'Unknown error') })
+                if (isMounted) setMessage({ type: 'error', text: 'Error loading profile: ' + (err.message || 'Unknown error') })
             } finally {
-                setLoading(false)
+                if (isMounted) setLoading(false)
             }
         }
 
         loadProfile()
-    }, [supabase, router])
+        return () => { isMounted = false }
+    }, [router])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
