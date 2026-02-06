@@ -89,8 +89,7 @@
 }
 
 :global(.light-mode) .title {
-    color: #0F172A;
-    /* Deep Obsidian */
+    color: #0F172A !important;
 }
 
 .subtitle {

@@ -39,10 +39,10 @@
 }
 
 :global(.light-mode) .heroText h1 {
-    background: linear-gradient(135deg, #0F172A 0%, var(--color-gold) 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    text-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    background: none;
+    -webkit-text-fill-color: #0F172A;
+    color: #0F172A;
+    text-shadow: none;
 }
 
 .heroText p {
