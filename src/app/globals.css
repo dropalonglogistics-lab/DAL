@@ -160,7 +160,7 @@ a {
   color: var(--text-primary);
 }
 
-:global(.dark-mode) .btn-ghost:hover {
+body.dark-mode .btn-ghost:hover {
   background-color: rgba(255, 255, 255, 0.05);
 }
 

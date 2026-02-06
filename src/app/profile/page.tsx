@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Mail, MapPin, Calendar, Camera, LogOut, CheckCircle, AlertCircle } from 'lucide-react'
+import { User, Mail, MapPin, Calendar, Camera, LogOut, CheckCircle, AlertCircle, Shield, LayoutDashboard, Users as UsersIcon } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { updateProfile } from './actions'
 import { signOut } from '../login/actions'
@@ -176,9 +176,38 @@ export default function ProfilePage() {
                         <div className={styles.avatarInfo}>
                             <h3 style={{ margin: 0 }}>{profile?.full_name || 'User'}</h3>
                             <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>{profile?.email}</p>
+                            {profile?.is_admin && <span className={styles.adminBadge}>Administrator</span>}
                             <p className={styles.uploadHint}>Click the icon to change your photo</p>
                         </div>
                     </div>
+
+                    {profile?.is_admin && (
+                        <div className={styles.adminSection}>
+                            <div className={styles.sectionTitle}>
+                                <Shield size={20} color="var(--color-warning)" /> Admin Controls
+                            </div>
+                            <div className={styles.adminGrid}>
+                                <a href="/admin" className={styles.adminCard}>
+                                    <div className={styles.adminCardIcon}>
+                                        <LayoutDashboard size={20} />
+                                    </div>
+                                    <div className={styles.adminCardContent}>
+                                        <h4>Dashboard Overview</h4>
+                                        <p>View system stats and reports</p>
+                                    </div>
+                                </a>
+                                <a href="/admin/users" className={styles.adminCard}>
+                                    <div className={styles.adminCardIcon}>
+                                        <UsersIcon size={20} />
+                                    </div>
+                                    <div className={styles.adminCardContent}>
+                                        <h4>User Management</h4>
+                                        <p>Manage roles and permissions</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    )}
 
                     <div className={styles.section}>
                         <div className={styles.sectionTitle}>

@@ -330,3 +330,78 @@
     color: var(--color-success);
     border: 1px solid var(--color-success);
 }
+
+.adminBadge {
+    background-color: var(--color-warning);
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 8px;
+    display: inline-block;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+.adminSection {
+    margin-bottom: 32px;
+    animation: fadeIn 0.6s ease-out;
+}
+
+.adminGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media (min-width: 640px) {
+    .adminGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.adminCard {
+    background: linear-gradient(135deg, var(--card-bg) 0%, rgba(245, 158, 11, 0.05) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.adminCard:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-warning);
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+}
+
+.adminCardIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.adminCardContent h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.adminCardContent p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
