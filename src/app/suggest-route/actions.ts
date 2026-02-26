@@ -31,11 +31,11 @@ export async function suggestRoute(formData: FormData) {
         if (error) return { error: error.message }
 
         // Award Point (Incident)
-        if (userId) {
+        if (user) {
             try {
-                const { data: profile } = await supabase.from('profiles').select('points, full_name').eq('id', userId).single()
+                const { data: profile } = await supabase.from('profiles').select('points, full_name').eq('id', user.id).single()
                 const { error: upsertError } = await supabase.from('profiles').upsert({
-                    id: userId,
+                    id: user.id,
                     email: user.email,
                     points: (profile?.points || 0) + 1,
                     full_name: profile?.full_name || user.user_metadata?.full_name || 'Community Member'
@@ -101,11 +101,11 @@ export async function suggestRoute(formData: FormData) {
     }
 
     // Award Point (Route)
-    if (userId) {
+    if (user) {
         try {
-            const { data: profile } = await supabase.from('profiles').select('points, full_name').eq('id', userId).single()
+            const { data: profile } = await supabase.from('profiles').select('points, full_name').eq('id', user.id).single()
             const { error: upsertError } = await supabase.from('profiles').upsert({
-                id: userId,
+                id: user.id,
                 email: user.email,
                 points: (profile?.points || 0) + 1,
                 full_name: profile?.full_name || user.user_metadata?.full_name || 'Community Member'
