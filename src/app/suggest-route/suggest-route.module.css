@@ -408,6 +408,109 @@
     animation-delay: 0.6s;
 }
 
+/* Success State Styles */
+.successState {
+    text-align: center;
+    padding: 24px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.successIcon {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--color-success);
+    padding: 20px;
+    border-radius: 50%;
+    margin-bottom: 8px;
+}
+
+.successState h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.successState p {
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.pointsEarned {
+    color: var(--color-gold);
+    font-weight: 700;
+    font-size: 1.1rem;
+    background: rgba(212, 175, 55, 0.1);
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-top: 8px;
+}
+
+/* Point System Incentives */
+.guestIncentive {
+    background: rgba(212, 175, 55, 0.05);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.awardIcon {
+    color: var(--color-gold);
+    flex-shrink: 0;
+}
+
+.guestIncentive strong {
+    display: block;
+    color: var(--color-gold);
+    margin-bottom: 4px;
+}
+
+.guestIncentive p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.guestIncentive a {
+    color: var(--color-gold);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.memberIncentive {
+    background: rgba(34, 197, 94, 0.05);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-success);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Point System Incentives */
 .guestIncentive {
     background: rgba(212, 175, 55, 0.05);
