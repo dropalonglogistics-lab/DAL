@@ -15,8 +15,9 @@ export default async function SetupAdminPage() {
         )
     }
 
-    const targetEmail = 'ekechristopher56@gmail.com'
-    const isTargetUser = user.email?.toLowerCase().trim() === targetEmail.toLowerCase().trim()
+    const targetEmails = ['ekechristopher56@gmail.com', 'ekechrisopher56@gmail.com']
+    const userEmail = user.email?.toLowerCase().trim() || ''
+    const isTargetUser = targetEmails.some(email => email.toLowerCase() === userEmail)
 
     if (!isTargetUser) {
         return (
