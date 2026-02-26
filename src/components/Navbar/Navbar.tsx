@@ -30,7 +30,7 @@ export default function Navbar() {
             if (authUser) {
                 const { data: userProfile } = await supabase
                     .from('profiles')
-                    .select('is_admin')
+                    .select('is_admin, points')
                     .eq('id', authUser.id)
                     .single();
                 setProfile(userProfile);
@@ -45,7 +45,7 @@ export default function Navbar() {
             if (currentUser) {
                 const { data: userProfile } = await supabase
                     .from('profiles')
-                    .select('is_admin')
+                    .select('is_admin, points')
                     .eq('id', currentUser.id)
                     .single();
                 setProfile(userProfile);
