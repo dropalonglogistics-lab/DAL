@@ -1,7 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
+import { suggestRoute } from './actions';
 import {
     AlertTriangle,
     Shield,
@@ -11,7 +14,9 @@ import {
     ChevronLeft,
     Send,
     PlusCircle,
-    Navigation
+    Navigation,
+    Coins,
+    Award
 } from 'lucide-react';
 import styles from './suggest-route.module.css';
 
@@ -23,17 +28,38 @@ export default function SuggestRoute() {
     const [incidentType, setIncidentType] = useState<IncidentType>('traffic');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [user, setUser] = useState<any>(null);
+    const router = useRouter();
+    const supabase = createClient();
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user: authUser } } = await supabase.auth.getUser();
+            setUser(authUser);
+        };
+        checkUser();
+    }, [supabase]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        // Simulate submission for now
-        // In a real app, we would use a Server Action or API route here
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        const formData = new FormData(e.currentTarget);
+        formData.append('type', mode);
+        if (mode === 'incident') {
+            formData.append('incidentType', incidentType);
+        }
+
+        const result = await suggestRoute(formData);
+
+        if (result.success) {
+            setSubmitted(true);
+            router.refresh(); // Update points in navbar
+        } else {
+            alert(result.error || 'Something went wrong');
+        }
 
         setIsSubmitting(false);
-        setSubmitted(true);
     };
 
     if (submitted) {
@@ -175,6 +201,23 @@ export default function SuggestRoute() {
                             <div className={styles.sectionHeader}>
                                 <h2>Route Details</h2>
                             </div>
+
+                            {!user && (
+                                <div className={styles.guestIncentive}>
+                                    <Award size={20} className={styles.awardIcon} />
+                                    <div>
+                                        <strong>Earn Points for Suggestions!</strong>
+                                        <p>Signed-up members earn reputation points for verified route data. <Link href="/login">Join the network →</Link></p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {user && (
+                                <div className={styles.memberIncentive}>
+                                    <Coins size={18} />
+                                    <span>You'll earn <strong>1 Point</strong> for this contribution!</span>
+                                </div>
+                            )}
 
                             <div className={styles.formGroup}>
                                 <label className={styles.label}>Starting Point</label>

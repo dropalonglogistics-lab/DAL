@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Mail, MapPin, Calendar, Camera, LogOut, CheckCircle, AlertCircle, Shield, LayoutDashboard, Users as UsersIcon } from 'lucide-react'
+import { User, Mail, MapPin, Calendar, Camera, LogOut, CheckCircle, AlertCircle, Shield, LayoutDashboard, Users as UsersIcon, Coins, Award } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { updateProfile } from './actions'
 import { signOut } from '../login/actions'
@@ -400,6 +400,18 @@ export default function ProfilePage() {
                             <div className={styles.avatarInfo}>
                                 <h3 style={{ margin: 0 }}>{profile?.full_name || 'User'}</h3>
                                 <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>{profile?.email}</p>
+                                <div className={styles.profileStatRow}>
+                                    <div className={styles.pointsDisplay}>
+                                        <Coins size={16} />
+                                        <span>{profile?.points || 0} Points Earned</span>
+                                    </div>
+                                    {profile?.points >= 10 && (
+                                        <div className={styles.rankBadge}>
+                                            <Award size={14} />
+                                            <span>Master Scout</span>
+                                        </div>
+                                    )}
+                                </div>
                                 {profile?.is_admin && <span className={styles.adminBadge}>Administrator</span>}
                                 <p className={styles.uploadHint}>Click the icon to change your photo</p>
                             </div>

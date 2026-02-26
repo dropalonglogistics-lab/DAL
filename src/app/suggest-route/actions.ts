@@ -30,6 +30,16 @@ export async function suggestRoute(formData: FormData) {
 
         if (error) return { error: error.message }
 
+        // Award Point to Authenticated User
+        if (userId) {
+            await supabase.rpc('increment_points', { user_id: userId, amount: 1 })
+            // Fallback if RPC isn't available:
+            // await supabase.from('profiles').update({ points: (profile?.points || 0) + 1 }).eq('id', userId)
+            // However, it's better to use a simple update if we don't want to create an RPC
+            const { data: profile } = await supabase.from('profiles').select('points').eq('id', userId).single()
+            await supabase.from('profiles').update({ points: (profile?.points || 0) + 1 }).eq('id', userId)
+        }
+
         // Conceptual AI Learning
         await processIncidentImpact(incidentData.type, incidentData.description)
 
@@ -82,6 +92,12 @@ export async function suggestRoute(formData: FormData) {
 
     if (error) {
         return { error: error.message }
+    }
+
+    // Award Point to Authenticated User
+    if (userId) {
+        const { data: profile } = await supabase.from('profiles').select('points').eq('id', userId).single()
+        await supabase.from('profiles').update({ points: (profile?.points || 0) + 1 }).eq('id', userId)
     }
 
     // Conceptual AI Learning

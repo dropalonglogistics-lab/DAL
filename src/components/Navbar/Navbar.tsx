@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { Moon, Sun, Menu, User, Map, AlertTriangle, Users, Lock, LogOut, Navigation, Shield } from 'lucide-react';
+import { Moon, Sun, Menu, User, Map, AlertTriangle, Users, Lock, LogOut, Navigation, Shield, Coins } from 'lucide-react';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
@@ -140,6 +140,13 @@ export default function Navbar() {
                                     user.email?.charAt(0).toUpperCase()
                                 )}
                             </Link>
+
+                            {profile && (
+                                <div className={styles.pointsBadge}>
+                                    <Coins size={14} className={styles.coinIcon} />
+                                    <span>{profile.points || 0}</span>
+                                </div>
+                            )}
                             <button onClick={handleSignOut} className={styles.iconBtn} aria-label="Sign Out" title="Sign Out">
                                 <LogOut size={20} />
                             </button>
