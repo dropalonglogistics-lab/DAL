@@ -38,6 +38,23 @@ export default function Navbar() {
         };
         loadInitialData();
 
+        // Real-time listener for profile (points update)
+        let profileChannel: any = null;
+
+        const setupProfileListener = (currentUserId: string) => {
+            if (profileChannel) supabase.removeChannel(profileChannel);
+            profileChannel = supabase
+                .channel(`profile-${currentUserId}`)
+                .on(
+                    'postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${currentUserId}` },
+                    (payload) => {
+                        setProfile(payload.new as any);
+                    }
+                )
+                .subscribe();
+        };
+
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             const currentUser = session?.user ?? null;
@@ -49,8 +66,10 @@ export default function Navbar() {
                     .eq('id', currentUser.id)
                     .single();
                 setProfile(userProfile);
+                setupProfileListener(currentUser.id);
             } else {
                 setProfile(null);
+                if (profileChannel) supabase.removeChannel(profileChannel);
             }
             if (_event === 'SIGNED_OUT') {
                 setProfile(null);
@@ -61,6 +80,7 @@ export default function Navbar() {
         return () => {
             darkModeMediaQuery.removeEventListener('change', handleChange);
             subscription.unsubscribe();
+            if (profileChannel) supabase.removeChannel(profileChannel);
         };
     }, [supabase, router]);
 
