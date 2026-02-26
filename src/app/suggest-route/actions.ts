@@ -31,14 +31,14 @@ export async function suggestRoute(formData: FormData) {
         if (error) return { error: error.message }
 
         // Award Point (Incident)
-        if (user) {
+        if (user && user.id) {
             try {
                 const { data: profile } = await supabase.from('profiles').select('points, full_name').eq('id', user.id).single()
                 const { error: upsertError } = await supabase.from('profiles').upsert({
                     id: user.id,
-                    email: user.email,
+                    email: user.email || '',
                     points: (profile?.points || 0) + 1,
-                    full_name: profile?.full_name || user.user_metadata?.full_name || 'Community Member'
+                    full_name: profile?.full_name || (user.user_metadata?.full_name as string) || 'Community Member'
                 })
                 if (upsertError) console.error('Point Award Error (Incident):', upsertError)
             } catch (err) {
@@ -101,14 +101,14 @@ export async function suggestRoute(formData: FormData) {
     }
 
     // Award Point (Route)
-    if (user) {
+    if (user && user.id) {
         try {
             const { data: profile } = await supabase.from('profiles').select('points, full_name').eq('id', user.id).single()
             const { error: upsertError } = await supabase.from('profiles').upsert({
                 id: user.id,
-                email: user.email,
+                email: user.email || '',
                 points: (profile?.points || 0) + 1,
-                full_name: profile?.full_name || user.user_metadata?.full_name || 'Community Member'
+                full_name: profile?.full_name || (user.user_metadata?.full_name as string) || 'Community Member'
             })
             if (upsertError) console.error('Point Award Error (Route):', upsertError)
         } catch (err) {
