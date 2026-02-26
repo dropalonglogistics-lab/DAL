@@ -32,8 +32,31 @@ export async function suggestRoute(formData: FormData) {
 
         // Award Point to Authenticated User
         if (userId) {
-            const { data: profile } = await supabase.from('profiles').select('points').eq('id', userId).single()
-            await supabase.from('profiles').update({ points: (profile?.points || 0) + 1 }).eq('id', userId)
+            try {
+                const { data: profile, error: getError } = await supabase
+                    .from('profiles')
+                    .select('points')
+                    .eq('id', userId)
+                    .single()
+
+                if (getError && getError.code !== 'PGRST116') {
+                    console.error('Error fetching points (incident):', getError)
+                }
+
+                const currentPoints = profile?.points || 0
+                const { error: updateError } = await supabase
+                    .from('profiles')
+                    .update({ points: currentPoints + 1 })
+                    .eq('id', userId)
+
+                if (updateError) {
+                    console.error('Error awarding point (incident):', updateError)
+                } else {
+                    console.log(`Successfully awarded 1 point (incident) to ${userId}. New total: ${currentPoints + 1}`)
+                }
+            } catch (err) {
+                console.error('Exceptional error awarding point (incident):', err)
+            }
         }
 
         // Conceptual AI Learning
@@ -92,8 +115,31 @@ export async function suggestRoute(formData: FormData) {
 
     // Award Point to Authenticated User
     if (userId) {
-        const { data: profile } = await supabase.from('profiles').select('points').eq('id', userId).single()
-        await supabase.from('profiles').update({ points: (profile?.points || 0) + 1 }).eq('id', userId)
+        try {
+            const { data: profile, error: getError } = await supabase
+                .from('profiles')
+                .select('points')
+                .eq('id', userId)
+                .single()
+
+            if (getError && getError.code !== 'PGRST116') {
+                console.error('Error fetching points:', getError)
+            }
+
+            const currentPoints = profile?.points || 0
+            const { error: updateError } = await supabase
+                .from('profiles')
+                .update({ points: currentPoints + 1 })
+                .eq('id', userId)
+
+            if (updateError) {
+                console.error('Error awarding point:', updateError)
+            } else {
+                console.log(`Successfully awarded 1 point to ${userId}. New total: ${currentPoints + 1}`)
+            }
+        } catch (err) {
+            console.error('Exceptional error awarding point:', err)
+        }
     }
 
     // Conceptual AI Learning
