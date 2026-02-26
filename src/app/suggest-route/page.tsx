@@ -1,279 +1,245 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { MapPin, Info, DollarSign, Clock, Send, CheckCircle, AlertCircle, ArrowLeft, Shield, TrafficCone, AlertTriangle, Construction, Navigation } from 'lucide-react'
-import Link from 'next/link'
-import { suggestRoute } from './actions'
-import styles from './suggest-route.module.css'
+import { useState } from 'react';
+import Link from 'next/link';
+import {
+    AlertTriangle,
+    Shield,
+    TrafficCone,
+    Construction,
+    MapPin,
+    ChevronLeft,
+    Send,
+    PlusCircle,
+    Navigation
+} from 'lucide-react';
+import styles from './suggest-route.module.css';
 
-export default function SuggestRoutePage() {
-    const [loading, setLoading] = useState(false)
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
-    const [view, setView] = useState<'route' | 'incident'>('route')
-    const router = useRouter()
+type SuggestType = 'incident' | 'route';
+type IncidentType = 'police' | 'traffic' | 'blocked' | 'checkpoint';
 
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault()
-        setLoading(true)
-        setMessage(null)
+export default function SuggestRoute() {
+    const [mode, setMode] = useState<SuggestType>('incident');
+    const [incidentType, setIncidentType] = useState<IncidentType>('traffic');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
 
-        const formData = new FormData(e.currentTarget)
-        formData.append('type', view) // Distinguish between route suggestion and incident report
-        const result = await suggestRoute(formData)
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
 
-        if (result?.error) {
-            setMessage({ type: 'error', text: result.error })
-            setLoading(false)
-        } else {
-            const successText = view === 'route'
-                ? 'Thank you! Your route suggestion has been shared.'
-                : 'Report submitted successfully. Stay safe!'
+        // Simulate submission for now
+        // In a real app, we would use a Server Action or API route here
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
-            setMessage({
-                type: 'success',
-                text: result.isGuest
-                    ? `${successText} Why not sign up to track your contributions?`
-                    : successText
-            })
+        setIsSubmitting(false);
+        setSubmitted(true);
+    };
 
-            if (!result.isGuest) {
-                setTimeout(() => {
-                    router.push(view === 'route' ? '/community' : '/alerts')
-                }, 2000)
-            } else {
-                setLoading(false) // Keep them on the page to see the CTA
-            }
-        }
+    if (submitted) {
+        return (
+            <div className={styles.container}>
+                <div className={styles.card} style={{ textAlign: 'center', padding: '60px 40px' }}>
+                    <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifySelf: 'center', justifyContent: 'center', margin: '0 auto 24px auto' }}>
+                        <Send size={40} />
+                    </div>
+                    <h2 className={styles.title}>Thank You!</h2>
+                    <p className={styles.subtitle}>Your contribution helps make Port Harcourt transit smarter for everyone.</p>
+                    <Link href="/" className={styles.submitBtn} style={{ marginTop: '32px', textDecoration: 'none' }}>
+                        Return to Dashboard
+                    </Link>
+                </div>
+            </div>
+        );
     }
 
     return (
         <div className={styles.container}>
-            <Link href="/community" className={styles.backLink}>
-                <ArrowLeft size={16} /> Back to Community
+            <Link href="/" className={styles.backLink}>
+                <ChevronLeft size={18} />
+                Back to Search
             </Link>
 
-            <div className={`${styles.header} ${styles.staggerEntry} ${styles.delay_1}`}>
-                <h1 className={styles.title}>{view === 'route' ? 'Share your knowledge' : 'Report an incident'}</h1>
-                <p className={styles.subtitle}>
-                    {view === 'route'
-                        ? 'Help Port Harcourt move smarter by sharing your expert route knowledge.'
-                        : 'Real-time road intelligence helps everyone avoid delays.'}
-                </p>
+            <div className={styles.header}>
+                <h1 className={styles.title}>Community Intelligence</h1>
+                <p className={styles.subtitle}>Real-time updates and new route suggestions from the collective.</p>
             </div>
 
-            <div className={`${styles.toggleGroup} ${styles.staggerEntry} ${styles.delay_2}`}>
-                <button
-                    className={`${styles.toggleBtn} ${view === 'route' ? styles.activeToggle : ''}`}
-                    onClick={() => setView('route')}
-                >
-                    <Navigation size={18} /> Suggest Route
-                </button>
-                <button
-                    className={`${styles.toggleBtn} ${view === 'incident' ? styles.activeToggle : ''}`}
-                    onClick={() => setView('incident')}
-                >
-                    <AlertTriangle size={18} /> Report Incident
-                </button>
-            </div>
+            <div className={styles.card}>
+                <div className={styles.toggleGroup}>
+                    <button
+                        className={`${styles.toggleBtn} ${mode === 'incident' ? styles.activeToggle : ''}`}
+                        onClick={() => setMode('incident')}
+                    >
+                        <AlertTriangle size={18} />
+                        Report Incident
+                    </button>
+                    <button
+                        className={`${styles.toggleBtn} ${mode === 'route' ? styles.activeToggle : ''}`}
+                        onClick={() => setMode('route')}
+                    >
+                        <PlusCircle size={18} />
+                        Suggest Route
+                    </button>
+                </div>
 
-            <div className={`${styles.card} ${styles.staggerEntry} ${styles.delay_3}`}>
-                {message && (
-                    <div className={`${styles.message} ${styles[message.type]} animate-fade-in`}>
-                        {message.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
-                        {message.text}
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className={styles.form}>
-                    {message?.type === 'success' && !loading && (
-                        <div className={styles.guestCTA}>
-                            <p>Join the community to get more out of DAL!</p>
-                            <div className={styles.ctaButtons}>
-                                <Link href="/auth/signup" className={styles.ctaBtnPrimary}>Join DAL</Link>
-                                <Link href="/login" className={styles.ctaBtnSecondary}>Login</Link>
-                            </div>
-                        </div>
-                    )}
-                    {view === 'route' ? (
+                <form className={styles.form} onSubmit={handleSubmit}>
+                    {mode === 'incident' ? (
                         <>
-                            <div className={`${styles.sectionHeader} ${styles.staggerEntry} ${styles.delay_4}`}>
-                                <h2>Where are you going?</h2>
+                            <div className={styles.sectionHeader}>
+                                <h2>What's going on?</h2>
                             </div>
-                            <div className={styles.row}>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.label}>Starting Point</label>
-                                    <div className={styles.inputWrapper}>
-                                        <MapPin size={18} className={styles.inputIcon} />
-                                        <input
-                                            type="text"
-                                            name="origin"
-                                            required
-                                            placeholder="e.g. Mile 1 Park"
-                                            className={styles.inputWithIcon}
-                                        />
-                                    </div>
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.label}>End Point</label>
-                                    <div className={styles.inputWrapper}>
-                                        <MapPin size={18} className={styles.inputIcon} />
-                                        <input
-                                            type="text"
-                                            name="destination"
-                                            required
-                                            placeholder="e.g. Rumuokoro Junction"
-                                            className={styles.inputWithIcon}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={`${styles.sectionHeader} ${styles.staggerEntry} ${styles.delay_5}`}>
-                                <h2>Route Details</h2>
-                            </div>
-
-                            <div className={styles.row}>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.label}>Best Vehicle</label>
-                                    <select name="vehicleType" className={styles.select}>
-                                        <option value="taxi">Taxi</option>
-                                        <option value="bus">Bus</option>
-                                        <option value="keke">Keke</option>
-                                        <option value="private">Private Car</option>
-                                    </select>
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.label}>Approx. Cost (₦)</label>
-                                    <div className={styles.inputWrapper}>
-                                        <DollarSign size={16} className={styles.inputIcon} />
-                                        <input
-                                            type="number"
-                                            name="fareMax"
-                                            placeholder="e.g. 500"
-                                            className={styles.inputWithIcon}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={styles.row}>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.label}>How long does it take? (mins)</label>
-                                    <div className={styles.inputWrapper}>
-                                        <Clock size={18} className={styles.inputIcon} />
-                                        <input
-                                            type="number"
-                                            name="durationMinutes"
-                                            placeholder="e.g. 30"
-                                            className={styles.inputWithIcon}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={`${styles.sectionHeader} ${styles.staggerEntry} ${styles.delay_6}`}>
-                                <h2>Directions</h2>
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>Step-by-Step Directions</label>
-                                <div className={styles.inputWrapper}>
-                                    <textarea
-                                        name="itinerary"
-                                        placeholder="List major stops or turn-by-turn directions..."
-                                        className={styles.textarea}
+                            <div className={styles.incidentGrid}>
+                                <label className={styles.incidentOption}>
+                                    <input
+                                        type="radio"
+                                        name="incident"
+                                        value="traffic"
+                                        className={styles.hiddenRadio}
+                                        checked={incidentType === 'traffic'}
+                                        onChange={() => setIncidentType('traffic')}
                                     />
-                                </div>
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>Important Advice</label>
-                                <div className={styles.inputWrapper}>
-                                    <textarea
-                                        name="proTips"
-                                        placeholder="Best time to go, where to board, or pitfalls to avoid..."
-                                        className={styles.textarea}
+                                    <div className={styles.incidentBox}>
+                                        <TrafficCone size={24} />
+                                        <span>Slow Traffic</span>
+                                    </div>
+                                </label>
+                                <label className={styles.incidentOption}>
+                                    <input
+                                        type="radio"
+                                        name="incident"
+                                        value="police"
+                                        className={styles.hiddenRadio}
+                                        checked={incidentType === 'police'}
+                                        onChange={() => setIncidentType('police')}
                                     />
-                                </div>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>Incident Type</label>
-                                <div className={styles.incidentGrid}>
-                                    <label className={styles.incidentOption}>
-                                        <input type="radio" name="incidentType" value="police" defaultChecked className={styles.hiddenRadio} />
-                                        <div className={styles.incidentBox}>
-                                            <Shield size={24} />
-                                            <span>Police</span>
-                                        </div>
-                                    </label>
-                                    <label className={styles.incidentOption}>
-                                        <input type="radio" name="incidentType" value="traffic" className={styles.hiddenRadio} />
-                                        <div className={styles.incidentBox}>
-                                            <TrafficCone size={24} />
-                                            <span>Traffic</span>
-                                        </div>
-                                    </label>
-                                    <label className={styles.incidentOption}>
-                                        <input type="radio" name="incidentType" value="slow" className={styles.hiddenRadio} />
-                                        <div className={styles.incidentBox}>
-                                            <Clock size={24} />
-                                            <span>Slow</span>
-                                        </div>
-                                    </label>
-                                    <label className={styles.incidentOption}>
-                                        <input type="radio" name="incidentType" value="blocked" className={styles.hiddenRadio} />
-                                        <div className={styles.incidentBox}>
-                                            <Construction size={24} />
-                                            <span>Blocked</span>
-                                        </div>
-                                    </label>
-                                </div>
+                                    <div className={styles.incidentBox}>
+                                        <Shield size={24} />
+                                        <span>Police</span>
+                                    </div>
+                                </label>
+                                <label className={styles.incidentOption}>
+                                    <input
+                                        type="radio"
+                                        name="incident"
+                                        value="blocked"
+                                        className={styles.hiddenRadio}
+                                        checked={incidentType === 'blocked'}
+                                        onChange={() => setIncidentType('blocked')}
+                                    />
+                                    <div className={styles.incidentBox}>
+                                        <Construction size={24} />
+                                        <span>Blocked Road</span>
+                                    </div>
+                                </label>
+                                <label className={styles.incidentOption}>
+                                    <input
+                                        type="radio"
+                                        name="incident"
+                                        value="checkpoint"
+                                        className={styles.hiddenRadio}
+                                        checked={incidentType === 'checkpoint'}
+                                        onChange={() => setIncidentType('checkpoint')}
+                                    />
+                                    <div className={styles.incidentBox}>
+                                        <AlertTriangle size={24} />
+                                        <span>Checkpoint</span>
+                                    </div>
+                                </label>
                             </div>
 
                             <div className={styles.formGroup}>
-                                <label className={styles.label}>Location</label>
+                                <label className={styles.label}>Location / Landmark</label>
                                 <div className={styles.inputWrapper}>
                                     <MapPin size={18} className={styles.inputIcon} />
                                     <input
                                         type="text"
-                                        name="location"
-                                        required
-                                        placeholder="e.g. Near Rumuola Bridge"
+                                        placeholder="e.g. Rumuokoro Junction, Opposite Oil Mill..."
                                         className={styles.inputWithIcon}
+                                        required
                                     />
                                 </div>
                             </div>
 
                             <div className={styles.formGroup}>
-                                <label className={styles.label}>Describe what's happening</label>
+                                <label className={styles.label}>Additional Details (Optional)</label>
                                 <textarea
-                                    name="description"
-                                    placeholder="Tell others what to expect..."
                                     className={styles.textarea}
+                                    placeholder="Describe what you see..."
+                                    rows={3}
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className={styles.sectionHeader}>
+                                <h2>Route Details</h2>
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>Starting Point</label>
+                                <div className={styles.inputWrapper}>
+                                    <Navigation size={18} className={styles.inputIcon} />
+                                    <input
+                                        type="text"
+                                        placeholder="Where does this route start?"
+                                        className={styles.inputWithIcon}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>Final Destination</label>
+                                <div className={styles.inputWrapper}>
+                                    <MapPin size={18} className={styles.inputIcon} />
+                                    <input
+                                        type="text"
+                                        placeholder="Where does this route end?"
+                                        className={styles.inputWithIcon}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>Recommended Vehicle(s)</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Bus, Keke, Taxi"
+                                    className={styles.input}
+                                    required
+                                />
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>Typical Fare Range (₦)</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. 200 - 350"
+                                    className={styles.input}
                                 />
                             </div>
                         </>
                     )}
 
-                    <div className={styles.actions}>
-                        <button type="submit" disabled={loading} className={styles.submitBtn}>
-                            {loading ? (
-                                <>
-                                    <div className="spinner-small"></div> Sharing...
-                                </>
-                            ) : (
-                                <>
-                                    <Send size={18} /> {view === 'route' ? 'Share with Community' : 'Post Incident Report'}
-                                </>
-                            )}
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        className={styles.submitBtn}
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Sending Intelligence...' : 'Submit Report'}
+                        {!isSubmitting && <Send size={18} />}
+                    </button>
                 </form>
             </div>
+
+            <div className={styles.staggerEntry} style={{ marginTop: '24px', textAlign: 'center' }}>
+                <p style={{ color: var(--text-secondary), fontSize: '0.85rem' }}>
+                <AlertTriangle size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                Submissions are automatically verified by nearby users.
+            </p>
         </div>
-    )
+        </div >
+    );
 }

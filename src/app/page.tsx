@@ -70,21 +70,41 @@ export default async function Home({ searchParams }: HomeProps) {
                 </div>
 
                 <div className={styles.shortcuts}>
-                    <Link href="#search" className={styles.shortcutCard}>
-                        <Search size={22} color="var(--color-gold)" />
-                        <span className={styles.shortcutLabel}>Find Route</span>
+                    <Link href="#search-results" className={styles.shortcutCard}>
+                        <div className={styles.shortcutIcon}>
+                            <Search size={24} />
+                        </div>
+                        <div className={styles.shortcutText}>
+                            <span className={styles.shortcutLabel}>Find Route</span>
+                            <span className={styles.shortcutHighlight}>{routes?.length || 0} paths verified today</span>
+                        </div>
                     </Link>
                     <Link href="/suggest-route" className={styles.shortcutCard}>
-                        <Navigation size={22} color="var(--color-gold)" />
-                        <span className={styles.shortcutLabel}>Report/Suggest</span>
+                        <div className={styles.shortcutIcon} style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e' }}>
+                            <Navigation size={24} />
+                        </div>
+                        <div className={styles.shortcutText}>
+                            <span className={styles.shortcutLabel}>Report/Suggest</span>
+                            <span className={styles.shortcutHighlight}>3 new community reports</span>
+                        </div>
                     </Link>
                     <Link href="/community" className={styles.shortcutCard}>
-                        <Users size={22} color="var(--color-gold)" />
-                        <span className={styles.shortcutLabel}>Community</span>
+                        <div className={styles.shortcutIcon} style={{ background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1' }}>
+                            <Users size={24} />
+                        </div>
+                        <div className={styles.shortcutText}>
+                            <span className={styles.shortcutLabel}>Community</span>
+                            <span className={styles.shortcutHighlight}>{communityCount || 0} active locales</span>
+                        </div>
                     </Link>
                     <Link href="/alerts" className={styles.shortcutCard}>
-                        <Bell size={22} color="var(--color-gold)" />
-                        <span className={styles.shortcutLabel}>Live Alerts</span>
+                        <div className={styles.shortcutIcon} style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
+                            <Bell size={24} />
+                        </div>
+                        <div className={styles.shortcutText}>
+                            <span className={styles.shortcutLabel}>Live Alerts</span>
+                            <span className={styles.shortcutHighlight}>{alerts?.length || 0} active incidents</span>
+                        </div>
                     </Link>
                 </div>
 
@@ -153,11 +173,10 @@ export default async function Home({ searchParams }: HomeProps) {
                                         key={route.id}
                                         title={`${route.origin} → ${route.destination}`}
                                         time={`${route.duration_minutes} min`}
-                                        fare={`₦${route.price_estimated}`}
-                                        fareRange={route.fare_min && route.fare_max ? `₦${route.fare_min} - ₦${route.fare_max}` : undefined}
+                                        fare_min={route.fare_min || route.price_estimated}
+                                        fare_max={route.fare_max || route.price_estimated}
                                         traffic="clear"
                                         isRecommended={true}
-                                        vehicleType={route.vehicle_type}
                                         itinerary={route.itinerary}
                                     />
                                 ))

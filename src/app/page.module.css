@@ -135,49 +135,73 @@
 
 .shortcuts {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    grid-template-columns: 1fr;
+    gap: 16px;
     margin: 24px 0;
 }
 
-@media (min-width: 480px) {
+@media (min-width: 640px) {
     .shortcuts {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 .shortcutCard {
     background-color: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 16px;
+    border-radius: var(--radius-lg);
+    padding: 20px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
     text-decoration: none;
     color: var(--text-primary);
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    text-shadow: 0 4px 12px var(--color-shadow);
-    text-align: center;
+    box-shadow: 0 4px 12px var(--color-shadow);
+    text-align: left;
 }
 
 .shortcutCard:hover {
     transform: translateY(-4px);
     border-color: var(--color-gold);
     background-color: var(--background);
-    box-shadow: 0 8px 24px var(--color-shadow);
+    box-shadow: 0 12px 32px var(--color-shadow);
 }
 
-.shortcutCard svg {
+.shortcutIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background-color: rgba(212, 175, 55, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--color-gold);
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.shortcutCard:hover .shortcutIcon {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+.shortcutText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .shortcutLabel {
-    font-size: 0.85rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.shortcutHighlight {
+    font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 0.02em;
+    color: var(--color-gold);
+    opacity: 0.9;
 }
 
 .highlightsSection {
