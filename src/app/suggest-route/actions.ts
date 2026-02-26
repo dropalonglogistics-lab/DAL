@@ -30,32 +30,19 @@ export async function suggestRoute(formData: FormData) {
 
         if (error) return { error: error.message }
 
-        // Award Point to Authenticated User
+        // Award Point (Incident)
         if (userId) {
             try {
-                const { data: profile, error: getError } = await supabase
-                    .from('profiles')
-                    .select('points')
-                    .eq('id', userId)
-                    .single()
-
-                if (getError && getError.code !== 'PGRST116') {
-                    console.error('Error fetching points (incident):', getError)
-                }
-
-                const currentPoints = profile?.points || 0
-                const { error: updateError } = await supabase
-                    .from('profiles')
-                    .update({ points: currentPoints + 1 })
-                    .eq('id', userId)
-
-                if (updateError) {
-                    console.error('Error awarding point (incident):', updateError)
-                } else {
-                    console.log(`Successfully awarded 1 point (incident) to ${userId}. New total: ${currentPoints + 1}`)
-                }
+                const { data: profile } = await supabase.from('profiles').select('points, full_name').eq('id', userId).single()
+                const { error: upsertError } = await supabase.from('profiles').upsert({
+                    id: userId,
+                    email: user.email,
+                    points: (profile?.points || 0) + 1,
+                    full_name: profile?.full_name || user.user_metadata?.full_name || 'Community Member'
+                })
+                if (upsertError) console.error('Point Award Error (Incident):', upsertError)
             } catch (err) {
-                console.error('Exceptional error awarding point (incident):', err)
+                console.error('Point error (Incident):', err)
             }
         }
 
@@ -113,32 +100,19 @@ export async function suggestRoute(formData: FormData) {
         return { error: error.message }
     }
 
-    // Award Point to Authenticated User
+    // Award Point (Route)
     if (userId) {
         try {
-            const { data: profile, error: getError } = await supabase
-                .from('profiles')
-                .select('points')
-                .eq('id', userId)
-                .single()
-
-            if (getError && getError.code !== 'PGRST116') {
-                console.error('Error fetching points:', getError)
-            }
-
-            const currentPoints = profile?.points || 0
-            const { error: updateError } = await supabase
-                .from('profiles')
-                .update({ points: currentPoints + 1 })
-                .eq('id', userId)
-
-            if (updateError) {
-                console.error('Error awarding point:', updateError)
-            } else {
-                console.log(`Successfully awarded 1 point to ${userId}. New total: ${currentPoints + 1}`)
-            }
+            const { data: profile } = await supabase.from('profiles').select('points, full_name').eq('id', userId).single()
+            const { error: upsertError } = await supabase.from('profiles').upsert({
+                id: userId,
+                email: user.email,
+                points: (profile?.points || 0) + 1,
+                full_name: profile?.full_name || user.user_metadata?.full_name || 'Community Member'
+            })
+            if (upsertError) console.error('Point Award Error (Route):', upsertError)
         } catch (err) {
-            console.error('Exceptional error awarding point:', err)
+            console.error('Point error (Route):', err)
         }
     }
 

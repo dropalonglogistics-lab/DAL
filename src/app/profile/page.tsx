@@ -19,7 +19,8 @@ export default function ProfilePage() {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [uploadProgress, setUploadProgress] = useState(0)
     const [viewMode, setViewMode] = useState<'profile' | 'admin'>('profile')
-    const [adminStats, setAdminStats] = useState<any>(null)
+    const [debugLog, setDebugLog] = useState<string[]>([])
+    const addLog = (msg: string) => setDebugLog(prev => [...prev.slice(-10), msg])
 
     const supabase = useState(() => createClient())[0]
     const router = useRouter()
@@ -29,105 +30,87 @@ export default function ProfilePage() {
 
         async function loadProfile() {
             const loadId = Math.random().toString(36).substring(7)
-            console.log(`[Profile:${loadId}] 🔍 Initialization started...`)
+            addLog(`[${loadId}] Starting initialization...`)
             setLoading(true)
 
             try {
-                // 1. Check Auth Session explicitly
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-                console.log(`[Profile:${loadId}] 🔑 Session Check:`, { active: !!session, error: sessionError?.message || "None" })
-
+                // 1. Auth check
                 const { data: { user }, error: userError } = await supabase.auth.getUser()
-                console.log(`[Profile:${loadId}] 👤 Auth User:`, {
-                    email: user?.email || "No user found",
-                    id: user?.id || "N/A",
-                    error: userError?.message || "None"
-                })
+                if (userError) addLog(`Auth Error: ${userError.message}`)
 
                 if (!isMounted) return
-
                 if (!user) {
-                    console.warn(`[Profile:${loadId}] 🚀 Redirecting to login (User missing)`)
+                    addLog("No user, redirecting...")
                     router.push('/login')
                     return
                 }
 
-                // 2. Query Profile
-                console.log(`[Profile:${loadId}] 📬 Querying DB...`)
-                let { data, error: fetchError } = await supabase
+                addLog(`Authenticated as ${user.email}`)
+
+                // 2. Fetch Profile
+                addLog("Fetching profile from DB...")
+                const { data, error: fetchError } = await supabase
                     .from('profiles')
                     .select('*')
                     .eq('id', user.id)
                     .single()
 
-                if (!isMounted) return
-
                 if (fetchError) {
-                    console.error(`[Profile:${loadId}] ❌ Fetch Error Code:`, fetchError.code)
-                    if (fetchError.code !== 'PGRST116') {
-                        throw new Error(`DB Error: ${fetchError.message} (${fetchError.code})`)
-                    }
+                    addLog(`Fetch Error: ${fetchError.code} - ${fetchError.message}`)
+                    if (fetchError.code !== 'PGRST116') throw fetchError
                 }
 
-                // 3. Auto-Create if missing
-                if (!data) {
-                    console.warn(`[Profile:${loadId}] ⚠️ Record missing. Creating profile...`)
-                    const { data: newProfile, error: insertError } = await supabase.from('profiles').insert([{
+                let profileData = data
+
+                // 3. Auto-Create
+                if (!profileData) {
+                    addLog("Profile missing, attempting creation...")
+                    const { data: neu, error: insErr } = await supabase.from('profiles').insert([{
                         id: user.id,
                         email: user.email,
-                        full_name: user.user_metadata?.full_name || '',
-                        avatar_url: user.user_metadata?.avatar_url || '',
+                        full_name: user.user_metadata?.full_name || 'Member',
                         is_admin: false
                     }]).select().single()
 
-                    if (!isMounted) return
-
-                    if (insertError) {
-                        console.error(`[Profile:${loadId}] ❌ Creation Error:`, insertError)
-                        throw new Error(`Creation failed: ${insertError.message}`)
+                    if (insErr) {
+                        addLog(`Creation failed: ${insErr.message}`)
+                        throw insErr
                     }
-                    console.log(`[Profile:${loadId}] ✅ Created successfully`)
-                    data = newProfile
+                    addLog("Profile created successfully")
+                    profileData = neu
                 }
 
-                // 4. Final State Update
-                if (data && isMounted) {
-                    console.log(`[Profile:${loadId}] ✨ SUCCESS. Rendering profile for`, data.email)
-                    setProfile(data)
-                    setPreviewUrl(data.avatar_url)
-
-                    if (data.is_admin) {
-                        try {
-                            const stats = await fetchAdminStats()
-                            if (isMounted) setAdminStats(stats)
-                        } catch (err) {
-                            console.error(`[Profile:${loadId}] ⚠️ Stats Error (Non-critical):`, err)
-                        }
+                // 4. Admin Stats with TIMEOUT
+                if (profileData?.is_admin) {
+                    addLog("User is admin, fetching stats (with timeout)...")
+                    try {
+                        // Use a Promise.race to ensure we don't hang
+                        const stats = await Promise.race([
+                            fetchAdminStats(),
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('Stats Timeout')), 5000))
+                        ])
+                        if (isMounted) setAdminStats(stats)
+                        addLog("Admin stats loaded")
+                    } catch (err: any) {
+                        addLog(`Stats failed or timed out: ${err.message}`)
                     }
-                } else if (!data) {
-                    console.error(`[Profile:${loadId}] ❌ FINAL CHECK FAILED: data is null`)
-                    if (isMounted) setMessage({ type: 'error', text: 'Diagnostic: No profile record returned for ' + user.email })
+                }
+
+                if (isMounted) {
+                    setProfile(profileData)
+                    setPreviewUrl(profileData?.avatar_url)
+                    addLog("Loading complete")
                 }
             } catch (err: any) {
-                if (err.name === 'AbortError') {
-                    console.log(`[Profile:${loadId}] 🛑 Aborted`)
-                } else {
-                    console.error(`[Profile:${loadId}] 💥 CRASH:`, err)
-                    if (isMounted) setMessage({ type: 'error', text: 'Critical Error: ' + (err.message || 'Unknown. Check console.') })
-                }
+                addLog(`CRITICAL ERROR: ${err.message}`)
+                if (isMounted) setMessage({ type: 'error', text: err.message })
             } finally {
-                if (isMounted) {
-                    setLoading(false)
-                    console.log(`[Profile:${loadId}] 🏁 End of lifecycle`)
-                }
+                if (isMounted) setLoading(false)
             }
         }
 
         loadProfile()
-        return () => {
-            console.log("[Profile] 🧹 Unmounting component")
-            isMounted = false
-        }
+        return () => { isMounted = false }
     }, [router, supabase])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -222,19 +205,27 @@ export default function ProfilePage() {
                             <div className={`${styles.skeleton} ${styles.skeletonText}`} />
                         </div>
                     </div>
-                    <div className={styles.section} style={{ marginTop: '32px' }}>
-                        <div className={`${styles.skeleton} ${styles.skeletonLabel}`} style={{ width: '120px' }} />
-                        <div className={styles.grid}>
-                            <div className={styles.formGroup}>
-                                <div className={`${styles.skeleton} ${styles.skeletonLabel}`} />
-                                <div className={`${styles.skeleton} ${styles.skeletonField}`} />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <div className={`${styles.skeleton} ${styles.skeletonLabel}`} />
-                                <div className={`${styles.skeleton} ${styles.skeletonField}`} />
-                            </div>
-                        </div>
+                </div>
+
+                {/* Debug Console */}
+                <div style={{
+                    marginTop: '32px',
+                    padding: '16px',
+                    background: '#1E293B',
+                    color: '#94A3B8',
+                    borderRadius: '8px',
+                    fontSize: '0.75rem',
+                    fontFamily: 'monospace',
+                    maxHeight: '200px',
+                    overflowY: 'auto'
+                }}>
+                    <div style={{ fontWeight: 'bold', borderBottom: '1px solid #334155', paddingBottom: '8px', marginBottom: '8px', color: '#F8FAFC' }}>
+                        🔍 Real-time Diagnostic Log
                     </div>
+                    {debugLog.length === 0 && <div>Waiting for process...</div>}
+                    {debugLog.map((log, i) => (
+                        <div key={i} style={{ marginBottom: '2px' }}>{log}</div>
+                    ))}
                 </div>
             </div>
         )
