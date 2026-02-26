@@ -9,7 +9,9 @@ export async function promoteToAdmin(formData: FormData) {
         const supabase = await createClient()
 
         // Security check: Only admins can promote others
-        const { data: { user } } = await supabase.auth.getUser()
+        const { data: authData } = await supabase.auth.getUser()
+        const user = authData?.user
+
         const { data: actorProfile } = await supabase
             .from('profiles')
             .select('is_admin')
@@ -20,7 +22,7 @@ export async function promoteToAdmin(formData: FormData) {
             return { error: 'Unauthorized: Only admins can promote users.' }
         }
 
-        const { error, count } = await supabase
+        const { error } = await supabase
             .from('profiles')
             .update({ is_admin: true })
             .eq('id', userId)
@@ -40,7 +42,9 @@ export async function demoteToUser(formData: FormData) {
         const supabase = await createClient()
 
         // Security check: Only admins can demote others
-        const { data: { user } } = await supabase.auth.getUser()
+        const { data: authData } = await supabase.auth.getUser()
+        const user = authData?.user
+
         const { data: actorProfile } = await supabase
             .from('profiles')
             .select('is_admin')

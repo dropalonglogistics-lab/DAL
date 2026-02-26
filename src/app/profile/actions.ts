@@ -13,7 +13,8 @@ export async function updateProfile(formData: FormData) {
         avatar_url: formData.get('avatarUrl') as string,
     }
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: authData } = await supabase.auth.getUser()
+    const user = authData?.user
 
     if (!user) {
         return { error: 'Not authenticated' }

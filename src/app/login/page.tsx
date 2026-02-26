@@ -25,7 +25,8 @@ export default function LoginPage() {
     useEffect(() => {
         // Check for active session
         const checkUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: authData } = await supabase.auth.getUser();
+            const user = authData?.user;
             if (user && !isSuccess) {
                 router.push('/profile');
             }

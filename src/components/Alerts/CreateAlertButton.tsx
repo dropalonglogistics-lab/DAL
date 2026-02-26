@@ -23,7 +23,8 @@ export default function CreateAlertButton() {
         setLoading(true);
 
         try {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: authData } = await supabase.auth.getUser();
+            const user = authData?.user;
             const userId = user?.id || null;
 
             const { error } = await supabase.from('alerts').insert({

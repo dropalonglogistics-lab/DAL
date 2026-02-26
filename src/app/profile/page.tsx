@@ -35,7 +35,8 @@ export default function ProfilePage() {
 
             try {
                 // 1. Auth check
-                const { data: { user }, error: userError } = await supabase.auth.getUser()
+                const { data, error: userError } = await supabase.auth.getUser()
+                const user = data?.user
                 if (userError) addLog(`Auth Error: ${userError.message}`)
 
                 if (!isMounted) return

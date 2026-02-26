@@ -7,7 +7,8 @@ import { learnNewRoutePattern, processIncidentImpact } from '@/utils/ai-learning
 export async function suggestRoute(formData: FormData) {
     const supabase = await createClient()
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser()
+    const user = data?.user
     const userId = user?.id || null
 
     const type = formData.get('type') as 'route' | 'incident'

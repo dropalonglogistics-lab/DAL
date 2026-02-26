@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 
 export default async function SetupAdminPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser()
+    const user = data?.user
 
     if (!user) {
         return (
