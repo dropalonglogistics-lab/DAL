@@ -235,11 +235,11 @@ export default function SuggestRoute() {
             </div>
 
             <div className={styles.staggerEntry} style={{ marginTop: '24px', textAlign: 'center' }}>
-                <p style={{ color: var(--text-secondary), fontSize: '0.85rem' }}>
-                <AlertTriangle size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
-                Submissions are automatically verified by nearby users.
-            </p>
-        </div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                    <AlertTriangle size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                    Submissions are automatically verified by nearby users.
+                </p>
+            </div>
         </div >
     );
 }
