@@ -25,7 +25,8 @@ export default function Navbar() {
 
         // Check Auth Session & Profile
         const loadInitialData = async () => {
-            const { data: { user: authUser } } = await supabase.auth.getUser();
+            const { data: authData } = await supabase.auth.getUser();
+            const authUser = authData?.user;
             setUser(authUser);
             if (authUser) {
                 const { data: userProfile } = await supabase

@@ -34,7 +34,8 @@ export default function SuggestRoute() {
 
     useEffect(() => {
         const checkUser = async () => {
-            const { data: { user: authUser } } = await supabase.auth.getUser();
+            const { data: authData } = await supabase.auth.getUser();
+            const authUser = authData?.user;
             setUser(authUser);
         };
         checkUser();

@@ -11,7 +11,18 @@ export default async function UserManagement() {
         .order('created_at', { ascending: false })
 
     // Get current user to prevent self-demotion
-    const { data: { user: currentUser } } = await supabase.auth.getUser()
+    const { data: authData } = await supabase.auth.getUser()
+    const currentUser = authData?.user
+
+    async function handlePromote(formData: FormData) {
+        'use server'
+        await promoteToAdmin(formData)
+    }
+
+    async function handleDemote(formData: FormData) {
+        'use server'
+        await demoteToUser(formData)
+    }
 
     return (
         <div className="animate-fade-in">
@@ -47,7 +58,7 @@ export default async function UserManagement() {
                                 </td>
                                 <td>
                                     {!profile.is_admin ? (
-                                        <form action={promoteToAdmin}>
+                                        <form action={handlePromote}>
                                             <input type="hidden" name="userId" value={profile.id} />
                                             <button type="submit" className={styles.promoteBtn}>
                                                 <UserCheck size={14} /> Make Admin
@@ -55,7 +66,7 @@ export default async function UserManagement() {
                                         </form>
                                     ) : (
                                         currentUser?.id !== profile.id && (
-                                            <form action={demoteToUser}>
+                                            <form action={handleDemote}>
                                                 <input type="hidden" name="userId" value={profile.id} />
                                                 <button type="submit" className={styles.demoteBtn}>
                                                     <UserMinus size={14} /> Revoke

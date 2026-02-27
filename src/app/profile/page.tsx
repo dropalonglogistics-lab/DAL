@@ -135,7 +135,8 @@ export default function ProfilePage() {
 
             // 1. Handle File Upload if a new file is selected
             if (file && file.size > 0) {
-                const { data: { user } } = await supabase.auth.getUser()
+                const { data: authData } = await supabase.auth.getUser()
+                const user = authData?.user
                 if (!user) throw new Error('Not authenticated')
 
                 const fileExt = file.name.split('.').pop()
