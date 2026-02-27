@@ -20,6 +20,7 @@ export default function ProfilePage() {
     const [uploadProgress, setUploadProgress] = useState(0)
     const [viewMode, setViewMode] = useState<'profile' | 'admin'>('profile')
     const [debugLog, setDebugLog] = useState<string[]>([])
+    const [adminStats, setAdminStats] = useState<any>(null)
     const addLog = (msg: string) => setDebugLog(prev => [...prev.slice(-10), msg])
 
     const supabase = useState(() => createClient())[0]
@@ -50,7 +51,7 @@ export default function ProfilePage() {
 
                 // 2. Fetch Profile
                 addLog("Fetching profile from DB...")
-                const { data, error: fetchError } = await supabase
+                const { data: dbData, error: fetchError } = await supabase
                     .from('profiles')
                     .select('*')
                     .eq('id', user.id)
@@ -61,7 +62,7 @@ export default function ProfilePage() {
                     if (fetchError.code !== 'PGRST116') throw fetchError
                 }
 
-                let profileData = data
+                let profileData = dbData
 
                 // 3. Auto-Create
                 if (!profileData) {
