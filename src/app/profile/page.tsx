@@ -31,26 +31,29 @@ export default function ProfilePage() {
 
         async function loadProfile() {
             const loadId = Math.random().toString(36).substring(7)
-            addLog(`[${loadId}] Starting initialization...`)
+            addLog(`[${loadId}] 1. Starting initialization...`)
             setLoading(true)
 
             try {
-                // 1. Auth check
-                const { data, error: userError } = await supabase.auth.getUser()
-                const user = data?.user
-                if (userError) addLog(`Auth Error: ${userError.message}`)
+                addLog(`[${loadId}] 2. Fetching local session...`)
+                const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
 
-                if (!isMounted) return
-                if (!user) {
-                    addLog("No user, redirecting...")
-                    router.push('/login')
+                if (sessionError) {
+                    addLog(`[${loadId}] Auth Error: ${sessionError.message}`)
+                    throw sessionError
+                }
+
+                if (!sessionData.session) {
+                    addLog(`[${loadId}] 3. No session found. Redirecting...`)
+                    if (isMounted) router.push('/login')
                     return
                 }
 
-                addLog(`Authenticated as ${user.email}`)
+                const user = sessionData.session.user
+                addLog(`[${loadId}] 4. Authenticated! ID: ${user?.id?.substring(0, 8)}...`)
 
                 // 2. Fetch Profile
-                addLog("Fetching profile from DB...")
+                addLog(`[${loadId}] 5. Fetching profile from DB...`)
                 const { data: dbData, error: fetchError } = await supabase
                     .from('profiles')
                     .select('*')
