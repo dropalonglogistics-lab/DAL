@@ -37,15 +37,33 @@ export default function ProfilePage() {
 
             try {
                 addLog(`[${loadId}] 2. Fetching session with timeout (10s)...`)
-                const { data: sessionData, error: sessionError } = await Promise.race([
-                    supabase.auth.getSession(),
-                    new Promise<{ data: any, error: any }>((_, reject) => setTimeout(() => reject(new Error('Session Timeout')), 10000))
-                ])
+                let sessionData, sessionError;
 
-                if (sessionError) {
-                    addLog(`[${loadId}] Session error: ${sessionError.message}`)
+                // Try up to 2 times for session sync
+                for (let attempt = 1; attempt <= 2; attempt++) {
+                    try {
+                        const result = await Promise.race([
+                            supabase.auth.getSession(),
+                            new Promise<{ data: any, error: any }>((_, reject) => setTimeout(() => reject(new Error('Session Timeout')), 10000))
+                        ])
+                        sessionData = result.data;
+                        sessionError = result.error;
+                        if (sessionData?.session) break;
+                        if (attempt < 2) addLog(`[${loadId}] Session not found, retrying... (${attempt}/2)`);
+                        await new Promise(r => setTimeout(r, 1000));
+                    } catch (e: any) {
+                        sessionError = e;
+                        if (attempt === 2) throw e;
+                        addLog(`[${loadId}] Session check attempt ${attempt} failed: ${e.message}. Retrying...`);
+                    }
+                }
+
+                if (sessionError && !sessionData?.session) {
+                    addLog(`[${loadId}] 3. Session Fetch failed: ${sessionError.message}`)
                     // If session fetch fails, we might still be able to try getUser
                     addLog(`[${loadId}] Attempting fallback to getUser...`)
+                } else {
+                    addLog(`[${loadId}] 3. Session Data: ${sessionData?.session ? 'Retrieved' : 'None'}`)
                 }
 
                 if (!sessionData?.session) {

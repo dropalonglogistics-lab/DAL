@@ -29,20 +29,15 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
-    // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
-    // creating a new Response object with NextResponse.next() make sure to:
-    // 1. Pass the request in it, like so:
-    //    const myNewResponse = NextResponse.next({ request })
-    // 2. Copy over the cookies, like so:
-    //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-    // 3. Change the myNewResponse object to fit your needs, but avoid changing
-    //    the cookies!
-    // 4. Finally:
-    //    return myNewResponse
-    // If this is not done, you may be causing the browser and server to go out
-    // of sync and terminate the user's session prematurely!
-
-    await supabase.auth.getUser()
+    // Using a timeout for getUser to prevent middleware-induced hangs
+    try {
+        await Promise.race([
+            supabase.auth.getUser(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Auth Timeout')), 3000))
+        ])
+    } catch (e) {
+        console.error('[Middleware] Auth check stalled or failed:', e)
+    }
 
     return supabaseResponse
 }

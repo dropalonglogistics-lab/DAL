@@ -100,8 +100,16 @@ export default function Navbar() {
     };
 
     const handleSignOut = async () => {
-        await supabase.auth.signOut();
-        router.refresh();
+        try {
+            await supabase.auth.signOut();
+            setUser(null);
+            setProfile(null);
+            // Hard redirect to clear all middle-ware cached states
+            window.location.href = '/';
+        } catch (e) {
+            console.error('Sign out error:', e);
+            window.location.href = '/';
+        }
     };
 
     return (
