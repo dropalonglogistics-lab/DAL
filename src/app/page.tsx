@@ -1,4 +1,4 @@
-import { Search, Navigation, Users, Bell, Shield, Info, MapPin, AlertTriangle, TrafficCone, Coins } from 'lucide-react';
+import { Search, Navigation, Users, Bell, Shield, Info, MapPin, AlertTriangle, TrafficCone, Coins, Sparkles, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import RouteSearch from '@/components/RouteSearch/RouteSearch';
 import RouteResultCard from '@/components/RouteResults/RouteResultCard';
@@ -196,35 +196,63 @@ export default async function Home({ searchParams }: HomeProps) {
 
             {/* Premium Teaser Section */}
             <section className={styles.premiumSection}>
+                <div className={styles.premiumOverlay}></div>
                 <div className={styles.premiumContent}>
                     <div className={styles.premiumHeader}>
-                        <span className={styles.premiumBadge}>Coming Soon</span>
-                        <h2>Elevate Your Commute</h2>
+                        <div className={styles.badgeWrapper}>
+                            <Sparkles size={14} className={styles.sparkleIcon} />
+                            <span className={styles.premiumBadge}>Exclusive Access</span>
+                        </div>
+                        <h2 className={styles.premiumTitle}>Experience the Future of Transit</h2>
                     </div>
                     <p className={styles.premiumDescription}>
-                        Unlock <strong>DAL Premium</strong> for advanced route analytics, real-time congestion heatmaps,
-                        and priority incident reports. Move faster, smarter, and safer.
+                        Unlock <strong>DAL Obsidian</strong>—our most advanced intelligence layer.
+                        Get real-time congestion heatmaps, predictive fare analytics, and priority road hazard intelligence.
                     </p>
                     <div className={styles.premiumFeatures}>
                         <div className={styles.pFeature}>
-                            <Shield size={18} />
-                            <span>Priority Alerts</span>
+                            <div className={styles.pFeatureIcon}><Shield size={18} /></div>
+                            <div className={styles.pFeatureText}>
+                                <strong>Elite Alerts</strong>
+                                <span>Priority incident reporting</span>
+                            </div>
                         </div>
                         <div className={styles.pFeature}>
-                            <Navigation size={18} />
-                            <span>AI Routing</span>
+                            <div className={styles.pFeatureIcon}><Navigation size={18} /></div>
+                            <div className={styles.pFeatureText}>
+                                <strong>Neural Routing</strong>
+                                <span>AI-optimized pathfinding</span>
+                            </div>
                         </div>
                         <div className={styles.pFeature}>
-                            <Coins size={18} />
-                            <span>Fare Predictions</span>
+                            <div className={styles.pFeatureIcon}><Coins size={18} /></div>
+                            <div className={styles.pFeatureText}>
+                                <strong>Smart Fares</strong>
+                                <span>Price auditing</span>
+                            </div>
                         </div>
                     </div>
+                    <button className={styles.waitlistBtn} disabled>
+                        Join the Obsidian Waitlist <ChevronRight size={18} />
+                    </button>
                 </div>
                 <div className={styles.premiumVisual}>
-                    <div className={styles.glassCard}>
-                        <div className={styles.shimmerLine}></div>
-                        <div className={styles.shimmerLine} style={{ width: '70%' }}></div>
-                        <div className={styles.shimmerLine} style={{ width: '90%' }}></div>
+                    <div className={styles.visualContainer}>
+                        <div className={`${styles.floatingElement} ${styles.float1}`}></div>
+                        <div className={`${styles.floatingElement} ${styles.float2}`}></div>
+                        <div className={styles.glassCard}>
+                            <div className={styles.cardHeader}>
+                                <div className={styles.cardCircle}></div>
+                                <div className={styles.cardLine}></div>
+                            </div>
+                            <div className={styles.shimmerLine}></div>
+                            <div className={styles.shimmerLine} style={{ width: '70%', marginTop: '12px' }}></div>
+                            <div className={styles.shimmerLine} style={{ width: '40%', marginTop: '12px' }}></div>
+                            <div className={styles.cardStats}>
+                                <div className={styles.statMini}></div>
+                                <div className={styles.statMini}></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
