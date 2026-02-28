@@ -1,7 +1,8 @@
-import ForgotPasswordClient from './ForgotPasswordClient'
+'use client';
+import dynamic from 'next/dynamic';
 
-export const dynamic = 'force-dynamic'
+const ForgotPasswordClient = dynamic(() => import('./ForgotPasswordClient'), { ssr: false });
 
 export default function ForgotPasswordPage() {
-    return <ForgotPasswordClient />
+    return <ForgotPasswordClient />;
 }
