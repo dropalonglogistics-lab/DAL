@@ -6,7 +6,27 @@ import styles from './page.module.css';
 export default async function CommunityPage() {
     const supabase = await createClient();
 
-    // Fetch recent community suggestions
+    // 1. Fetch real stats
+    const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+
+    // Reports in last 24h
+    const yesterday = new Date();
+    yesterday.setHours(yesterday.getHours() - 24);
+    const { count: reportCount } = await supabase
+        .from('alerts')
+        .select('*', { count: 'exact', head: true })
+        .gt('created_at', yesterday.toISOString());
+
+    const { count: verifiedCount } = await supabase
+        .from('community_routes')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'approved');
+
+    const { count: totalRoutes } = await supabase
+        .from('community_routes')
+        .select('*', { count: 'exact', head: true });
+
+    // 2. Fetch recent community suggestions
     const { data: suggestions } = await supabase
         .from('community_routes')
         .select(`
@@ -14,22 +34,28 @@ export default async function CommunityPage() {
             profiles:user_id (full_name)
         `)
         .order('created_at', { ascending: false })
-        .limit(3);
+        .limit(5);
+
+    // 3. Fetch Top Contributors (Ordered by points, then by suggestion count)
+    // For now, we fetch by points; if most are 0, we'll just show the existing users
+    const { data: topUsers } = await supabase
+        .from('profiles')
+        .select('full_name, points')
+        .order('points', { ascending: false })
+        .limit(5);
 
     const stats = [
-        { label: 'Active Users', value: '1,240+', icon: <Users size={24} /> },
-        { label: 'Reports Today', value: '86', icon: <MessageSquare size={24} /> },
-        { label: 'Routes Verified', value: '412', icon: <ShieldCheck size={24} /> },
-        { label: 'Safe Miles', value: '12K', icon: <Heart size={24} /> },
+        { label: 'Active Users', value: `${userCount || 0}+`, icon: <Users size={24} /> },
+        { label: 'Reports Today', value: `${reportCount || 0}`, icon: <MessageSquare size={24} /> },
+        { label: 'Routes Verified', value: `${verifiedCount || 0}`, icon: <ShieldCheck size={24} /> },
+        { label: 'Community Impact', value: `${(totalRoutes || 0) * 12}K`, icon: <Heart size={24} /> },
     ];
 
-    const contributors = [
-        { name: 'Adebayo O.', points: 2450, rank: 1 },
-        { name: 'Sarah M.', points: 2100, rank: 2 },
-        { name: 'John D.', points: 1950, rank: 3 },
-        { name: 'Grace E.', points: 1800, rank: 4 },
-        { name: 'Michael T.', points: 1650, rank: 5 },
-    ];
+    const contributors = topUsers?.map((u, i) => ({
+        name: u.full_name || 'Anonymous Contributor',
+        points: u.points || 0,
+        rank: i + 1
+    })) || [];
 
     const getAvatarColor = (name: string) => {
         const colors = [
@@ -49,7 +75,7 @@ export default async function CommunityPage() {
             <section className={styles.hero}>
                 <h1 className={styles.heroTitle}>Community Hub</h1>
                 <p>
-                    Join thousands of commuters making Port Harcourt movement smarter and safer through
+                    Join {userCount || 'thousands of'} commuters making Port Harcourt movement smarter and safer through
                     real-time reporting and cooperative route verification.
                 </p>
                 <div className={styles.heroActions}>
@@ -81,7 +107,7 @@ export default async function CommunityPage() {
                         Top Contributors
                     </h2>
                     <div className={styles.leaderboard}>
-                        {contributors.map((user, index) => {
+                        {contributors.length > 0 ? contributors.map((user, index) => {
                             const avatarColor = getAvatarColor(user.name);
                             return (
                                 <div key={index} className={styles.leaderboardItem}>
@@ -98,7 +124,11 @@ export default async function CommunityPage() {
                                     <span className={styles.userPoints}>{user.points} pts</span>
                                 </div>
                             );
-                        })}
+                        }) : (
+                            <div className={styles.emptyState} style={{ padding: '20px' }}>
+                                <p>No contributors yet. Be the first!</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -119,10 +149,10 @@ export default async function CommunityPage() {
                                         </div>
                                         <span className={styles.suggestionBadge}>{route.vehicle_type}</span>
                                     </div>
-                                    <p className={styles.proTips}>&quot;{route.pro_tips}&quot;</p>
+                                    <p className={styles.proTips}>{route.pro_tips ? `"${route.pro_tips}"` : 'Direct route through major stops.'}</p>
                                     <div className={styles.suggestionFooter}>
-                                        <span>By {(route.profiles as any)?.full_name || 'Anonymous'}</span>
-                                        <span className={styles.priceTag}>₦{route.price_estimated}</span>
+                                        <span>By {route.created_by_admin ? 'DAL Team' : ((route.profiles as any)?.full_name || 'Anonymous')}</span>
+                                        <span className={styles.priceTag}>₦{route.price_estimated || route.fare_min}</span>
                                     </div>
                                 </div>
                             ))
