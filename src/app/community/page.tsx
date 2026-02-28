@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import styles from './page.module.css';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CommunityPage() {
     const supabase = await createClient();
 

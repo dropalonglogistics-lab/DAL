@@ -3,6 +3,8 @@ import AlertCard from '@/components/Alerts/AlertCard';
 import CreateAlertButton from '@/components/Alerts/CreateAlertButton';
 import styles from './page.module.css';
 
+export const dynamic = 'force-dynamic';
+
 // Function to format "2023-10-27T..." to "2 hrs ago" - simple helper for now
 function timeAgo(dateString: string) {
     const date = new Date(dateString);

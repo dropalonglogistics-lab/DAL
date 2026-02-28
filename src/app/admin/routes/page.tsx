@@ -3,6 +3,8 @@ import styles from '../admin.module.css'
 import { approveRoute, rejectRoute } from '../actions'
 import { CheckCircle, XCircle, MapPin, Clock } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function RouteApprovals() {
     const supabase = await createClient()
     const { data: routes } = await supabase

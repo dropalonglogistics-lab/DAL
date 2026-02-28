@@ -4,6 +4,8 @@ import { fetchAdminStats } from '@/components/Admin/actions'
 import AdminStats from '@/components/Admin/AdminStats'
 import { DownloadCloud, Activity } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboard() {
     const stats = await fetchAdminStats()
 

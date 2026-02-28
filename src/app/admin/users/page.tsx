@@ -3,6 +3,8 @@ import styles from '../admin.module.css'
 import { promoteToAdmin, demoteToUser } from '../actions'
 import { UserCheck, Shield, UserMinus } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function UserManagement() {
     const supabase = await createClient()
     const { data: profiles } = await supabase
