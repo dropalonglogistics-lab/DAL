@@ -1,6 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import styles from '../admin.module.css'
-import { MapPin, Clock, MoreHorizontal } from 'lucide-react'
+import { MapPin, Clock, MoreHorizontal, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react'
+import { deleteRoute, updateRouteStatus } from '../actions'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,11 +28,21 @@ export default async function AllRoutesPage() {
         }
     }
 
+    async function handleDelete(formData: FormData) {
+        'use server'
+        await deleteRoute(formData)
+    }
+
+    async function handleStatusUpdate(formData: FormData) {
+        'use server'
+        await updateRouteStatus(formData)
+    }
+
     return (
         <div className="animate-fade-in">
             <h1 className={styles.title}>All Community Routes</h1>
             <p className={styles.subtitle} style={{ marginBottom: '24px' }}>
-                View the entire database of suggested routes regardless of their approval status.
+                View and manage the entire database of suggested routes regardless of their approval status.
             </p>
 
             <div className={styles.grid}>
@@ -85,6 +97,42 @@ export default async function AllRoutesPage() {
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 'auto', paddingTop: '16px', borderTop: '1px dashed var(--border)' }}>
                                     Submitted on: {new Date(route.created_at).toLocaleDateString()}
                                 </div>
+
+                                {/* Quick Actions */}
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px', paddingTop: '16px', borderTop: '1px dashed var(--border)' }}>
+
+                                    <Link href={`/admin/routes/${route.id}/edit`} className={styles.secondaryBtn} style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px', fontSize: '0.85rem', textDecoration: 'none', background: 'var(--button-secondary-bg)', color: 'var(--text-primary)', borderRadius: '8px', fontWeight: '500', border: '1px solid var(--border)' }}>
+                                        <Edit size={14} /> Edit
+                                    </Link>
+
+                                    {route.status !== 'approved' && (
+                                        <form action={handleStatusUpdate} style={{ flex: '1' }}>
+                                            <input type="hidden" name="routeId" value={route.id} />
+                                            <input type="hidden" name="status" value="approved" />
+                                            <button type="submit" className={styles.saveBtn} style={{ width: '100%', padding: '8px', fontSize: '0.85rem', background: 'var(--color-success)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                <CheckCircle size={14} /> Approve
+                                            </button>
+                                        </form>
+                                    )}
+
+                                    {route.status !== 'rejected' && (
+                                        <form action={handleStatusUpdate} style={{ flex: '1' }}>
+                                            <input type="hidden" name="routeId" value={route.id} />
+                                            <input type="hidden" name="status" value="rejected" />
+                                            <button type="submit" className={styles.signOutBtn} style={{ width: '100%', padding: '8px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                <XCircle size={14} /> Reject
+                                            </button>
+                                        </form>
+                                    )}
+
+                                    <form action={handleDelete} style={{ flex: 'none' }}>
+                                        <input type="hidden" name="routeId" value={route.id} />
+                                        <button type="submit" className={styles.signOutBtn} style={{ padding: '8px', fontSize: '0.85rem', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-error)', borderColor: 'rgba(239, 68, 68, 0.2)' }} title="Delete Route permanently">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </form>
+                                </div>
+
                             </div>
                         )
                     })
