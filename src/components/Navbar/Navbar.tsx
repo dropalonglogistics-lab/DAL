@@ -60,6 +60,7 @@ export default function Navbar() {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             const currentUser = session?.user ?? null;
             setUser(currentUser);
+
             if (currentUser) {
                 const { data: userProfile } = await supabase
                     .from('profiles')
@@ -68,13 +69,21 @@ export default function Navbar() {
                     .single();
                 setProfile(userProfile);
                 setupProfileListener(currentUser.id);
+
+                if (_event === 'SIGNED_IN') {
+                    router.refresh(); // Refresh server components
+                }
             } else {
                 setProfile(null);
                 if (profileChannel) supabase.removeChannel(profileChannel);
-            }
-            if (_event === 'SIGNED_OUT') {
-                setProfile(null);
-                router.refresh();
+
+                if (_event === 'SIGNED_OUT') {
+                    // Force immediate local state clear and push to home
+                    setUser(null);
+                    setProfile(null);
+                    router.push('/');
+                    router.refresh();
+                }
             }
         });
 
@@ -101,11 +110,15 @@ export default function Navbar() {
 
     const handleSignOut = async () => {
         try {
-            await supabase.auth.signOut();
+            // Immediate UI feedback
             setUser(null);
             setProfile(null);
-            // Hard redirect to clear all middle-ware cached states
-            window.location.href = '/';
+
+            await supabase.auth.signOut();
+
+            // Fast redirect
+            router.push('/');
+            router.refresh();
         } catch (e) {
             console.error('Sign out error:', e);
             window.location.href = '/';

@@ -201,39 +201,39 @@ export default async function Home({ searchParams }: HomeProps) {
                     <div className={styles.premiumHeader}>
                         <div className={styles.badgeWrapper}>
                             <Sparkles size={14} className={styles.sparkleIcon} />
-                            <span className={styles.premiumBadge}>Exclusive Access</span>
+                            <span className={styles.premiumBadge}>Coming Soon</span>
                         </div>
-                        <h2 className={styles.premiumTitle}>Experience the Future of Transit</h2>
+                        <h2 className={styles.premiumTitle}>Advanced Logistics Intelligence</h2>
                     </div>
                     <p className={styles.premiumDescription}>
-                        Unlock <strong>DAL Obsidian</strong>—our most advanced intelligence layer.
-                        Get real-time congestion heatmaps, predictive fare analytics, and priority road hazard intelligence.
+                        Upgrade to <strong>DAL Premium</strong> for our most advanced data layer.
+                        Get real-time traffic heatmaps, predictive fare analytics, and priority route intelligence.
                     </p>
                     <div className={styles.premiumFeatures}>
                         <div className={styles.pFeature}>
                             <div className={styles.pFeatureIcon}><Shield size={18} /></div>
                             <div className={styles.pFeatureText}>
-                                <strong>Elite Alerts</strong>
-                                <span>Priority incident reporting</span>
+                                <strong>Priority Alerts</strong>
+                                <span>Real-time hazard updates</span>
                             </div>
                         </div>
                         <div className={styles.pFeature}>
                             <div className={styles.pFeatureIcon}><Navigation size={18} /></div>
                             <div className={styles.pFeatureText}>
-                                <strong>Neural Routing</strong>
-                                <span>AI-optimized pathfinding</span>
+                                <strong>Smart Routing</strong>
+                                <span>Traffic-optimized paths</span>
                             </div>
                         </div>
                         <div className={styles.pFeature}>
                             <div className={styles.pFeatureIcon}><Coins size={18} /></div>
                             <div className={styles.pFeatureText}>
-                                <strong>Smart Fares</strong>
-                                <span>Price auditing</span>
+                                <strong>Fare Analytics</strong>
+                                <span>Price auditing & trends</span>
                             </div>
                         </div>
                     </div>
                     <button className={styles.waitlistBtn} disabled>
-                        Join the Obsidian Waitlist <ChevronRight size={18} />
+                        Join the Premium Waitlist <ChevronRight size={18} />
                     </button>
                 </div>
                 <div className={styles.premiumVisual}>

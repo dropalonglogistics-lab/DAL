@@ -79,13 +79,13 @@ export default function LoginPage() {
                 const result = await login(formData);
                 if (result?.error) throw new Error(result.error);
 
-                // Show success state and redirect
+                // Show success state and redirect quickly
                 setIsSuccess(true);
                 setSuccessMsg('Access granted. Entry secured.');
 
                 setTimeout(() => {
                     router.push('/profile');
-                }, 1000);
+                }, 500);
             }
         } catch (err: any) {
             setError(err.message);
