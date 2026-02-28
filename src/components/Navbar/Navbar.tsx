@@ -49,7 +49,7 @@ export default function Navbar() {
                 .on(
                     'postgres_changes',
                     { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${currentUserId}` },
-                    (payload) => {
+                    (payload: any) => {
                         setProfile(payload.new as any);
                     }
                 )
@@ -57,7 +57,7 @@ export default function Navbar() {
         };
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
             const currentUser = session?.user ?? null;
             setUser(currentUser);
 
