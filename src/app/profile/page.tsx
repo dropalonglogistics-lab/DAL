@@ -36,10 +36,10 @@ export default function ProfilePage() {
             setLoading(true)
 
             try {
-                addLog(`[${loadId}] 2. Fetching session with timeout...`)
+                addLog(`[${loadId}] 2. Fetching session with timeout (10s)...`)
                 const { data: sessionData, error: sessionError } = await Promise.race([
                     supabase.auth.getSession(),
-                    new Promise<{ data: any, error: any }>((_, reject) => setTimeout(() => reject(new Error('Session Timeout')), 5000))
+                    new Promise<{ data: any, error: any }>((_, reject) => setTimeout(() => reject(new Error('Session Timeout')), 10000))
                 ])
 
                 if (sessionError) {
@@ -62,6 +62,11 @@ export default function ProfilePage() {
 
                 const user = sessionData?.session?.user || (await supabase.auth.getUser()).data.user
                 addLog(`[${loadId}] 4. Authenticated! ID: ${user?.id?.substring(0, 8)}...`)
+
+                if (!user) {
+                    addLog(`[${loadId}] CRITICAL: All authentication attempts failed.`)
+                    throw new Error('Could not retrieve user session after multiple attempts.')
+                }
 
                 // 2. Fetch Profile
                 addLog(`[${loadId}] 5. Fetching profile from DB...`)
