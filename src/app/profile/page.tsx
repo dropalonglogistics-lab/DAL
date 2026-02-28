@@ -36,21 +36,31 @@ export default function ProfilePage() {
             setLoading(true)
 
             try {
-                addLog(`[${loadId}] 2. Fetching local session...`)
-                const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+                addLog(`[${loadId}] 2. Fetching session with timeout...`)
+                const { data: sessionData, error: sessionError } = await Promise.race([
+                    supabase.auth.getSession(),
+                    new Promise<{ data: any, error: any }>((_, reject) => setTimeout(() => reject(new Error('Session Timeout')), 8000))
+                ])
 
                 if (sessionError) {
-                    addLog(`[${loadId}] Auth Error: ${sessionError.message}`)
-                    throw sessionError
+                    addLog(`[${loadId}] Session error: ${sessionError.message}`)
+                    // If session fetch fails, we might still be able to try getUser
+                    addLog(`[${loadId}] Attempting fallback to getUser...`)
                 }
 
-                if (!sessionData.session) {
-                    addLog(`[${loadId}] 3. No session found. Redirecting...`)
-                    if (isMounted) router.push('/login')
-                    return
+                if (!sessionData?.session) {
+                    addLog(`[${loadId}] 2b. Trying direct getUser check...`)
+                    const { data: { user: authUser }, error: userError } = await supabase.auth.getUser()
+
+                    if (userError || !authUser) {
+                        addLog(`[${loadId}] 3. No user/session found. Redirecting...`)
+                        if (isMounted) router.push('/login')
+                        return
+                    }
+                    addLog(`[${loadId}] Authenticated via getUser!`)
                 }
 
-                const user = sessionData.session.user
+                const user = sessionData?.session?.user || (await supabase.auth.getUser()).data.user
                 addLog(`[${loadId}] 4. Authenticated! ID: ${user?.id?.substring(0, 8)}...`)
 
                 // 2. Fetch Profile
@@ -241,6 +251,15 @@ export default function ProfilePage() {
                     {debugLog.map((log, i) => (
                         <div key={i} style={{ marginBottom: '2px' }}>{log}</div>
                     ))}
+                </div>
+
+                <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                    <button onClick={() => signOut()} className={styles.signOutBtn} style={{ background: 'rgba(239, 68, 68, 0.1)' }}>
+                        <LogOut size={16} /> Sign Out (Emergency)
+                    </button>
+                    <button onClick={() => window.location.reload()} className={styles.toggleBtn}>
+                        Retry Loading
+                    </button>
                 </div>
             </div>
         )
