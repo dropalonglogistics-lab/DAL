@@ -60,7 +60,21 @@ export default function LoginPage() {
             if (isSignUp) {
                 const result = await signup(formData);
                 if (result?.error) throw new Error(result.error);
-                setSuccessMsg('Verification email sent! Check your inbox.');
+                setSuccessMsg('Account Created! Waiting for confirmation...');
+
+                // Automate: Start polling for session
+                const pollInterval = setInterval(async () => {
+                    const { data } = await supabase.auth.getSession();
+                    if (data.session) {
+                        clearInterval(pollInterval);
+                        setIsSuccess(true);
+                        setSuccessMsg('Identity Confirmed. Accessing Dashboard...');
+                        setTimeout(() => router.push('/profile'), 1000);
+                    }
+                }, 2000);
+
+                // Cleanup interval after 3 minutes if no session found
+                setTimeout(() => clearInterval(pollInterval), 180000);
             } else {
                 const result = await login(formData);
                 if (result?.error) throw new Error(result.error);

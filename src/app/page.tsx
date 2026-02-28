@@ -1,4 +1,4 @@
-import { Search, Navigation, Users, Bell, Shield, Info, MapPin, AlertTriangle, TrafficCone } from 'lucide-react';
+import { Search, Navigation, Users, Bell, Shield, Info, MapPin, AlertTriangle, TrafficCone, Coins } from 'lucide-react';
 import Link from 'next/link';
 import RouteSearch from '@/components/RouteSearch/RouteSearch';
 import RouteResultCard from '@/components/RouteResults/RouteResultCard';
@@ -192,6 +192,41 @@ export default async function Home({ searchParams }: HomeProps) {
                         {/* Start Search State - Routes are hidden by default */}
                     </div>
                 )}
+            </section>
+
+            {/* Premium Teaser Section */}
+            <section className={styles.premiumSection}>
+                <div className={styles.premiumContent}>
+                    <div className={styles.premiumHeader}>
+                        <span className={styles.premiumBadge}>Coming Soon</span>
+                        <h2>Elevate Your Commute</h2>
+                    </div>
+                    <p className={styles.premiumDescription}>
+                        Unlock <strong>DAL Premium</strong> for advanced route analytics, real-time congestion heatmaps,
+                        and priority incident reports. Move faster, smarter, and safer.
+                    </p>
+                    <div className={styles.premiumFeatures}>
+                        <div className={styles.pFeature}>
+                            <Shield size={18} />
+                            <span>Priority Alerts</span>
+                        </div>
+                        <div className={styles.pFeature}>
+                            <Navigation size={18} />
+                            <span>AI Routing</span>
+                        </div>
+                        <div className={styles.pFeature}>
+                            <Coins size={18} />
+                            <span>Fare Predictions</span>
+                        </div>
+                    </div>
+                </div>
+                <div className={styles.premiumVisual}>
+                    <div className={styles.glassCard}>
+                        <div className={styles.shimmerLine}></div>
+                        <div className={styles.shimmerLine} style={{ width: '70%' }}></div>
+                        <div className={styles.shimmerLine} style={{ width: '90%' }}></div>
+                    </div>
+                </div>
             </section>
         </div>
     );

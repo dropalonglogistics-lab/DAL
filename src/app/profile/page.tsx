@@ -87,19 +87,30 @@ export default function ProfilePage() {
                 }
 
                 // 2. Fetch Profile
-                addLog(`[${loadId}] 5. Fetching profile from DB...`)
-                const { data: dbData, error: fetchError } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single()
+                addLog(`[${loadId}] 4. Searching for profile record...`)
+                let profileData, profileError;
 
-                if (fetchError) {
-                    addLog(`Fetch Error: ${fetchError.code} - ${fetchError.message}`)
-                    if (fetchError.code !== 'PGRST116') throw fetchError
+                // Retry profile fetch up to 3 times (database trigger might be slow)
+                for (let pAttempt = 1; pAttempt <= 3; pAttempt++) {
+                    const profileResult = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', user.id)
+                        .single()
+
+                    profileData = profileResult.data
+                    profileError = profileResult.error
+
+                    if (profileData) break;
+
+                    addLog(`[${loadId}] Profile not found, retrying... (${pAttempt}/3)`)
+                    await new Promise(r => setTimeout(r, 2000))
                 }
 
-                let profileData = dbData
+                if (profileError && !profileData) {
+                    addLog(`[${loadId}] 5. Profile Lookup failed: ${profileError.message}`)
+                    throw profileError
+                }
 
                 // 3. Auto-Create
                 if (!profileData) {
