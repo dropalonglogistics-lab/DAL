@@ -39,7 +39,7 @@ export default function ProfilePage() {
                 addLog(`[${loadId}] 2. Fetching session with timeout...`)
                 const { data: sessionData, error: sessionError } = await Promise.race([
                     supabase.auth.getSession(),
-                    new Promise<{ data: any, error: any }>((_, reject) => setTimeout(() => reject(new Error('Session Timeout')), 8000))
+                    new Promise<{ data: any, error: any }>((_, reject) => setTimeout(() => reject(new Error('Session Timeout')), 5000))
                 ])
 
                 if (sessionError) {
@@ -215,6 +215,25 @@ export default function ProfilePage() {
         }
     }
 
+    const handleEmergencySignOut = async () => {
+        addLog("🚨 Triggering Emergency Sign Out...")
+        try {
+            // 1. Client-side sign out
+            await supabase.auth.signOut()
+            // 2. Clear local storage
+            localStorage.clear()
+            sessionStorage.clear()
+            addLog("Local data cleared! Redirecting to login...")
+            // 3. Hard redirect
+            setTimeout(() => {
+                window.location.href = '/login'
+            }, 1000)
+        } catch (e: any) {
+            addLog(`Sign out error: ${e.message}`)
+            window.location.href = '/' // Force move
+        }
+    }
+
     if (loading) {
         return (
             <div className={styles.container}>
@@ -254,8 +273,8 @@ export default function ProfilePage() {
                 </div>
 
                 <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                    <button onClick={() => signOut()} className={styles.signOutBtn} style={{ background: 'rgba(239, 68, 68, 0.1)' }}>
-                        <LogOut size={16} /> Sign Out (Emergency)
+                    <button onClick={handleEmergencySignOut} className={styles.signOutBtn} style={{ background: 'var(--color-error)', color: 'white' }}>
+                        <LogOut size={16} /> Force Sign Out
                     </button>
                     <button onClick={() => window.location.reload()} className={styles.toggleBtn}>
                         Retry Loading
