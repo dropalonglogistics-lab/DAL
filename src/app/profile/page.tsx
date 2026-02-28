@@ -21,6 +21,7 @@ export default function ProfilePage() {
     const [viewMode, setViewMode] = useState<'profile' | 'admin'>('profile')
     const [debugLog, setDebugLog] = useState<string[]>([])
     const [adminStats, setAdminStats] = useState<any>(null)
+    const [counts, setCounts] = useState({ routes: 0, reports: 0 })
     const addLog = (msg: string) => setDebugLog(prev => [...prev.slice(-10), msg])
 
     const supabase = useState(() => createClient())[0]
@@ -100,6 +101,14 @@ export default function ProfilePage() {
                         addLog(`Stats failed or timed out: ${err.message}`)
                     }
                 }
+
+                // 5. Fetch User Counts (Dynamic)
+                addLog("Fetching contribution counts...")
+                const [{ count: rCount }, { count: repCount }] = await Promise.all([
+                    supabase.from('community_routes').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+                    supabase.from('route_reports').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+                ])
+                if (isMounted) setCounts({ routes: rCount || 0, reports: repCount || 0 })
 
                 if (isMounted) {
                     setProfile(profileData)
@@ -421,7 +430,7 @@ export default function ProfilePage() {
                                     <MapPin size={24} color="var(--color-primary)" />
                                 </div>
                                 <div className={styles.statInfo}>
-                                    <h4 className={styles.statNumber}>0</h4>
+                                    <h4 className={styles.statNumber}>{counts.routes}</h4>
                                     <p className={styles.statLabel}>Routes Suggested</p>
                                 </div>
                             </div>
@@ -430,7 +439,7 @@ export default function ProfilePage() {
                                     <AlertCircle size={24} color="var(--color-warning)" />
                                 </div>
                                 <div className={styles.statInfo}>
-                                    <h4 className={styles.statNumber}>0</h4>
+                                    <h4 className={styles.statNumber}>{counts.reports}</h4>
                                     <p className={styles.statLabel}>Incidents Reported</p>
                                 </div>
                             </div>
