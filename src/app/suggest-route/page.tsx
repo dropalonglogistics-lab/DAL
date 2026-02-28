@@ -20,6 +20,14 @@ import {
 } from 'lucide-react';
 import styles from './suggest-route.module.css';
 
+interface RouteStop {
+    id: string;
+    location: string;
+    instructions: string;
+    vehicle: string;
+    fare: string;
+}
+
 type SuggestType = 'incident' | 'route';
 type IncidentType = 'police' | 'traffic' | 'blocked' | 'checkpoint';
 
@@ -29,6 +37,9 @@ export default function SuggestRoute() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [user, setUser] = useState<any>(null);
+    const [stops, setStops] = useState<RouteStop[]>([
+        { id: '1', location: '', instructions: '', vehicle: '', fare: '' }
+    ]);
     const router = useRouter();
     const supabase = createClient();
 
@@ -40,6 +51,21 @@ export default function SuggestRoute() {
         };
         checkUser();
     }, [supabase]);
+
+    const addStop = () => {
+        setStops([...stops, { id: Date.now().toString(), location: '', instructions: '', vehicle: '', fare: '' }]);
+    };
+
+    const removeStop = (id: string) => {
+        if (stops.length > 1) {
+            setStops(stops.filter(stop => stop.id !== id));
+        }
+    };
+
+    const updateStop = (id: string, field: keyof RouteStop, value: string) => {
+        setStops(stops.map(stop => stop.id === id ? { ...stop, [field]: value } : stop));
+    };
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -95,6 +121,7 @@ export default function SuggestRoute() {
             <div className={styles.card}>
                 <div className={styles.toggleGroup}>
                     <button
+                        type="button"
                         className={`${styles.toggleBtn} ${mode === 'incident' ? styles.activeToggle : ''}`}
                         onClick={() => setMode('incident')}
                     >
@@ -102,6 +129,7 @@ export default function SuggestRoute() {
                         Report Incident
                     </button>
                     <button
+                        type="button"
                         className={`${styles.toggleBtn} ${mode === 'route' ? styles.activeToggle : ''}`}
                         onClick={() => setMode('route')}
                     >
@@ -181,6 +209,7 @@ export default function SuggestRoute() {
                                     <MapPin size={18} className={styles.inputIcon} />
                                     <input
                                         type="text"
+                                        name="location"
                                         placeholder="e.g. Rumuokoro Junction, Opposite Oil Mill..."
                                         className={styles.inputWithIcon}
                                         required
@@ -191,6 +220,7 @@ export default function SuggestRoute() {
                             <div className={styles.formGroup}>
                                 <label className={styles.label}>Additional Details (Optional)</label>
                                 <textarea
+                                    name="description"
                                     className={styles.textarea}
                                     placeholder="Describe what you see..."
                                     rows={3}
@@ -200,7 +230,10 @@ export default function SuggestRoute() {
                     ) : (
                         <>
                             <div className={styles.sectionHeader}>
-                                <h2>Route Details</h2>
+                                <h2>Detailed Route Path</h2>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>
+                                    Help others by providing step-by-step directions for this route.
+                                </p>
                             </div>
 
                             {!user && (
@@ -221,12 +254,13 @@ export default function SuggestRoute() {
                             )}
 
                             <div className={styles.formGroup}>
-                                <label className={styles.label}>Starting Point</label>
+                                <label className={styles.label}>Starting Point (Origin)</label>
                                 <div className={styles.inputWrapper}>
                                     <Navigation size={18} className={styles.inputIcon} />
                                     <input
                                         type="text"
-                                        placeholder="Where does this route start?"
+                                        name="origin"
+                                        placeholder="Where does the journey begin? e.g. Rumuokoro"
                                         className={styles.inputWithIcon}
                                         required
                                     />
@@ -239,30 +273,114 @@ export default function SuggestRoute() {
                                     <MapPin size={18} className={styles.inputIcon} />
                                     <input
                                         type="text"
-                                        placeholder="Where does this route end?"
+                                        name="destination"
+                                        placeholder="Where does the journey end? e.g. Choba"
                                         className={styles.inputWithIcon}
                                         required
                                     />
                                 </div>
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>Recommended Vehicle(s)</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Bus, Keke, Taxi"
-                                    className={styles.input}
-                                    required
-                                />
+                            {/* Dynamically build stops from here */}
+
+                            <div className={styles.stopsContainer}>
+                                <h3>Step-by-Step Directions</h3>
+                                {stops.map((stop, index) => (
+                                    <div key={stop.id} className={styles.stopCard}>
+                                        <div className={styles.stopHeader}>
+                                            <h4>Stop {index + 1}</h4>
+                                            {stops.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeStop(stop.id)}
+                                                    className={styles.removeStopBtn}
+                                                >
+                                                    Remove
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        <div className={styles.formGroup}>
+                                            <label className={styles.label}>Location</label>
+                                            <input
+                                                type="text"
+                                                value={stop.location}
+                                                onChange={(e) => updateStop(stop.id, 'location', e.target.value)}
+                                                placeholder="e.g. Alakahia Junction"
+                                                className={styles.input}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className={styles.stopSplitGrid}>
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.label}>Take a (Vehicle)</label>
+                                                <input
+                                                    type="text"
+                                                    value={stop.vehicle}
+                                                    onChange={(e) => updateStop(stop.id, 'vehicle', e.target.value)}
+                                                    placeholder="e.g. Keke, Bus, Taxi"
+                                                    className={styles.input}
+                                                    required
+                                                />
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.label}>Est. Fare (₦)</label>
+                                                <input
+                                                    type="number"
+                                                    value={stop.fare}
+                                                    onChange={(e) => updateStop(stop.id, 'fare', e.target.value)}
+                                                    placeholder="200"
+                                                    className={styles.input}
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className={styles.formGroup}>
+                                            <label className={styles.label}>Directions / Instructions</label>
+                                            <textarea
+                                                value={stop.instructions}
+                                                onChange={(e) => updateStop(stop.id, 'instructions', e.target.value)}
+                                                placeholder="e.g. Drop at junction, cross the road and take a Keke."
+                                                className={styles.textarea}
+                                                rows={2}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+
+                                <button
+                                    type="button"
+                                    onClick={addStop}
+                                    className={styles.addStopBtn}
+                                >
+                                    <PlusCircle size={16} /> Add Next Stop
+                                </button>
+
+                                <input type="hidden" name="stopsJSON" value={JSON.stringify(stops)} />
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>Typical Fare Range (₦)</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. 200 - 350"
-                                    className={styles.input}
-                                />
+                            <div className={styles.stopSplitGrid} style={{ marginTop: '24px' }}>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Total Est. Fare (₦)</label>
+                                    <input
+                                        type="number"
+                                        name="fareMax"
+                                        placeholder="Sum of all fares e.g. 500"
+                                        className={styles.input}
+                                        required
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Est. Duration (mins)</label>
+                                    <input
+                                        type="number"
+                                        name="durationMinutes"
+                                        placeholder="e.g. 45"
+                                        className={styles.input}
+                                    />
+                                </div>
                             </div>
                         </>
                     )}

@@ -55,38 +55,45 @@ export async function suggestRoute(formData: FormData) {
         return { success: true }
     }
 
+    const stopsJSON = formData.get('stopsJSON') as string
+    let itinerary: any[] = [];
+    const vehicleTypes = new Set<string>();
+
+    if (stopsJSON) {
+        try {
+            const stops = JSON.parse(stopsJSON);
+            itinerary = stops.map((stop: any, index: number) => {
+                let type: 'start' | 'stop' | 'switch' | 'end' = 'stop';
+                if (index === 0) type = 'start';
+                if (index === stops.length - 1) type = 'end';
+
+                if (stop.vehicle) {
+                    // Split strictly by comma just in case they put multiple in one input
+                    stop.vehicle.split(',').forEach((v: string) => vehicleTypes.add(v.trim()));
+                }
+
+                return {
+                    type,
+                    location: stop.location,
+                    instruction: stop.instructions,
+                    vehicle: stop.vehicle,
+                    fare: stop.fare
+                };
+            });
+        } catch (e) {
+            console.error('Failed to parse stops JSON', e);
+        }
+    }
+
     const routeData: any = {
         user_id: userId,
         origin: formData.get('origin') as string,
         destination: formData.get('destination') as string,
-        vehicle_type: formData.get('vehicleType') as string,
-        price_estimated: parseFloat(formData.get('fareMax') as string) || null, // Mapping to correct column
+        vehicle_type: Array.from(vehicleTypes).join(', ') || 'Various',
+        price_estimated: parseFloat(formData.get('fareMax') as string) || null,
         duration_minutes: parseInt(formData.get('durationMinutes') as string) || null,
-        pro_tips: formData.get('proTips') as string,
-    }
-
-    // Parse itinerary from text
-    const itineraryText = formData.get('itinerary') as string
-    if (itineraryText) {
-        const lines = itineraryText.split('\n').filter(line => line.trim())
-        const itinerary = lines.map((line, index) => {
-            let type: 'start' | 'stop' | 'switch' | 'end' = 'stop'
-            if (index === 0) type = 'start'
-            else if (index === lines.length - 1) type = 'end'
-            else if (line.toLowerCase().includes('switch') || line.toLowerCase().includes('change')) type = 'switch'
-
-            const match = line.match(/(.*?)\((.*?)\)/)
-            const location = match ? match[1].trim() : line.trim()
-            const instruction = match ? match[2].trim() : line.trim()
-
-            return {
-                type,
-                location,
-                instruction,
-                vehicle: line.toLowerCase().includes('bus') ? 'Bus' : line.toLowerCase().includes('keke') ? 'Keke' : line.toLowerCase().includes('taxi') ? 'Taxi' : undefined
-            }
-        })
-        routeData.itinerary = itinerary
+        itinerary: itinerary,
+        status: 'pending' // For admin approval workflow
     }
 
     if (!routeData.origin || !routeData.destination) {

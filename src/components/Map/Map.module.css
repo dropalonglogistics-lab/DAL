@@ -1,0 +1,56 @@
+.mapContainer {
+    width: 100%;
+    height: 350px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    /* Keep map below modals/navs */
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    margin: 16px 0;
+}
+
+.loadingOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 10;
+    color: var(--text-primary);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.customPopup {
+    font-family: system-ui, sans-serif;
+}
+
+.customPopup strong {
+    color: var(--color-primary);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.customPopup span {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}

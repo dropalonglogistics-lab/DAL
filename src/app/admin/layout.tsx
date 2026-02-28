@@ -28,6 +28,9 @@ export default async function AdminLayout({
                     <Link href="/admin/users" className={styles.navItem}>
                         <Users size={20} /> User Management
                     </Link>
+                    <Link href="/admin/routes" className={styles.navItem}>
+                        <LayoutDashboard size={20} /> Route Approvals
+                    </Link>
                     <Link href="/alerts" className={styles.navItem}>
                         <AlertTriangle size={20} /> View Alerts
                     </Link>

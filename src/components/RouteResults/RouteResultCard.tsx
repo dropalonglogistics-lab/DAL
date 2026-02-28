@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Clock, AlertTriangle, ChevronRight, MapPin, CreditCard, Info, Navigation, TrafficCone } from 'lucide-react';
+import RouteMap from '../Map/RouteMap';
 import styles from './RouteResultCard.module.css';
 
 interface ItineraryStep {
@@ -110,6 +111,18 @@ export default function RouteResultCard({
                             </div>
                         </div>
                     ))}
+
+                    <div style={{ marginTop: '20px' }}>
+                        <RouteMap
+                            locations={
+                                itinerary.map((step, index) => ({
+                                    title: step.location,
+                                    desc: step.description || `Stop ${index + 1}`,
+                                    city: 'Port Harcourt'
+                                }))
+                            }
+                        />
+                    </div>
                 </div>
             )}
 

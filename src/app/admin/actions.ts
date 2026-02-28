@@ -68,3 +68,48 @@ export async function demoteToUser(formData: FormData) {
         return { error: err.message || 'An unexpected error occurred.' }
     }
 }
+
+export async function approveRoute(formData: FormData) {
+    try {
+        const routeId = formData.get('routeId') as string
+        const supabase = await createClient()
+
+        const { data: authData } = await supabase.auth.getUser()
+        const user = authData?.user
+
+        const { data: actorProfile } = await supabase.from('profiles').select('is_admin').eq('id', user?.id).single()
+
+        if (!actorProfile?.is_admin) return { error: 'Unauthorized' }
+
+        const { error } = await supabase.from('community_routes').update({ status: 'approved' }).eq('id', routeId)
+        if (error) return { error: error.message }
+
+        revalidatePath('/admin/routes')
+        revalidatePath('/route-suggest') // Revalidate main search
+        return { success: true }
+    } catch (err: any) {
+        return { error: err.message }
+    }
+}
+
+export async function rejectRoute(formData: FormData) {
+    try {
+        const routeId = formData.get('routeId') as string
+        const supabase = await createClient()
+
+        const { data: authData } = await supabase.auth.getUser()
+        const user = authData?.user
+
+        const { data: actorProfile } = await supabase.from('profiles').select('is_admin').eq('id', user?.id).single()
+
+        if (!actorProfile?.is_admin) return { error: 'Unauthorized' }
+
+        const { error } = await supabase.from('community_routes').update({ status: 'rejected' }).eq('id', routeId)
+        if (error) return { error: error.message }
+
+        revalidatePath('/admin/routes')
+        return { success: true }
+    } catch (err: any) {
+        return { error: err.message }
+    }
+}

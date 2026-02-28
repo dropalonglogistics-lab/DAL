@@ -414,8 +414,39 @@ export default function ProfilePage() {
                             </div>
                         </div>
 
+                        {/* Profile Stats / Badges Section */}
+                        <div className={`${styles.statsGrid} ${styles.staggerEntry} ${styles.delay_4}`}>
+                            <div className={styles.statCard}>
+                                <div className={styles.statIconWrapper} style={{ background: 'rgba(67, 97, 238, 0.1)' }}>
+                                    <MapPin size={24} color="var(--color-primary)" />
+                                </div>
+                                <div className={styles.statInfo}>
+                                    <h4 className={styles.statNumber}>0</h4>
+                                    <p className={styles.statLabel}>Routes Suggested</p>
+                                </div>
+                            </div>
+                            <div className={styles.statCard}>
+                                <div className={styles.statIconWrapper} style={{ background: 'rgba(245, 158, 11, 0.1)' }}>
+                                    <AlertCircle size={24} color="var(--color-warning)" />
+                                </div>
+                                <div className={styles.statInfo}>
+                                    <h4 className={styles.statNumber}>0</h4>
+                                    <p className={styles.statLabel}>Incidents Reported</p>
+                                </div>
+                            </div>
+                            <div className={styles.statCard}>
+                                <div className={styles.statIconWrapper} style={{ background: 'rgba(212, 175, 55, 0.1)' }}>
+                                    <Award size={24} color="var(--color-gold)" />
+                                </div>
+                                <div className={styles.statInfo}>
+                                    <h4 className={styles.statNumber}>{profile?.points || 0}</h4>
+                                    <p className={styles.statLabel}>Total Points</p>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Personal Details Form */}
-                        <div className={`${styles.section} ${styles.staggerEntry} ${styles.delay_4}`}>
+                        <div className={`${styles.section} ${styles.staggerEntry} ${styles.delay_5}`}>
                             <div className={styles.sectionTitle}>
                                 <User size={20} /> Personal Details
                             </div>
@@ -443,7 +474,7 @@ export default function ProfilePage() {
                             </div>
                         </div>
 
-                        <div className={`${styles.section} ${styles.staggerEntry} ${styles.delay_5}`}>
+                        <div className={`${styles.section} ${styles.staggerEntry} ${styles.delay_6}`}>
                             <div className={styles.sectionTitle}>
                                 <MapPin size={20} /> Location Information
                             </div>
