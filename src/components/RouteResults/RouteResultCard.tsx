@@ -137,20 +137,36 @@ export default function RouteResultCard({
                                             <span className={styles.stepLocation}>{step.location}</span>
                                             {step.vehicle && <span className={styles.vehicleBadge}>{step.vehicle}</span>}
                                         </div>
-                                        <p className={styles.stepInstruction}>
-                                            {step.instruction || (step.type === 'start' ? 'Start your journey here' : step.type === 'end' ? 'You have arrived at your destination' : 'Continue along the route')}
-                                        </p>
+                                        <div className={styles.stepInstructionWrapper}>
+                                            <p className={styles.stepInstruction}>
+                                                {step.instruction || (
+                                                    step.type === 'start' ? `Begin your journey at ${step.location}` :
+                                                        step.type === 'end' ? `Arrive at your destination: ${step.location}` :
+                                                            `Head towards ${step.location}`
+                                                )}
+                                            </p>
+                                            {step.vehicle && (
+                                                <p className={styles.vehicleInstruction}>
+                                                    {step.type === 'start' ? `Look for a ${step.vehicle} heading towards the next stop.` :
+                                                        step.type === 'switch' ? `Transfer to a ${step.vehicle} to continue.` :
+                                                            `Continue on the ${step.vehicle}.`}
+                                                </p>
+                                            )}
+                                        </div>
                                         {step.type === 'switch' && (
                                             <div className={styles.switchBox}>
-                                                <div className={styles.switchLabel}>TRANSFER</div>
+                                                <div className={styles.switchLabel}>TRANSFER POINT</div>
                                                 <div className={styles.switchText}>
-                                                    Disembark from <strong>{step.vehicleFrom}</strong> and board <strong>{step.vehicleTo}</strong>
+                                                    Alight from your current vehicle and board a <strong>{step.vehicle || 'connecting vehicle'}</strong>
                                                 </div>
                                             </div>
                                         )}
                                         {activeStepIndex === index && (
                                             <div className={styles.stepAction}>
-                                                <button className={styles.showOnMapBtn}>
+                                                <button className={styles.showOnMapBtn} onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (onStepSelect) onStepSelect(index);
+                                                }}>
                                                     <MapPin size={14} /> Center on Map
                                                 </button>
                                             </div>

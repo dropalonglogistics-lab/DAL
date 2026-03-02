@@ -16,10 +16,6 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
     const handleRouteSelect = (route: any) => {
         setSelectedRoute(route);
         setActiveStepIndex(null); // Reset step when switching routes
-        // On mobile, automatically show map when a route is selected
-        if (window.innerWidth < 1024) {
-            setViewMode('map');
-        }
     };
 
     return (
