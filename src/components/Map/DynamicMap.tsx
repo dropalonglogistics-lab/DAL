@@ -26,19 +26,60 @@ function SetBounds({ pts }: { pts: [number, number][] }) {
     return null;
 }
 
+// Component to fly to a specific point when activeStepIndex changes
+function FlyToStep({ center, active }: { center: [number, number] | null; active: boolean }) {
+    const map = useMap();
+    useEffect(() => {
+        if (active && center) {
+            map.flyTo(center, 15, { duration: 1.5 });
+        }
+    }, [active, center, map]);
+    return null;
+}
+
+const getMarkerIcon = (type: string, isActive: boolean) => {
+    const color = type === 'start' ? '#22c55e' : type === 'end' ? '#ef4444' : type === 'switch' ? '#3b82f6' : '#94a3b8';
+    const size = isActive ? 36 : 24;
+
+    return L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div style="
+            background-color: ${color};
+            width: ${size}px;
+            height: ${size}px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        ">
+            <div style="
+                width: 8px;
+                height: 8px;
+                background: white;
+                border-radius: 50%;
+                transform: rotate(45deg);
+            "></div>
+        </div>`,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size]
+    });
+};
+
 export default function DynamicMap({
-    locations
+    locations,
+    activeStepIndex
 }: {
-    locations: { title: string; desc: string; city: string }[] // e.g. [{title: 'Rumuokoro', desc: 'Start', city: 'Port Harcourt'}, ...]
+    locations: { title: string; desc: string; city: string; type?: string }[];
+    activeStepIndex?: number | null;
 }) {
-    const [coordinates, setCoordinates] = useState<Array<{ lat: number; lng: number; title: string; desc: string }>>([]);
+    const [coordinates, setCoordinates] = useState<Array<{ lat: number; lng: number; title: string; desc: string; type?: string }>>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // We need to loosely Geocode the text locations into lat/long.
-        // We will use OpenStreetMap Nominatim for this (free, no API key).
-        // To be safe against rate limits, we add a brief delay between requests.
-
         let isMounted = true;
 
         const fetchCoordinates = async () => {
@@ -47,9 +88,7 @@ export default function DynamicMap({
 
             for (const loc of locations) {
                 try {
-                    // Quick debounce for OSM rate limit via loop
                     await new Promise(r => setTimeout(r, 600));
-
                     const query = encodeURIComponent(`${loc.title}, ${loc.city}, Nigeria`);
                     const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`);
                     const data = await res.json();
@@ -59,7 +98,8 @@ export default function DynamicMap({
                             lat: parseFloat(data[0].lat),
                             lng: parseFloat(data[0].lon),
                             title: loc.title,
-                            desc: loc.desc
+                            desc: loc.desc,
+                            type: loc.type
                         });
                     }
                 } catch (e) {
@@ -74,14 +114,10 @@ export default function DynamicMap({
         };
 
         fetchCoordinates();
-
         return () => { isMounted = false; };
     }, [locations]);
 
-    // Fallback coordinates for Port Harcourt if geocoding fails totally
     const PH_CENTER: [number, number] = [4.8156, 7.0498];
-
-    // Extract array of [lat, lng] for the Polyline
     const pathPositions: [number, number][] = coordinates.map(c => [c.lat, c.lng]);
 
     return (
@@ -105,21 +141,28 @@ export default function DynamicMap({
                 />
 
                 {coordinates.map((coord, idx) => (
-                    <Marker key={idx} position={[coord.lat, coord.lng]}>
-                        <Popup className={styles.customPopup}>
+                    <Marker
+                        key={idx}
+                        position={[coord.lat, coord.lng]}
+                        icon={getMarkerIcon(coord.type || '', activeStepIndex === idx)}
+                    >
+                        <Popup className={styles.customPopup} autoPan={false}>
                             <strong>{coord.title}</strong>
                             <span>{coord.desc}</span>
                         </Popup>
+                        <FlyToStep
+                            active={activeStepIndex === idx}
+                            center={[coord.lat, coord.lng]}
+                        />
                     </Marker>
                 ))}
 
                 {pathPositions.length > 1 && (
                     <Polyline
                         positions={pathPositions}
-                        color="var(--color-primary)"
-                        weight={4}
-                        opacity={0.7}
-                        dashArray="10, 10"
+                        color="#d4af37"
+                        weight={5}
+                        opacity={0.8}
                     />
                 )}
 

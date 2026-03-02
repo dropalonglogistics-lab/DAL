@@ -411,12 +411,43 @@
     color: var(--color-gold);
 }
 
+.premiumBanner {
+    position: relative;
+    padding: 8px 20px;
+    background: linear-gradient(135deg, var(--color-gold) 0%, #000 100%);
+    border: none;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
+.premiumBanner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: bannerShimmer 3s infinite;
+}
+
+@keyframes bannerShimmer {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
 .premiumBadge {
-    color: var(--color-gold);
-    font-size: 0.8rem;
-    font-weight: 800;
+    color: #FFF;
+    font-size: 0.85rem;
+    font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .premiumTitle {

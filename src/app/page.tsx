@@ -199,7 +199,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 <div className={styles.premiumOverlay}></div>
                 <div className={styles.premiumContent}>
                     <div className={styles.premiumHeader}>
-                        <div className={styles.badgeWrapper}>
+                        <div className={`${styles.badgeWrapper} ${styles.premiumBanner}`}>
                             <Sparkles size={14} className={styles.sparkleIcon} />
                             <span className={styles.premiumBadge}>Coming Soon</span>
                         </div>

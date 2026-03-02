@@ -6,11 +6,13 @@ import RouteMap from '../Map/RouteMap';
 import styles from './RouteResultCard.module.css';
 
 interface ItineraryStep {
-    type: 'stop' | 'switch' | 'junction';
+    type: 'start' | 'end' | 'switch' | 'stop' | 'junction';
     location: string;
     description?: string;
+    vehicle?: string;
     vehicleFrom?: string;
     vehicleTo?: string;
+    instruction?: string;
 }
 
 interface RouteResultProps {
@@ -35,6 +37,7 @@ export default function RouteResultCard({
     itinerary = []
 }: RouteResultProps) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
 
     const trafficColors = {
         clear: '#22c55e',
@@ -45,6 +48,11 @@ export default function RouteResultCard({
     const toggleExpand = (e: React.MouseEvent) => {
         e.stopPropagation();
         setIsExpanded(!isExpanded);
+    };
+
+    const handleStepClick = (e: React.MouseEvent, index: number) => {
+        e.stopPropagation();
+        setActiveStepIndex(index === activeStepIndex ? null : index);
     };
 
     return (
@@ -86,39 +94,54 @@ export default function RouteResultCard({
             )}
 
             {isExpanded && itinerary && itinerary.length > 0 && (
-                <div className={styles.itinerary}>
-                    <div className={styles.itineraryHeader}>
-                        <Navigation size={16} />
-                        <span>Step-by-Step Itinerary</span>
-                    </div>
-                    {itinerary.map((step, index) => (
-                        <div key={index} className={styles.itineraryLine}>
-                            <div className={styles.step}>
-                                <div className={styles.iconContainer}>
-                                    {step.type === 'stop' && <MapPin size={16} className={styles.stepIcon} />}
-                                    {step.type === 'switch' && <Info size={16} className={styles.stepIcon} />}
-                                    {step.type === 'junction' && <Navigation size={16} className={styles.stepIcon} />}
-                                </div>
-                                <div className={styles.stepContent}>
-                                    <div className={styles.stepLocation}>{step.location}</div>
-                                    {step.description && <div className={styles.stepDescription}>{step.description}</div>}
-                                    {step.type === 'switch' && (
-                                        <div className={styles.switchInfo}>
-                                            Change from <span className={styles.vehicle}>{step.vehicleFrom}</span> to <span className={styles.vehicle}>{step.vehicleTo}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                <div className={styles.itineraryWrapper}>
+                    <div className={styles.itinerary}>
+                        <div className={styles.itineraryHeader}>
+                            <Navigation size={16} />
+                            <span>Step-by-Step Directions</span>
                         </div>
-                    ))}
+                        <div className={styles.stepsTimeline}>
+                            {itinerary.map((step, index) => (
+                                <div
+                                    key={index}
+                                    className={`${styles.stepItem} ${activeStepIndex === index ? styles.activeStep : ''}`}
+                                    onClick={(e) => handleStepClick(e, index)}
+                                >
+                                    <div className={styles.stepVisual}>
+                                        <div className={`${styles.stepIconContainer} ${styles[step.type]}`}>
+                                            {step.type === 'start' && <MapPin size={16} />}
+                                            {step.type === 'end' && <Navigation size={16} />}
+                                            {step.type === 'switch' && <Info size={16} />}
+                                            {(step.type === 'stop' || step.type === 'junction') && <div className={styles.smallDot} />}
+                                        </div>
+                                        {index < itinerary.length - 1 && <div className={styles.stepLine} />}
+                                    </div>
+                                    <div className={styles.stepContent}>
+                                        <div className={styles.stepMain}>
+                                            <span className={styles.stepLocation}>{step.location}</span>
+                                            {step.vehicle && <span className={styles.vehicleBadge}>{step.vehicle}</span>}
+                                        </div>
+                                        {step.instruction && <p className={styles.stepInstruction}>{step.instruction}</p>}
+                                        {step.type === 'switch' && (
+                                            <div className={styles.switchDetail}>
+                                                Change from <strong>{step.vehicleFrom}</strong> to <strong>{step.vehicleTo}</strong>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
-                    <div style={{ marginTop: '20px' }}>
+                    <div className={styles.mapContainer}>
                         <RouteMap
+                            activeStepIndex={activeStepIndex}
                             locations={
                                 itinerary.map((step, index) => ({
                                     title: step.location,
-                                    desc: step.description || `Stop ${index + 1}`,
-                                    city: 'Port Harcourt'
+                                    desc: step.instruction || step.description || `Stop ${index + 1}`,
+                                    city: 'Port Harcourt',
+                                    type: step.type
                                 }))
                             }
                         />
@@ -128,7 +151,7 @@ export default function RouteResultCard({
 
             <div className={styles.footer}>
                 <button className={styles.detailsBtn} onClick={toggleExpand}>
-                    {isExpanded ? 'Show less' : 'View full itinerary'}
+                    {isExpanded ? 'Collapse' : 'View full itinerary'}
                     <ChevronRight size={16} style={{ transform: isExpanded ? 'rotate(-90deg)' : 'rotate(90deg)', transition: 'transform 0.2s' }} />
                 </button>
             </div>

@@ -174,94 +174,130 @@
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
-.detailsSection {
-    margin: 16px 0;
-    padding-top: 16px;
-    border-top: 1px solid #262626;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    animation: fadeIn 0.3s ease-out;
-}
-
-.detailItem {
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-}
-
-.detailIcon {
-    color: var(--color-gold);
-    margin-top: 2px;
-}
-
-.detailItem strong {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--color-gold);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 800;
-}
-
-.detailItem p {
-    font-size: 1rem;
-    color: var(--text-primary);
-    margin: 2px 0 0 0;
-}
-
-.itinerary {
-    margin: 16px 0;
-    padding-left: 14px;
-    border-left: 2px dashed var(--border);
+.itineraryWrapper {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    margin-top: 20px;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@media (min-width: 768px) {
+    .itineraryWrapper {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+}
+
+.itinerary {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .itineraryHeader {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 12px;
     color: var(--color-gold);
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
 }
 
-.itineraryHeader strong {
-    font-size: 0.95rem;
-    color: var(--text-primary);
-}
-
-.step {
+.stepsTimeline {
     display: flex;
-    gap: 14px;
+    flex-direction: column;
+}
+
+.stepItem {
+    display: flex;
+    gap: 16px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.stepItem:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.activeStep {
+    background: rgba(212, 175, 55, 0.08) !important;
+}
+
+.stepVisual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 32px;
     position: relative;
 }
 
-.stepDot {
-    position: absolute;
-    left: -21px;
-    width: 12px;
-    height: 12px;
+.stepIconContainer {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background-color: var(--background);
-    border: 3px solid var(--color-gold);
-    top: 4px;
-    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--background);
+    border: 2px solid var(--border);
+    z-index: 2;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
 }
 
-.stepSwitch .stepDot {
-    border-color: #F59E0B;
-    background-color: #F59E0B;
+.activeStep .stepIconContainer {
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+.stepIconContainer.start {
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+.stepIconContainer.end {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.stepIconContainer.switch {
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.smallDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+}
+
+.activeStep .smallDot {
+    background: var(--color-gold);
+}
+
+.stepLine {
+    flex: 1;
+    width: 2px;
+    background: var(--border);
+    margin: 4px 0;
+    min-height: 20px;
 }
 
 .stepContent {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    flex: 1;
+    gap: 4px;
 }
 
-.stepHeader {
+.stepMain {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -269,35 +305,46 @@
 }
 
 .stepLocation {
-    font-size: 0.95rem;
     font-weight: 700;
     color: var(--text-primary);
+    font-size: 1rem;
 }
 
 .stepInstruction {
     font-size: 0.85rem;
     color: var(--text-secondary);
-    margin: 4px 0;
-    line-height: 1.4;
+    line-height: 1.5;
+    margin: 0;
 }
 
-.stepVehicleBadge {
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: var(--color-gold);
-    background-color: rgba(212, 175, 55, 0.1);
-    padding: 2px 8px;
-    border-radius: 4px;
-    text-transform: uppercase;
-    width: fit-content;
+.switchDetail {
+    padding: 8px 12px;
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
     margin-top: 4px;
 }
 
-.fareRange {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--color-gold);
-    opacity: 0.9;
+.switchDetail strong {
+    color: #3b82f6;
+}
+
+.mapContainer {
+    flex: 1.2;
+    min-height: 350px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    position: sticky;
+    top: 20px;
+}
+
+.footer {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
 }
 
 @keyframes fadeIn {
