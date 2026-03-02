@@ -25,7 +25,9 @@ interface RouteResultProps {
     isRecommended?: boolean;
     itinerary?: any[];
     isGlobalMode?: boolean;
+    activeStepIndex?: number | null;
     onStepSelect?: (index: number) => void;
+    onExpand?: () => void;
 }
 
 export default function RouteResultCard({
@@ -38,10 +40,11 @@ export default function RouteResultCard({
     isRecommended,
     itinerary = [],
     isGlobalMode = false,
-    onStepSelect
+    activeStepIndex,
+    onStepSelect,
+    onExpand
 }: RouteResultProps) {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
 
     const trafficColors = {
         clear: '#22c55e',
@@ -49,14 +52,17 @@ export default function RouteResultCard({
         heavy: '#ef4444'
     };
 
-    const toggleExpand = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setIsExpanded(!isExpanded);
+    const toggleExpand = (e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        const nextState = !isExpanded;
+        setIsExpanded(nextState);
+        if (nextState && onExpand) {
+            onExpand();
+        }
     };
 
     const handleStepClick = (e: React.MouseEvent, index: number) => {
         e.stopPropagation();
-        setActiveStepIndex(index === activeStepIndex ? null : index);
         if (onStepSelect) {
             onStepSelect(index);
         }
@@ -65,7 +71,7 @@ export default function RouteResultCard({
     return (
         <div
             className={`${styles.card} ${isRecommended ? styles.recommended : ''} ${isExpanded ? styles.expanded : ''}`}
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => toggleExpand()}
         >
             {isRecommended && <div className={styles.badge}>Recommended</div>}
 
@@ -101,9 +107,9 @@ export default function RouteResultCard({
             )}
 
             {isExpanded && itinerary && itinerary.length > 0 && (
-                <div className={styles.itineraryWrapper}>
+                <div className={styles.itineraryWrapper} onClick={(e) => e.stopPropagation()}>
                     <div className={styles.itinerary}>
-                        <div className={styles.itineraryHeader}>
+                        <div className={styles.itineraryHeader} onClick={toggleExpand} style={{ cursor: 'pointer' }}>
                             <Navigation size={18} className={styles.headerIcon} />
                             <div>
                                 <h3>Full Directions</h3>

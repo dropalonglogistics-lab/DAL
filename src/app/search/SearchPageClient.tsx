@@ -44,7 +44,6 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
                                 <div
                                     key={route.id}
                                     className={`${styles.cardWrapper} ${selectedRoute?.id === route.id ? styles.selectedCard : ''}`}
-                                    onClick={() => handleRouteSelect(route)}
                                 >
                                     <RouteResultCard
                                         title={`${route.origin} → ${route.destination}`}
@@ -55,7 +54,12 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
                                         isRecommended={true}
                                         itinerary={route.itinerary}
                                         isGlobalMode={true}
-                                        onStepSelect={(idx) => setActiveStepIndex(idx)}
+                                        activeStepIndex={selectedRoute?.id === route.id ? activeStepIndex : null}
+                                        onStepSelect={(idx) => {
+                                            handleRouteSelect(route);
+                                            setActiveStepIndex(idx);
+                                        }}
+                                        onExpand={() => handleRouteSelect(route)}
                                     />
                                 </div>
                             ))
