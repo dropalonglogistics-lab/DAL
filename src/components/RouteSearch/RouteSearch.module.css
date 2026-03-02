@@ -17,8 +17,9 @@
 .title {
     font-size: 1.25rem;
     font-weight: 700;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     color: var(--text-primary);
+    text-align: center;
 }
 
 .inputGroup {
@@ -26,9 +27,9 @@
     align-items: center;
     background-color: var(--background);
     border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 12px 16px;
-    transition: all 0.2s;
+    border-radius: 16px;
+    padding: 14px 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 :global(.light-mode) .inputGroup {
@@ -39,47 +40,22 @@
 .inputGroup:focus-within {
     border-color: var(--color-gold);
     background-color: var(--card-bg);
-    box-shadow: 0 0 0 4px rgba(133, 102, 18, 0.08);
-    /* Sophisticated Antique Gold glow */
-}
-
-.iconWrapper.icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    transition: color 0.2s;
-}
-
-:global(.light-mode) .icon {
-    color: var(--text-secondary);
-}
-
-:global(.dark-mode) .icon {
-    color: #94A3B8;
-}
-
-.input:focus+.icon {
-    color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(180, 83, 9, 0.1);
 }
 
 .iconWrapper {
-    margin-right: 12px;
+    margin-right: 14px;
     display: flex;
     align-items: center;
     color: var(--text-secondary);
-    transition: color 0.2s;
+    transition: color 0.3s ease;
 }
 
 .inputGroup:focus-within .iconWrapper {
     color: var(--color-gold);
 }
 
-.startIcon {
-    color: var(--color-gold);
-}
-
+.startIcon,
 .endIcon {
     color: var(--color-gold);
 }
@@ -89,66 +65,93 @@
     background: none;
     width: 100%;
     font-size: 1.1rem;
-    /* Slightly larger for better readability */
     color: var(--text-primary);
-    font-weight: 500;
+    font-weight: 600;
     outline: none;
 }
 
 .input::placeholder {
     color: var(--text-secondary);
-    opacity: 0.8;
+    opacity: 0.6;
 }
 
 .dots {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
-    padding: 4px 0 4px 22px;
+    gap: 5px;
+    padding: 6px 0 6px 28px;
 }
 
 .dot {
     width: 4px;
     height: 4px;
-    background-color: #262626;
+    background-color: var(--border);
     border-radius: 50%;
 }
 
 .vehicleSelector {
     display: flex;
-    gap: 8px;
-    margin: 20px 0;
+    gap: 12px;
+    margin: 24px 0;
 }
 
 .vehicleBtn {
     flex: 1;
-    padding: 10px;
-    border: 1px solid #262626;
-    background-color: #111111;
+    padding: 12px;
+    border: 1px solid var(--border);
+    background-color: var(--card-bg);
     color: var(--text-secondary);
-    border-radius: var(--radius-md);
+    border-radius: 12px;
     cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s;
+    font-weight: 700;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.9rem;
 }
 
 .vehicleBtn:hover {
-    background-color: #161616;
     border-color: var(--color-gold);
+    color: var(--text-primary);
 }
 
 .vehicleBtn.active {
     background-color: var(--color-gold);
-    color: #050505;
+    color: #000;
     border-color: var(--color-gold);
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 8px 20px rgba(180, 83, 9, 0.2);
 }
 
 .buttonGroup {
     display: flex;
     gap: 12px;
-    margin-top: 24px;
+    margin-top: 32px;
+}
+
+.searchBtn {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--color-gold) 0%, #D97706 100%);
+    color: #000;
+    border: none;
+    padding: 18px;
+    border-radius: 100px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 10px 30px rgba(180, 83, 9, 0.3);
+}
+
+.searchBtn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 40px rgba(180, 83, 9, 0.4);
+}
+
+.searchBtn:active {
+    transform: translateY(-1px);
 }
 
 .compact {
@@ -160,50 +163,39 @@
     margin: 0;
 }
 
+.compact .title {
+    display: none;
+}
+
 .compact .inputGroup {
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
+    padding: 10px 16px;
+    background: rgba(var(--foreground-rgb), 0.05);
+    border-radius: 12px;
+}
+
+:global(.light-mode) .compact .inputGroup {
+    background: rgba(15, 23, 42, 0.04);
 }
 
 .compact .input {
     font-size: 0.95rem;
 }
 
+.compact .vehicleSelector {
+    margin: 12px 0;
+    gap: 8px;
+}
+
+.compact .vehicleBtn {
+    padding: 8px;
+}
+
 .compact .buttonGroup {
-    margin-top: 12px;
+    margin-top: 16px;
 }
 
 .compact .searchBtn {
-    padding: 10px;
-    font-size: 0.9rem;
-    border-radius: 8px;
-}
-
-.searchBtn {
-    flex: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background-color: var(--color-gold);
-    color: #050505;
-    border: none;
-    padding: 14px;
-    border-radius: var(--radius-md);
-    font-size: 1.05rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
-}
-
-.searchBtn:hover {
-    background-color: var(--color-primary-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
-}
-
-.searchBtn:active {
-    transform: translateY(0);
+    padding: 12px;
+    font-size: 0.95rem;
+    border-radius: 12px;
 }

@@ -82,12 +82,13 @@ body.light-mode {
   /* Deep Obsidian for maximum readability */
   --text-secondary: #475569;
   /* Crisp Slate for clear secondary info */
-  --color-gold: #A17D16;
-  /* Denser, richer gold to stand out on light backgrounds */
-  --color-primary: #A17D16;
-  --color-primary-hover: #856612;
+  --color-gold: #B45309;
+  /* Rich Amber-Gold for better visibility on light backgrounds */
+  --color-primary: #B45309;
+  --color-primary-hover: #92400E;
   --border: #E2E8F0;
-  --color-shadow: rgba(15, 23, 42, 0.06);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --color-shadow: rgba(15, 23, 42, 0.08);
 }
 
 * {
