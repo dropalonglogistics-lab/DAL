@@ -11,10 +11,15 @@ import Link from 'next/link';
 export default function SearchPageClient({ initialRoutes, initialTitle }: { initialRoutes: any[], initialTitle: string }) {
     const [selectedRoute, setSelectedRoute] = useState<any | null>(initialRoutes?.[0] || null);
     const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
+    const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
     const handleRouteSelect = (route: any) => {
         setSelectedRoute(route);
         setActiveStepIndex(null); // Reset step when switching routes
+        // On mobile, automatically show map when a route is selected
+        if (window.innerWidth < 1024) {
+            setViewMode('map');
+        }
     };
 
     return (
@@ -29,7 +34,7 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
             </header>
 
             <main className={styles.mainContent}>
-                <div className={styles.resultsSidebar}>
+                <div className={`${styles.resultsSidebar} ${viewMode === 'map' ? styles.hideOnMobile : ''}`}>
                     <div className={styles.resultsHeader}>
                         <Link href="/" className={styles.backLink}>
                             <ChevronLeft size={16} /> Back to Home
@@ -72,7 +77,7 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
                     </div>
                 </div>
 
-                <div className={styles.mapStickyContainer}>
+                <div className={`${styles.mapStickyContainer} ${viewMode === 'list' ? styles.hideOnMobile : ''}`}>
                     {selectedRoute ? (
                         <div className={styles.globalMapWrapper}>
                             <RouteMap
@@ -101,6 +106,23 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
                     )}
                 </div>
             </main>
+
+            <button
+                className={styles.mobileToggleButton}
+                onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
+            >
+                {viewMode === 'list' ? (
+                    <>
+                        <Navigation size={18} />
+                        <span>Show Map</span>
+                    </>
+                ) : (
+                    <>
+                        <SearchIcon size={18} />
+                        <span>Show List</span>
+                    </>
+                )}
+            </button>
         </div>
     );
 }
