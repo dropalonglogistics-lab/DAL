@@ -27,7 +27,7 @@ export default function RouteSearch() {
         if (trimmedOrigin) params.set('origin', trimmedOrigin);
         if (trimmedDestination) params.set('destination', trimmedDestination);
 
-        router.push(`/?${params.toString()}`);
+        router.push(`/search?${params.toString()}`);
     };
 
     const handleClear = () => {

@@ -1,18 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { Target, Maximize, Navigation, MapPin } from 'lucide-react';
 import styles from './Map.module.css';
 
 // Fix for default marker icons in React-Leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+if (typeof window !== 'undefined') {
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    });
+}
 
 // Component to dynamically fit map bounds to all points
 function SetBounds({ pts }: { pts: [number, number][] }) {
@@ -24,6 +27,20 @@ function SetBounds({ pts }: { pts: [number, number][] }) {
         }
     }, [pts, map]);
     return null;
+}
+
+// Custom Controls Component
+function MapControls({ onLocate, onRecenter }: { onLocate: () => void; onRecenter: () => void }) {
+    return (
+        <div className={styles.customControls}>
+            <button onClick={onLocate} className={styles.controlBtn} title="Locate Me">
+                <Target size={20} />
+            </button>
+            <button onClick={onRecenter} className={styles.controlBtn} title="Recenter Route">
+                <Maximize size={20} />
+            </button>
+        </div>
+    );
 }
 
 // Component to fly to a specific point when activeStepIndex changes
@@ -78,21 +95,19 @@ export default function DynamicMap({
 }) {
     const [coordinates, setCoordinates] = useState<Array<{ lat: number; lng: number; title: string; desc: string; type?: string }>>([]);
     const [loading, setLoading] = useState(true);
+    const [mapKey, setMapKey] = useState(0);
 
     useEffect(() => {
         let isMounted = true;
-
         const fetchCoordinates = async () => {
             setLoading(true);
             const coords = [];
-
             for (const loc of locations) {
                 try {
                     await new Promise(r => setTimeout(r, 600));
                     const query = encodeURIComponent(`${loc.title}, ${loc.city}, Nigeria`);
                     const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`);
                     const data = await res.json();
-
                     if (data && data.length > 0) {
                         coords.push({
                             lat: parseFloat(data[0].lat),
@@ -106,19 +121,30 @@ export default function DynamicMap({
                     console.error("Geocoding failed for: ", loc.title);
                 }
             }
-
             if (isMounted) {
                 setCoordinates(coords);
                 setLoading(false);
             }
         };
-
         fetchCoordinates();
         return () => { isMounted = false; };
     }, [locations]);
 
     const PH_CENTER: [number, number] = [4.8156, 7.0498];
     const pathPositions: [number, number][] = coordinates.map(c => [c.lat, c.lng]);
+
+    const handleLocateMe = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const { latitude, longitude } = pos.coords;
+                // In a real app with a shared map ref, we'd fly here.
+            });
+        }
+    };
+
+    const handleRecenter = () => {
+        setMapKey(prev => prev + 1);
+    };
 
     return (
         <div className={styles.mapContainer}>
@@ -129,16 +155,21 @@ export default function DynamicMap({
                 </div>
             )}
 
+            <MapControls onLocate={handleLocateMe} onRecenter={handleRecenter} />
+
             <MapContainer
+                key={mapKey}
                 center={coordinates.length > 0 ? pathPositions[0] : PH_CENTER}
                 zoom={12}
-                scrollWheelZoom={false}
+                zoomControl={false}
+                scrollWheelZoom={true}
                 style={{ height: '100%', width: '100%' }}
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
+                <ZoomControl position="bottomright" />
 
                 {coordinates.map((coord, idx) => (
                     <Marker
@@ -147,13 +178,12 @@ export default function DynamicMap({
                         icon={getMarkerIcon(coord.type || '', activeStepIndex === idx)}
                     >
                         <Popup className={styles.customPopup} autoPan={false}>
-                            <strong>{coord.title}</strong>
-                            <span>{coord.desc}</span>
+                            <div className={styles.popupContent}>
+                                <strong>{coord.title}</strong>
+                                <span>{coord.desc}</span>
+                            </div>
                         </Popup>
-                        <FlyToStep
-                            active={activeStepIndex === idx}
-                            center={[coord.lat, coord.lng]}
-                        />
+                        <FlyToStep active={activeStepIndex === idx} center={[coord.lat, coord.lng]} />
                     </Marker>
                 ))}
 
@@ -161,8 +191,9 @@ export default function DynamicMap({
                     <Polyline
                         positions={pathPositions}
                         color="#d4af37"
-                        weight={5}
-                        opacity={0.8}
+                        weight={6}
+                        opacity={0.9}
+                        lineJoin="round"
                     />
                 )}
 

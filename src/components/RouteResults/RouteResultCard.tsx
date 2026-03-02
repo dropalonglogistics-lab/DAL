@@ -23,7 +23,9 @@ interface RouteResultProps {
     traffic: 'clear' | 'moderate' | 'heavy';
     warnings?: string[];
     isRecommended?: boolean;
-    itinerary?: ItineraryStep[];
+    itinerary?: any[];
+    isGlobalMode?: boolean;
+    onStepSelect?: (index: number) => void;
 }
 
 export default function RouteResultCard({
@@ -34,7 +36,9 @@ export default function RouteResultCard({
     traffic,
     warnings,
     isRecommended,
-    itinerary = []
+    itinerary = [],
+    isGlobalMode = false,
+    onStepSelect
 }: RouteResultProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
@@ -53,6 +57,9 @@ export default function RouteResultCard({
     const handleStepClick = (e: React.MouseEvent, index: number) => {
         e.stopPropagation();
         setActiveStepIndex(index === activeStepIndex ? null : index);
+        if (onStepSelect) {
+            onStepSelect(index);
+        }
     };
 
     return (
@@ -97,8 +104,11 @@ export default function RouteResultCard({
                 <div className={styles.itineraryWrapper}>
                     <div className={styles.itinerary}>
                         <div className={styles.itineraryHeader}>
-                            <Navigation size={16} />
-                            <span>Step-by-Step Directions</span>
+                            <Navigation size={18} className={styles.headerIcon} />
+                            <div>
+                                <h3>Full Directions</h3>
+                                <p>Step-by-step guide to your destination</p>
+                            </div>
                         </div>
                         <div className={styles.stepsTimeline}>
                             {itinerary.map((step, index) => (
@@ -109,10 +119,10 @@ export default function RouteResultCard({
                                 >
                                     <div className={styles.stepVisual}>
                                         <div className={`${styles.stepIconContainer} ${styles[step.type]}`}>
-                                            {step.type === 'start' && <MapPin size={16} />}
-                                            {step.type === 'end' && <Navigation size={16} />}
-                                            {step.type === 'switch' && <Info size={16} />}
-                                            {(step.type === 'stop' || step.type === 'junction') && <div className={styles.smallDot} />}
+                                            {step.type === 'start' && <MapPin size={18} />}
+                                            {step.type === 'end' && <Navigation size={18} />}
+                                            {step.type === 'switch' && <TrafficCone size={18} />}
+                                            {(step.type === 'stop' || step.type === 'junction') && <div className={styles.dotPulse} />}
                                         </div>
                                         {index < itinerary.length - 1 && <div className={styles.stepLine} />}
                                     </div>
@@ -121,10 +131,22 @@ export default function RouteResultCard({
                                             <span className={styles.stepLocation}>{step.location}</span>
                                             {step.vehicle && <span className={styles.vehicleBadge}>{step.vehicle}</span>}
                                         </div>
-                                        {step.instruction && <p className={styles.stepInstruction}>{step.instruction}</p>}
+                                        <p className={styles.stepInstruction}>
+                                            {step.instruction || (step.type === 'start' ? 'Start your journey here' : step.type === 'end' ? 'You have arrived at your destination' : 'Continue along the route')}
+                                        </p>
                                         {step.type === 'switch' && (
-                                            <div className={styles.switchDetail}>
-                                                Change from <strong>{step.vehicleFrom}</strong> to <strong>{step.vehicleTo}</strong>
+                                            <div className={styles.switchBox}>
+                                                <div className={styles.switchLabel}>TRANSFER</div>
+                                                <div className={styles.switchText}>
+                                                    Disembark from <strong>{step.vehicleFrom}</strong> and board <strong>{step.vehicleTo}</strong>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {activeStepIndex === index && (
+                                            <div className={styles.stepAction}>
+                                                <button className={styles.showOnMapBtn}>
+                                                    <MapPin size={14} /> Center on Map
+                                                </button>
                                             </div>
                                         )}
                                     </div>
@@ -133,19 +155,21 @@ export default function RouteResultCard({
                         </div>
                     </div>
 
-                    <div className={styles.mapContainer}>
-                        <RouteMap
-                            activeStepIndex={activeStepIndex}
-                            locations={
-                                itinerary.map((step, index) => ({
-                                    title: step.location,
-                                    desc: step.instruction || step.description || `Stop ${index + 1}`,
-                                    city: 'Port Harcourt',
-                                    type: step.type
-                                }))
-                            }
-                        />
-                    </div>
+                    {!isGlobalMode && (
+                        <div className={styles.mapContainer}>
+                            <RouteMap
+                                activeStepIndex={activeStepIndex}
+                                locations={
+                                    itinerary.map((step, index) => ({
+                                        title: step.location,
+                                        desc: step.instruction || step.description || `Point ${index + 1}`,
+                                        city: 'Port Harcourt',
+                                        type: step.type
+                                    }))
+                                }
+                            />
+                        </div>
+                    )}
                 </div>
             )}
 

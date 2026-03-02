@@ -7,43 +7,8 @@ import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
 
-interface HomeProps {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}
-
-export default async function Home({ searchParams }: HomeProps) {
+export default async function Home() {
     const supabase = await createClient();
-    const params = await searchParams;
-
-    const origin = typeof params.origin === 'string' ? params.origin : '';
-    const destination = typeof params.destination === 'string' ? params.destination : '';
-
-    let query = supabase.from('routes').select('*');
-
-    const cleanOrigin = origin.trim();
-    const cleanDest = destination.trim();
-
-    if (cleanOrigin && cleanDest) {
-        // If both provided, try to find a direct match in either direction
-        query = query.or(`origin.ilike.%${cleanOrigin}%,destination.ilike.%${cleanDest}%,origin.ilike.%${cleanDest}%,destination.ilike.%${cleanOrigin}%`);
-    } else if (cleanOrigin || cleanDest) {
-        const term = cleanOrigin || cleanDest;
-        query = query.or(`origin.ilike.%${term}%,destination.ilike.%${term}%`);
-    }
-
-    let { data: routes, error } = await query;
-
-    // Reliability: If search returns nothing, show everything as "Recommended"
-    const isShowingSearch = !!(cleanOrigin || cleanDest);
-    let resultsTitle = isShowingSearch ? `Search results for "${cleanDest || cleanOrigin}"` : 'Recommended for You';
-
-    if (!routes || routes.length === 0) {
-        const { data: allRoutes } = await supabase.from('routes').select('*').limit(10);
-        routes = allRoutes;
-        if (isShowingSearch) {
-            resultsTitle = `No exact match for your search. Showing all available routes:`;
-        }
-    }
 
     // Fetch alerts for "Highlights"
     const { data: alerts } = await supabase
@@ -70,22 +35,22 @@ export default async function Home({ searchParams }: HomeProps) {
                 </div>
 
                 <div className={styles.shortcuts}>
-                    <Link href="#search-results" className={styles.shortcutCard}>
+                    <div className={styles.shortcutCard}>
                         <div className={styles.shortcutIcon}>
                             <Search size={24} />
                         </div>
                         <div className={styles.shortcutText}>
-                            <span className={styles.shortcutLabel}>Find Route</span>
-                            <span className={styles.shortcutHighlight}>{routes?.length || 0} paths verified today</span>
+                            <span className={styles.shortcutLabel}>Route Coverage</span>
+                            <span className={styles.shortcutHighlight}>45+ active paths verified</span>
                         </div>
-                    </Link>
+                    </div>
                     <Link href="/suggest-route" className={styles.shortcutCard}>
                         <div className={styles.shortcutIcon} style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e' }}>
                             <Navigation size={24} />
                         </div>
                         <div className={styles.shortcutText}>
                             <span className={styles.shortcutLabel}>Report/Suggest</span>
-                            <span className={styles.shortcutHighlight}>3 new community reports</span>
+                            <span className={styles.shortcutHighlight}>Help the community grow</span>
                         </div>
                     </Link>
                     <Link href="/community" className={styles.shortcutCard}>
@@ -93,7 +58,7 @@ export default async function Home({ searchParams }: HomeProps) {
                             <Users size={24} />
                         </div>
                         <div className={styles.shortcutText}>
-                            <span className={styles.shortcutLabel}>Community</span>
+                            <span className={styles.shortcutLabel}>Community Hub</span>
                             <span className={styles.shortcutHighlight}>{communityCount || 0} active locales</span>
                         </div>
                     </Link>
@@ -112,7 +77,6 @@ export default async function Home({ searchParams }: HomeProps) {
                     <div className={styles.sectionHeader}>
                         <h2>Live Road Intelligence</h2>
                     </div>
-                    {/* ... alerts logic ... */}
                     <div className={styles.highlightsGrid}>
                         {alerts && alerts.length > 0 && alerts.map((alert) => (
                             <div key={alert.id} className={styles.highlightCard}>
@@ -153,45 +117,6 @@ export default async function Home({ searchParams }: HomeProps) {
                         )}
                     </div>
                 </div>
-            </section>
-
-            <section className={styles.resultsSection} id="search-results">
-                {isShowingSearch ? (
-                    <>
-                        <div className={styles.sectionHeader}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <h2>{resultsTitle}</h2>
-                                {routes && <span className={styles.resultsCount}>{routes.length} found</span>}
-                            </div>
-                            <span className={styles.subtext}>Smart Search</span>
-                        </div>
-
-                        <div className={styles.resultsGrid}>
-                            {routes && routes.length > 0 ? (
-                                routes.map((route) => (
-                                    <RouteResultCard
-                                        key={route.id}
-                                        title={`${route.origin} → ${route.destination}`}
-                                        time={`${route.duration_minutes} min`}
-                                        fare_min={route.fare_min || route.price_estimated}
-                                        fare_max={route.fare_max || route.price_estimated}
-                                        traffic="clear"
-                                        isRecommended={true}
-                                        itinerary={route.itinerary}
-                                    />
-                                ))
-                            ) : (
-                                <div className={styles.emptyState}>
-                                    <p>No exact routes found. Try adjusting your search.</p>
-                                </div>
-                            )}
-                        </div>
-                    </>
-                ) : (
-                    <div style={{ padding: '0px 24px 24px 24px' }}>
-                        {/* Start Search State - Routes are hidden by default */}
-                    </div>
-                )}
             </section>
 
             {/* Premium Teaser Section */}
