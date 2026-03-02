@@ -151,6 +151,35 @@
     margin-top: 24px;
 }
 
+.compact {
+    max-width: none;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+}
+
+.compact .inputGroup {
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.compact .input {
+    font-size: 0.95rem;
+}
+
+.compact .buttonGroup {
+    margin-top: 12px;
+}
+
+.compact .searchBtn {
+    padding: 10px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+}
+
 .searchBtn {
     flex: 2;
     display: flex;

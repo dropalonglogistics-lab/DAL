@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, MapPin } from 'lucide-react';
 import styles from './RouteSearch.module.css';
 
-export default function RouteSearch() {
+export default function RouteSearch({ showTitle = true }: { showTitle?: boolean }) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -13,7 +13,6 @@ export default function RouteSearch() {
     const [destination, setDestination] = useState('');
 
     useEffect(() => {
-        // Sync state with URL params on mount/update
         setOrigin(searchParams.get('origin') || '');
         setDestination(searchParams.get('destination') || '');
     }, [searchParams]);
@@ -37,8 +36,8 @@ export default function RouteSearch() {
     };
 
     return (
-        <form id="search" className={styles.container} onSubmit={handleSearch}>
-            <h2 className={styles.title}>Where to?</h2>
+        <form id="search" className={`${styles.container} ${!showTitle ? styles.compact : ''}`} onSubmit={handleSearch}>
+            {showTitle && <h2 className={styles.title}>Where to?</h2>}
 
             <div className={styles.inputGroup}>
                 <div className={styles.iconWrapper}>
@@ -53,11 +52,13 @@ export default function RouteSearch() {
                 />
             </div>
 
-            <div className={styles.dots}>
-                <div className={styles.dot} />
-                <div className={styles.dot} />
-                <div className={styles.dot} />
-            </div>
+            {showTitle && (
+                <div className={styles.dots}>
+                    <div className={styles.dot} />
+                    <div className={styles.dot} />
+                    <div className={styles.dot} />
+                </div>
+            )}
 
             <div className={styles.inputGroup}>
                 <div className={styles.iconWrapper}>
@@ -76,9 +77,9 @@ export default function RouteSearch() {
             <div className={styles.buttonGroup}>
                 <button type="submit" className={styles.searchBtn}>
                     <Search size={20} />
-                    Find Best Route
+                    {showTitle ? 'Find Best Route' : 'Search'}
                 </button>
-                {(origin || destination) && (
+                {(origin || destination) && showTitle && (
                     <button type="button" className={styles.clearBtn} onClick={handleClear}>
                         Reset Search
                     </button>

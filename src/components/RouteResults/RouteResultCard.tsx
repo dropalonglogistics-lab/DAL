@@ -26,8 +26,10 @@ interface RouteResultProps {
     itinerary?: any[];
     isGlobalMode?: boolean;
     activeStepIndex?: number | null;
+    isExpanded?: boolean;
     onStepSelect?: (index: number) => void;
     onExpand?: () => void;
+    onToggleExpand?: (expanded: boolean) => void;
 }
 
 export default function RouteResultCard({
@@ -41,10 +43,11 @@ export default function RouteResultCard({
     itinerary = [],
     isGlobalMode = false,
     activeStepIndex,
+    isExpanded = false,
     onStepSelect,
-    onExpand
+    onExpand,
+    onToggleExpand
 }: RouteResultProps) {
-    const [isExpanded, setIsExpanded] = useState(false);
 
     const trafficColors = {
         clear: '#22c55e',
@@ -55,7 +58,9 @@ export default function RouteResultCard({
     const toggleExpand = (e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
         const nextState = !isExpanded;
-        setIsExpanded(nextState);
+        if (onToggleExpand) {
+            onToggleExpand(nextState);
+        }
         if (nextState && onExpand) {
             onExpand();
         }

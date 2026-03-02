@@ -12,6 +12,7 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
     const [selectedRoute, setSelectedRoute] = useState<any | null>(initialRoutes?.[0] || null);
     const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
     const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+    const [expandedRouteId, setExpandedRouteId] = useState<string | null>(null);
 
     const handleRouteSelect = (route: any) => {
         setSelectedRoute(route);
@@ -22,9 +23,14 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
         <div className={styles.searchContainer}>
             <header className={styles.searchHeader}>
                 <div className={styles.headerContent}>
-                    <Link href="/" className={styles.logo}>DAL</Link>
+                    <div className={styles.logoRow}>
+                        <Link href="/" className={styles.logo}>DAL</Link>
+                        {initialRoutes?.length > 0 && (
+                            <span className={styles.resultsBadge}>{initialRoutes.length} found</span>
+                        )}
+                    </div>
                     <div className={styles.searchBarWrapper}>
-                        <RouteSearch />
+                        <RouteSearch showTitle={false} />
                     </div>
                 </div>
             </header>
@@ -35,8 +41,7 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
                         <Link href="/" className={styles.backLink}>
                             <ChevronLeft size={16} /> Back to Home
                         </Link>
-                        <h1>{initialTitle}</h1>
-                        <p>{initialRoutes?.length || 0} routes found</p>
+                        <h1 className={styles.titleText}>{initialTitle}</h1>
                     </div>
 
                     <div className={styles.resultsList}>
@@ -55,12 +60,17 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
                                         isRecommended={true}
                                         itinerary={route.itinerary}
                                         isGlobalMode={true}
+                                        isExpanded={expandedRouteId === route.id}
                                         activeStepIndex={selectedRoute?.id === route.id ? activeStepIndex : null}
                                         onStepSelect={(idx) => {
                                             handleRouteSelect(route);
                                             setActiveStepIndex(idx);
                                         }}
                                         onExpand={() => handleRouteSelect(route)}
+                                        onToggleExpand={(expanded) => {
+                                            setExpandedRouteId(expanded ? route.id : null);
+                                            if (expanded) handleRouteSelect(route);
+                                        }}
                                     />
                                 </div>
                             ))
@@ -78,12 +88,12 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
                         <div className={styles.globalMapWrapper}>
                             <RouteMap
                                 activeStepIndex={activeStepIndex}
-                                locations={selectedRoute.itinerary.map((step: any, idx: number) => ({
+                                locations={selectedRoute.itinerary?.map((step: any, idx: number) => ({
                                     title: step.location,
                                     desc: step.instruction || `Step ${idx + 1}`,
                                     city: 'Port Harcourt',
                                     type: step.type
-                                }))}
+                                })) || []}
                             />
                             <div className={styles.mapOverlayInfo}>
                                 <div className={styles.overlayHeader}>
@@ -91,7 +101,7 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
                                     <span>LIVE ROUTE</span>
                                 </div>
                                 <h3>{selectedRoute.origin} → {selectedRoute.destination}</h3>
-                                <p>{selectedRoute.duration_minutes} min • {selectedRoute.itinerary.length} stops</p>
+                                <p>{selectedRoute.duration_minutes} min • {selectedRoute.itinerary?.length || 0} stops</p>
                             </div>
                         </div>
                     ) : (
