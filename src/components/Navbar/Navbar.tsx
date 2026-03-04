@@ -127,7 +127,7 @@ export default function Navbar() {
 
     return (
         <nav className={styles.navbar}>
-            <div className={`container ${styles.navContainer}`}>
+            <div className={styles.navContainer}>
                 <Link href="/" className={styles.logo}>
                     DAL
                 </Link>
