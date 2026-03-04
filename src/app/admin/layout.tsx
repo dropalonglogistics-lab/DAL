@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { isAdmin } from '@/utils/supabase/admin-check'
 import Link from 'next/link'
-import { LayoutDashboard, Users, AlertTriangle, Home, User, Route, Map } from 'lucide-react'
+import { LayoutDashboard, Users, AlertTriangle, Home, User, Route, Map, UploadCloud } from 'lucide-react'
 import styles from './admin.module.css'
 
 export default async function AdminLayout({
@@ -33,6 +33,9 @@ export default async function AdminLayout({
                     </Link>
                     <Link href="/admin/all-routes" className={styles.navItem}>
                         <Map size={20} /> All Routes
+                    </Link>
+                    <Link href="/admin/import" className={styles.navItem}>
+                        <UploadCloud size={20} /> Import Data
                     </Link>
                     <Link href="/profile" className={styles.navItem}>
                         <User size={20} /> My Profile
