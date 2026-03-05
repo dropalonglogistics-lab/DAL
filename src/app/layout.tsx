@@ -35,8 +35,22 @@ export default function RootLayout({
                 }} />
             </head>
             <body className={inter.className}>
+                <div style={{
+                    background: '#EF4444',
+                    color: 'white',
+                    padding: '8px',
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    position: 'fixed',
+                    top: 0,
+                    width: '100%',
+                    zIndex: 9999,
+                    fontSize: '14px'
+                }}>
+                    SYSTEM STATUS: VERSION 4.0 ACTIVATED - REFRESH IF YOU SEE THIS
+                </div>
                 <Navbar />
-                <main>
+                <main style={{ paddingTop: '40px' }}>
                     {children}
                 </main>
             </body>

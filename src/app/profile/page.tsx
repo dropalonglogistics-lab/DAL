@@ -1,8 +1,8 @@
 'use client';
 import dynamic from 'next/dynamic';
 
-const ProfileClient = dynamic(() => import('./ProfileClient'), { ssr: false });
+const ProfileView = dynamic(() => import('./ProfileView'), { ssr: false });
 
 export default function ProfilePage() {
-    return <ProfileClient />;
+    return <ProfileView />;
 }

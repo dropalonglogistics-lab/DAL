@@ -29,15 +29,9 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
-    // Using a timeout for getUser to prevent middleware-induced hangs
-    try {
-        await Promise.race([
-            supabase.auth.getUser(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Auth Timeout')), 3000))
-        ])
-    } catch (e) {
-        console.error('[Middleware] Auth check stalled or failed:', e)
-    }
+    // IMPORTANT: Only check session to refresh cookies. 
+    // Do NOT call getUser() in every request as it hits the network and can hang.
+    await supabase.auth.getSession()
 
     return supabaseResponse
 }

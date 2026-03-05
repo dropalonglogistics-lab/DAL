@@ -32,89 +32,55 @@ export default function ProfileClient() {
 
         async function loadProfile() {
             const loadId = Math.random().toString(36).substring(7)
-            addLog(`[${loadId}] 1. Starting initialization...`)
+            addLog(`[${loadId}] 1. INIT - VERSION: 2026-03-04-V4`)
             setLoading(true)
 
-            try {
-                addLog(`[${loadId}] 2. Fetching session with timeout (10s)...`)
-                let sessionData, sessionError;
-
-                // Try up to 2 times for session sync
-                for (let attempt = 1; attempt <= 2; attempt++) {
-                    try {
-                        const result = await Promise.race([
-                            supabase.auth.getSession(),
-                            new Promise<{ data: any, error: any }>((_, reject) => setTimeout(() => reject(new Error('Session Timeout')), 10000))
-                        ])
-                        sessionData = result.data;
-                        sessionError = result.error;
-                        if (sessionData?.session) break;
-                        if (attempt < 2) addLog(`[${loadId}] Session not found, retrying... (${attempt}/2)`);
-                        await new Promise(r => setTimeout(r, 1000));
-                    } catch (e: any) {
-                        sessionError = e;
-                        if (attempt === 2) throw e;
-                        addLog(`[${loadId}] Session check attempt ${attempt} failed: ${e.message}. Retrying...`);
+            // Emergency clear of legacy localStorage that might be causing hangs
+            if (typeof window !== 'undefined') {
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('sb-')) {
+                        console.log('Clearing legacy storage key:', key)
+                        localStorage.removeItem(key)
                     }
+                })
+            }
+
+            try {
+                // 1. Get Session / User
+                addLog(`[${loadId}] 2. Checking authentication...`)
+
+                // Use a reasonable timeout but rely on the fixed cookie storage
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+                if (sessionError) {
+                    addLog(`[${loadId}] Session error: ${sessionError.message}`)
                 }
 
-                if (sessionError && !sessionData?.session) {
-                    addLog(`[${loadId}] 3. Session Fetch failed: ${sessionError.message}`)
-                    // If session fetch fails, we might still be able to try getUser
-                    addLog(`[${loadId}] Attempting fallback to getUser...`)
-                } else {
-                    addLog(`[${loadId}] 3. Session Data: ${sessionData?.session ? 'Retrieved' : 'None'}`)
-                }
-
-                if (!sessionData?.session) {
-                    addLog(`[${loadId}] 2b. Trying direct getUser check...`)
+                let user = session?.user
+                if (!user) {
+                    addLog(`[${loadId}] No session, trying getUser fallback...`)
                     const { data: { user: authUser }, error: userError } = await supabase.auth.getUser()
-
                     if (userError || !authUser) {
                         addLog(`[${loadId}] 3. No user/session found. Redirecting...`)
                         if (isMounted) router.push('/login')
                         return
                     }
-                    addLog(`[${loadId}] Authenticated via getUser!`)
+                    user = authUser
                 }
 
-                const user = sessionData?.session?.user || (await supabase.auth.getUser()).data.user
-                addLog(`[${loadId}] 4. Authenticated! ID: ${user?.id?.substring(0, 8)}...`)
-
-                if (!user) {
-                    addLog(`[${loadId}] CRITICAL: All authentication attempts failed.`)
-                    throw new Error('Could not retrieve user session after multiple attempts.')
-                }
+                addLog(`[${loadId}] 4. Authenticated! ID: ${user.id.substring(0, 8)}...`)
 
                 // 2. Fetch Profile
-                addLog(`[${loadId}] 4. Searching for profile record...`)
-                let profileData, profileError;
+                addLog(`[${loadId}] 5. Searching for profile record...`)
+                let { data: profileData, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single()
 
-                // Retry profile fetch up to 3 times (database trigger might be slow)
-                for (let pAttempt = 1; pAttempt <= 3; pAttempt++) {
-                    const profileResult = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', user.id)
-                        .single()
-
-                    profileData = profileResult.data
-                    profileError = profileResult.error
-
-                    if (profileData) break;
-
-                    addLog(`[${loadId}] Profile not found, retrying... (${pAttempt}/3)`)
-                    await new Promise(r => setTimeout(r, 2000))
-                }
-
-                if (profileError && !profileData) {
-                    addLog(`[${loadId}] 5. Profile Lookup failed: ${profileError.message}`)
-                    throw profileError
-                }
-
-                // 3. Auto-Create
-                if (!profileData) {
-                    addLog("Profile missing, attempting creation...")
+                // 3. Handle Missing Profile (Auto-Create)
+                if (profileError || !profileData) {
+                    addLog(`[${loadId}] Profile not found or error. Attempting creation...`)
                     const { data: neu, error: insErr } = await supabase.from('profiles').insert([{
                         id: user.id,
                         email: user.email,
@@ -124,35 +90,42 @@ export default function ProfileClient() {
 
                     if (insErr) {
                         addLog(`Creation failed: ${insErr.message}`)
-                        throw insErr
+                        // If it fails because it actually exists (race condition), try fetching one last time
+                        const { data: retryData } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+                        if (retryData) {
+                            profileData = retryData
+                        } else {
+                            throw insErr
+                        }
+                    } else {
+                        addLog("Profile created successfully")
+                        profileData = neu
                     }
-                    addLog("Profile created successfully")
-                    profileData = neu
                 }
 
-                // 4. Admin Stats with TIMEOUT
+                // 4. Admin Stats
                 if (profileData?.is_admin) {
-                    addLog("User is admin, fetching stats (with timeout)...")
+                    addLog("User is admin, fetching stats...")
                     try {
-                        // Use a Promise.race to ensure we don't hang
-                        const stats = await Promise.race([
-                            fetchAdminStats(),
-                            new Promise((_, reject) => setTimeout(() => reject(new Error('Stats Timeout')), 5000))
-                        ])
+                        const stats = await fetchAdminStats()
                         if (isMounted) setAdminStats(stats)
                         addLog("Admin stats loaded")
                     } catch (err: any) {
-                        addLog(`Stats failed or timed out: ${err.message}`)
+                        addLog(`Stats failed: ${err.message}`)
                     }
                 }
 
-                // 5. Fetch User Counts (Dynamic)
+                // 5. Fetch User Counts (Parallel)
                 addLog("Fetching contribution counts...")
-                const [{ count: rCount }, { count: repCount }] = await Promise.all([
-                    supabase.from('community_routes').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-                    supabase.from('route_reports').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-                ])
-                if (isMounted) setCounts({ routes: rCount || 0, reports: repCount || 0 })
+                try {
+                    const [{ count: rCount }, { count: repCount }] = await Promise.all([
+                        supabase.from('community_routes').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+                        supabase.from('route_reports').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+                    ])
+                    if (isMounted) setCounts({ routes: rCount || 0, reports: repCount || 0 })
+                } catch (err) {
+                    addLog("Counts fetch failed, using defaults")
+                }
 
                 if (isMounted) {
                     setProfile(profileData)
