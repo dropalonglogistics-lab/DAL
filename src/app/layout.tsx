@@ -1,19 +1,9 @@
 import type { Metadata } from 'next';
-import { Syne, DM_Sans } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import PublicLayout from '@/components/layout/PublicLayout';
 
-const syne = Syne({
-    subsets: ['latin'],
-    variable: '--font-heading',
-    display: 'swap',
-});
-
-const dmSans = DM_Sans({
-    subsets: ['latin'],
-    variable: '--font-body',
-    display: 'swap',
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
     title: 'Drop Along Logistics (DAL)',
@@ -32,18 +22,17 @@ export default function RootLayout({
                     __html: `
                         (function() {
                             try {
-                                const theme = localStorage.getItem('theme');
-                                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                                if (theme === 'dark' || (!theme && systemTheme)) {
+                                var theme = localStorage.getItem('theme');
+                                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                                if (theme === 'dark' || (!theme && prefersDark)) {
                                     document.documentElement.classList.add('dark-mode');
-                                    document.body && document.body.classList.add('dark-mode');
                                 }
                             } catch (e) {}
                         })();
                     `
                 }} />
             </head>
-            <body className={`${dmSans.className} ${syne.variable}`}>
+            <body className={inter.className}>
                 <PublicLayout>
                     {children}
                 </PublicLayout>
