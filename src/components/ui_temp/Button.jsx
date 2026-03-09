@@ -35,9 +35,6 @@ const variantStyles = {
     },
 };
 
-/**
- * @param {import('react').ButtonHTMLAttributes<HTMLButtonElement> & { leftIcon?: import('react').ReactNode, rightIcon?: import('react').ReactNode, variant?: string, size?: string, loading?: boolean }} props
- */
 export default function Button({
     children,
     variant = 'primary',

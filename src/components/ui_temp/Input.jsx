@@ -2,9 +2,6 @@
 
 import React, { useId } from 'react';
 
-/**
- * @param {import('react').InputHTMLAttributes<HTMLInputElement> & { label?: import('react').ReactNode, helperText?: import('react').ReactNode, error?: string, leftIcon?: import('react').ReactNode, rightIcon?: import('react').ReactNode }} props
- */
 export default function Input({
     label,
     helperText,

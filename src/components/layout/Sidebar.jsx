@@ -12,7 +12,7 @@ import {
     BarChart2, Megaphone, Coins, UserCheck, Globe,
     Navigation, LogOut, Zap
 } from 'lucide-react';
-import Badge from '@/components/ui/Badge';
+import Badge from '@/components/UI/Badge';
 import styles from './Sidebar.module.css';
 
 const NAV_BY_ROLE = {
