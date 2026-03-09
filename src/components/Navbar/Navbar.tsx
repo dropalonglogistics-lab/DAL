@@ -158,11 +158,11 @@ export default function Navbar() {
                     {/* Logo */}
                     <Link href="/" className={styles.logo}>
                         <Image
-                            src="/images/dal-logo-full.png"
+                            src="/dal-logo.png"
                             alt="Drop Along Logistics"
                             height={40}
                             width={160}
-                            style={{ objectFit: 'contain', objectPosition: 'left' }}
+                            style={{ filter: 'brightness(0) invert(1)', objectFit: 'contain', objectPosition: 'left' }}
                             priority
                         />
                     </Link>

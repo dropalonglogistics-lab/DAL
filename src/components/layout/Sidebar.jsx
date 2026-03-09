@@ -144,11 +144,11 @@ export default function Sidebar() {
             <div className={styles.sidebarLogo}>
                 <Link href="/">
                     <Image
-                        src="/images/dal-logo-icon.png"
+                        src="/dal-logo.png"
                         alt="DAL"
                         height={36}
                         width={36}
-                        style={{ objectFit: 'contain' }}
+                        style={{ filter: 'brightness(0) invert(1)', objectFit: 'contain' }}
                     />
                 </Link>
             </div>

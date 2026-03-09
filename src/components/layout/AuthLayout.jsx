@@ -13,7 +13,7 @@ export default function AuthLayout({ children }) {
                 <div className={styles.authLogo}>
                     <Link href="/">
                         <Image
-                            src="/images/dal-logo-full.png"
+                            src="/dal-logo.png"
                             alt="Drop Along Logistics"
                             height={44}
                             width={176}

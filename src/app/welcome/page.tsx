@@ -12,7 +12,7 @@ export default function WelcomePage() {
                     </svg>
                 </div>
                 <Image
-                    src="/images/dal-logo-full.png"
+                    src="/dal-logo.png"
                     alt="Drop Along Logistics"
                     height={40}
                     width={160}

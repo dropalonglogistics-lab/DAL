@@ -69,7 +69,7 @@ export default function Footer() {
                 <div className={styles.top}>
                     <div className={styles.brand}>
                         <Image
-                            src="/images/dal-logo-full.png"
+                            src="/dal-logo.png"
                             alt="Drop Along Logistics"
                             height={38}
                             width={150}

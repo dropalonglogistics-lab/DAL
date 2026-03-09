@@ -38,7 +38,7 @@ export default function TestUIPage() {
 
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
-                <img src="/images/dal-logo-icon.png" alt="DAL" style={{ width: 48, height: 48, objectFit: 'contain' }} />
+                <img src="/dal-logo.png" alt="DAL" style={{ width: 48, height: 48, objectFit: 'contain' }} />
                 <div>
                     <h1 style={{ fontSize: '28px', fontFamily: 'var(--font-heading), sans-serif', margin: 0 }}>
                         DAL Design System
@@ -146,7 +146,7 @@ export default function TestUIPage() {
                 <Avatar name="DAL Admin" size="sm" online />
                 <Avatar name="Jane Doe" size="md" online={false} />
                 <Avatar name="Olumide" size="lg" online />
-                <Avatar src="/images/dal-logo-icon.png" alt="DAL" size="md" />
+                <Avatar src="/dal-logo.png" alt="DAL" size="md" />
             </div>
 
             {/* ─── Toasts ──────────────────────────────────── */}
@@ -167,11 +167,11 @@ export default function TestUIPage() {
             <h2 style={sectionTitle}>Brand Assets</h2>
             <div style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ textAlign: 'center' }}>
-                    <img src="/images/dal-logo-full.png" alt="DAL Full Logo" style={{ height: 80, objectFit: 'contain' }} />
+                    <img src="/dal-logo.png" alt="DAL Full Logo" style={{ height: 80, objectFit: 'contain' }} />
                     <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 'var(--space-2)' }}>Full Logo</p>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                    <img src="/images/dal-logo-icon.png" alt="DAL Icon" style={{ height: 60, objectFit: 'contain' }} />
+                    <img src="/dal-logo.png" alt="DAL Icon" style={{ height: 60, objectFit: 'contain' }} />
                     <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 'var(--space-2)' }}>Icon</p>
                 </div>
             </div>
