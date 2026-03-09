@@ -1,0 +1,679 @@
+/* ─── Page wrapper ───────────────────────────────── */
+.page {
+    padding: 0;
+    max-width: 1080px;
+}
+
+/* ─── Greeting ───────────────────────────────────── */
+.greetingRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+
+.greeting {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    margin: 0;
+}
+
+.greetingDate {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.premiumBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    background: linear-gradient(135deg, #C9A227, #E8C84A);
+    color: #0D0D0D;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 99px;
+    box-shadow: 0 2px 10px rgba(201, 162, 39, 0.35);
+}
+
+/* ─── Stat cards ─────────────────────────────────── */
+.statsRow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 36px;
+}
+
+@media (max-width: 900px) {
+    .statsRow {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .statsRow {
+        grid-template-columns: 1fr;
+    }
+}
+
+.statCard {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: box-shadow 0.2s;
+}
+
+.statCard:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+}
+
+.statIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(201, 162, 39, 0.1);
+    color: var(--brand-gold);
+    margin-bottom: 4px;
+}
+
+.statLabel {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.statValue {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+}
+
+.statSub {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* ─── Section headers ────────────────────────────── */
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.sectionTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.sectionLink {
+    font-size: 0.8rem;
+    color: var(--brand-gold);
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.sectionLink:hover {
+    opacity: 0.7;
+}
+
+/* ─── Generic card container ─────────────────────── */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 28px;
+}
+
+.cardPadded {
+    padding: 20px;
+}
+
+/* ─── Status pills ───────────────────────────────── */
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.pillPending {
+    background: rgba(217, 119, 6, 0.12);
+    color: #D97706;
+}
+
+.pillActive {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3B82F6;
+}
+
+.pillDelivered {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10B981;
+}
+
+.pillCancelled {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6B7280;
+}
+
+.pillDisputed {
+    background: rgba(239, 68, 68, 0.12);
+    color: #EF4444;
+}
+
+/* ─── Table ──────────────────────────────────────── */
+.tableWrap {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.table th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    background: var(--card-bg);
+}
+
+.table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.tableRow {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.tableRow:hover {
+    background: rgba(0, 0, 0, 0.025);
+}
+
+.tableRow:last-child td {
+    border-bottom: none;
+}
+
+/* ─── Tabs ───────────────────────────────────────── */
+.tabsRow {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--border);
+    border-radius: var(--radius-md);
+    width: fit-content;
+    margin-bottom: 16px;
+}
+
+.tab {
+    padding: 7px 16px;
+    border-radius: calc(var(--radius-md) - 2px);
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+}
+
+.tabActive {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Empty state ────────────────────────────────── */
+.emptyState {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-secondary);
+}
+
+.emptyIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    color: var(--text-secondary);
+}
+
+.emptyTitle {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+}
+
+.emptyText {
+    font-size: 0.83rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ─── Gold action button ─────────────────────────── */
+.btnGold {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
+    color: var(--brand-black);
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.2s, transform 0.2s;
+    text-decoration: none;
+}
+
+.btnGold:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+}
+
+.btnOutline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: transparent;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.btnOutline:hover {
+    border-color: var(--brand-gold);
+    background: rgba(201, 162, 39, 0.05);
+}
+
+.btnDanger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 1.5px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+
+.btnDanger:hover {
+    background: rgba(239, 68, 68, 0.18);
+}
+
+/* ─── Toggle switch ──────────────────────────────── */
+.toggle {
+    position: relative;
+    width: 42px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggleSlider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.toggleSlider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle input:checked+.toggleSlider {
+    background: var(--brand-gold);
+}
+
+.toggle input:checked+.toggleSlider::before {
+    transform: translateX(18px);
+}
+
+/* ─── Progress bar ───────────────────────────────── */
+.progressBar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--brand-gold), var(--brand-gold-light));
+    border-radius: 99px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Modal ──────────────────────────────────────── */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 540px;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--card-bg);
+    z-index: 1;
+}
+
+.modalTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.modalCloseBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: background 0.15s;
+}
+
+.modalCloseBtn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.modalBody {
+    padding: 24px;
+}
+
+/* ─── Settings tabs ──────────────────────────────── */
+.settingsTabs {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 180px;
+    flex-shrink: 0;
+}
+
+.settingsTab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    text-align: left;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+    width: 100%;
+}
+
+.settingsTab:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--text-primary);
+}
+
+.settingsTabActive {
+    background: rgba(201, 162, 39, 0.1);
+    color: var(--brand-gold);
+    font-weight: 700;
+}
+
+.settingsLayout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.settingsContent {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 640px) {
+    .settingsLayout {
+        flex-direction: column;
+    }
+
+    .settingsTabs {
+        flex-direction: row;
+        flex-wrap: wrap;
+        min-width: 0;
+        width: 100%;
+    }
+}
+
+/* ─── Form fields ────────────────────────────────── */
+.fieldRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+@media (max-width: 480px) {
+    .fieldRow {
+        grid-template-columns: 1fr;
+    }
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 14px;
+}
+
+.fieldLabel {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.fieldInput {
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--card-bg);
+    transition: border-color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.fieldInput:focus {
+    outline: none;
+    border-color: var(--brand-gold);
+}
+
+/* ─── Timeline ───────────────────────────────────── */
+.timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.timelineItem {
+    display: flex;
+    gap: 14px;
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.timelineItem:last-child {
+    padding-bottom: 0;
+}
+
+.timelineDotWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.timelineDot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--brand-gold);
+    border: 2px solid var(--card-bg);
+    box-shadow: 0 0 0 2px var(--brand-gold);
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+.timelineDotGrey {
+    background: var(--border);
+    box-shadow: 0 0 0 2px var(--border);
+}
+
+.timelineLine {
+    flex: 1;
+    width: 2px;
+    background: var(--border);
+    margin-top: 4px;
+}
+
+.timelineContent {
+    flex: 1;
+}
+
+.timelineLabel {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.timelineTime {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 1px;
+}
