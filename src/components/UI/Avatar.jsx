@@ -4,6 +4,7 @@ const sizeMap = {
     sm: 32,
     md: 42,
     lg: 56,
+    xl: 72,
 };
 
 function getInitials(name = '') {
@@ -81,7 +82,7 @@ export default function Avatar({
                         width: Math.max(10, px * 0.24),
                         height: Math.max(10, px * 0.24),
                         borderRadius: '50%',
-                        backgroundColor: online ? 'var(--success)' : 'var(--text-secondary)',
+                        backgroundColor: online ? '#1A8C4E' : 'var(--text-secondary)',
                         border: '2px solid var(--brand-surface)',
                     }}
                 />

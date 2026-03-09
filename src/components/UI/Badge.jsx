@@ -2,29 +2,33 @@ import React from 'react';
 
 const variantStyles = {
     gold: {
-        background: 'linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light))',
+        background: 'var(--brand-gold)',
         color: 'var(--brand-black)',
     },
     green: {
         background: 'rgba(26, 140, 78, 0.12)',
-        color: 'var(--success)',
+        color: '#1A8C4E',
     },
     amber: {
         background: 'rgba(217, 119, 6, 0.12)',
-        color: 'var(--warning)',
+        color: '#D97706',
     },
     red: {
         background: 'rgba(192, 57, 43, 0.12)',
-        color: 'var(--error)',
+        color: '#C0392B',
     },
     grey: {
         background: 'var(--border)',
         color: 'var(--text-secondary)',
     },
+    blue: {
+        background: 'rgba(59, 130, 246, 0.12)',
+        color: '#3B82F6',
+    }
 };
 
-export default function Badge({ children, variant = 'gold', style = {}, className = '' }) {
-    const v = variantStyles[variant] || variantStyles.gold;
+export default function Badge({ children, variant = 'grey', style = {}, className = '' }) {
+    const v = variantStyles[variant] || variantStyles.grey;
 
     return (
         <span

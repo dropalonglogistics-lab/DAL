@@ -1,8 +1,8 @@
 'use client';
 
+import React from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
-/* ─── Custom-styled Toaster ───────────────────────────────── */
 export function DALToaster() {
     return (
         <Toaster
@@ -21,13 +21,13 @@ export function DALToaster() {
                 },
                 success: {
                     iconTheme: {
-                        primary: 'var(--success)',
+                        primary: '#1A8C4E',
                         secondary: '#FFFFFF',
                     },
                 },
                 error: {
                     iconTheme: {
-                        primary: 'var(--error)',
+                        primary: '#C0392B',
                         secondary: '#FFFFFF',
                     },
                 },
@@ -36,7 +36,6 @@ export function DALToaster() {
     );
 }
 
-/* ─── Helper functions ────────────────────────────────────── */
 export function showToast(message, type = 'default') {
     switch (type) {
         case 'success':

@@ -2,7 +2,14 @@
 
 import React, { useEffect, useCallback } from 'react';
 
-export default function Modal({ isOpen, onClose, title, children, style = {} }) {
+const sizeMap = {
+    sm: '400px',
+    md: '520px',
+    lg: '720px',
+    xl: '960px'
+};
+
+export default function Modal({ isOpen, onClose, title, children, size = 'md', style = {} }) {
     const handleKeyDown = useCallback(
         (e) => {
             if (e.key === 'Escape') onClose?.();
@@ -32,7 +39,7 @@ export default function Modal({ isOpen, onClose, title, children, style = {} }) 
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: 'var(--space-4)',
+                padding: '16px',
             }}
             onClick={onClose}
         >
@@ -55,9 +62,9 @@ export default function Modal({ isOpen, onClose, title, children, style = {} }) 
                 style={{
                     position: 'relative',
                     backgroundColor: 'var(--brand-surface)',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: 'var(--space-6)',
-                    maxWidth: '520px',
+                    borderRadius: '16px',
+                    padding: '24px',
+                    maxWidth: sizeMap[size] || sizeMap.md,
                     width: '100%',
                     boxShadow: 'var(--shadow-lg)',
                     animation: 'fadeInUp 0.25s ease-out',
@@ -70,7 +77,7 @@ export default function Modal({ isOpen, onClose, title, children, style = {} }) 
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        marginBottom: 'var(--space-4)',
+                        marginBottom: '16px',
                     }}
                 >
                     {title && (
@@ -95,13 +102,13 @@ export default function Modal({ isOpen, onClose, title, children, style = {} }) 
                             justifyContent: 'center',
                             width: '32px',
                             height: '32px',
-                            borderRadius: 'var(--radius-full)',
+                            borderRadius: '50%',
                             border: 'none',
                             background: 'var(--brand-off-white)',
                             cursor: 'pointer',
                             fontSize: '18px',
                             color: 'var(--text-secondary)',
-                            transition: 'all var(--transition-fast)',
+                            transition: 'all 0.2s',
                             marginLeft: 'auto',
                         }}
                         onMouseEnter={(e) => {

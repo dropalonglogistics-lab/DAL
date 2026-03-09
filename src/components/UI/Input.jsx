@@ -47,6 +47,7 @@ export default function Input({
 
                 <input
                     id={id}
+                    disabled={props.disabled}
                     style={{
                         width: '100%',
                         padding: '10px 14px',
@@ -54,21 +55,27 @@ export default function Input({
                         paddingRight: rightIcon ? '40px' : '14px',
                         fontSize: '15px',
                         color: 'var(--text-primary)',
-                        backgroundColor: 'var(--brand-surface)',
-                        border: `1.5px solid ${error ? 'var(--error)' : 'var(--border)'}`,
+                        backgroundColor: props.disabled ? 'var(--border)' : 'var(--brand-surface)',
+                        border: `1.5px solid ${error ? '#C0392B' : 'var(--border)'}`,
                         borderRadius: 'var(--radius-md)',
                         outline: 'none',
                         transition: 'all var(--transition-fast)',
+                        opacity: props.disabled ? 0.6 : 1,
+                        cursor: props.disabled ? 'not-allowed' : 'text'
                     }}
                     onFocus={(e) => {
-                        e.target.style.borderColor = error ? 'var(--error)' : 'var(--brand-gold)';
-                        e.target.style.boxShadow = error
-                            ? '0 0 0 3px rgba(192, 57, 43, 0.2)'
-                            : 'var(--shadow-gold)';
+                        if (!props.disabled) {
+                            e.target.style.borderColor = error ? '#C0392B' : 'var(--brand-gold)';
+                            e.target.style.boxShadow = error
+                                ? '0 0 0 3px rgba(192, 57, 43, 0.2)'
+                                : 'var(--shadow-gold)';
+                        }
                     }}
                     onBlur={(e) => {
-                        e.target.style.borderColor = error ? 'var(--error)' : 'var(--border)';
-                        e.target.style.boxShadow = 'none';
+                        if (!props.disabled) {
+                            e.target.style.borderColor = error ? '#C0392B' : 'var(--border)';
+                            e.target.style.boxShadow = 'none';
+                        }
                     }}
                     {...props}
                 />
@@ -92,7 +99,7 @@ export default function Input({
                 <span
                     style={{
                         fontSize: '13px',
-                        color: error ? 'var(--error)' : 'var(--text-secondary)',
+                        color: error ? '#C0392B' : 'var(--text-secondary)',
                     }}
                 >
                     {error || helperText}

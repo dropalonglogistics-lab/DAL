@@ -10,7 +10,7 @@ const sizeMap = {
 
 const variantStyles = {
     primary: {
-        background: 'linear-gradient(135deg, var(--brand-gold) 0%, var(--brand-gold-light) 100%)',
+        background: 'var(--brand-gold)',
         color: 'var(--brand-black)',
         border: 'none',
         fontWeight: 700,
@@ -28,7 +28,7 @@ const variantStyles = {
         fontWeight: 600,
     },
     danger: {
-        background: 'var(--error)',
+        background: '#C0392B',
         color: '#FFFFFF',
         border: 'none',
         fontWeight: 600,
