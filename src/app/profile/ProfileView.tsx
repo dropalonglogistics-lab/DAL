@@ -47,10 +47,26 @@ export default function ProfileClient() {
 
             try {
                 // 1. Get Session / User
-                addLog(`[${loadId}] 2. Checking authentication...`)
+                addLog(`[${loadId}] 2. Checking authentication (timeout: 5s)...`)
 
-                // Use a reasonable timeout but rely on the fixed cookie storage
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+                // Wrap getSession in a timeout to prevent library-level hangs
+                const sessionPromise = supabase.auth.getSession()
+                const timeoutPromise = new Promise<{ data: { session: null }, error: any }>((_, reject) =>
+                    setTimeout(() => reject(new Error('Auth Library Hang')), 5000)
+                )
+
+                let session: any = null
+                let sessionError: any = null
+
+                try {
+                    addLog(`[${loadId}] 2.1 Triggering getSession...`)
+                    const result = await Promise.race([sessionPromise, timeoutPromise])
+                    session = result.data?.session
+                    sessionError = result.error
+                    addLog(`[${loadId}] 2.2 getSession responded.`)
+                } catch (e: any) {
+                    addLog(`[${loadId}] 2.3 getSession HANG detected: ${e.message}`)
+                }
 
                 if (sessionError) {
                     addLog(`[${loadId}] Session error: ${sessionError.message}`)
@@ -58,14 +74,21 @@ export default function ProfileClient() {
 
                 let user = session?.user
                 if (!user) {
-                    addLog(`[${loadId}] No session, trying getUser fallback...`)
-                    const { data: { user: authUser }, error: userError } = await supabase.auth.getUser()
-                    if (userError || !authUser) {
-                        addLog(`[${loadId}] 3. No user/session found. Redirecting...`)
+                    addLog(`[${loadId}] 3. No session or hang, trying direct network fetch (getUser)...`)
+                    try {
+                        const { data: { user: authUser }, error: userError } = await supabase.auth.getUser()
+                        if (userError || !authUser) {
+                            addLog(`[${loadId}] 3.1 No user found via network. Redirecting...`)
+                            if (isMounted) router.push('/login')
+                            return
+                        }
+                        user = authUser
+                        addLog(`[${loadId}] 3.2 Network fetch success!`)
+                    } catch (netErr: any) {
+                        addLog(`[${loadId}] 3.3 Network fetch failed: ${netErr.message}`)
                         if (isMounted) router.push('/login')
                         return
                     }
-                    user = authUser
                 }
 
                 addLog(`[${loadId}] 4. Authenticated! ID: ${user.id.substring(0, 8)}...`)

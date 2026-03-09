@@ -1,0 +1,284 @@
+/* ─── Shared Auth Form Styles ─────────────────────────────────── */
+
+.formCard {
+    padding: 32px 28px 36px;
+}
+
+.formTitle {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    font-family: var(--font-heading), sans-serif;
+    letter-spacing: -0.03em;
+    margin-bottom: 6px;
+}
+
+.formSubtitle {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 28px;
+    line-height: 1.5;
+}
+
+/* ─── Field group ─── */
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 16px;
+}
+
+.label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.inputWrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input {
+    width: 100%;
+    padding: 11px 44px 11px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    outline: none;
+}
+
+.input::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.input:focus {
+    border-color: var(--brand-gold);
+    box-shadow: var(--shadow-gold);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.inputError {
+    border-color: #F87171 !important;
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.2) !important;
+}
+
+.inputIcon {
+    position: absolute;
+    right: 13px;
+    color: rgba(255, 255, 255, 0.3);
+    display: flex;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.inputIcon:hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.inputIconLeft {
+    position: absolute;
+    left: 13px;
+    color: rgba(255, 255, 255, 0.3);
+    display: flex;
+    pointer-events: none;
+}
+
+.inputWithLeftIcon {
+    padding-left: 40px;
+}
+
+.helperText {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.35);
+    line-height: 1.4;
+}
+
+.errorText {
+    font-size: 0.75rem;
+    color: #F87171;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ─── Feedback banners ─── */
+.alertBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    line-height: 1.45;
+    margin-bottom: 20px;
+}
+
+.alertError {
+    background: rgba(248, 113, 113, 0.1);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    color: #F87171;
+}
+
+.alertSuccess {
+    background: rgba(52, 211, 153, 0.1);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    color: #34D399;
+}
+
+/* ─── Submit button ─── */
+.submitBtn {
+    width: 100%;
+    padding: 13px 20px;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
+    color: var(--brand-black);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    box-shadow: 0 4px 16px rgba(201, 162, 39, 0.3);
+    margin-top: 8px;
+    letter-spacing: 0.01em;
+}
+
+.submitBtn:hover:not(:disabled) {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(201, 162, 39, 0.4);
+}
+
+.submitBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Gold spinner */
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid rgba(13, 13, 13, 0.3);
+    border-top-color: var(--brand-black);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ─── OAuth divider ─── */
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.dividerLine {
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.dividerText {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.3);
+    white-space: nowrap;
+}
+
+/* Google OAuth button */
+.googleBtn {
+    width: 100%;
+    padding: 12px 20px;
+    background: #ffffff;
+    color: #1a1a1a;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background var(--transition-fast), box-shadow var(--transition-fast);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.googleBtn:hover {
+    background: #f5f5f5;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── Form footer links ─── */
+.formFooter {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.formLink {
+    color: var(--brand-gold);
+    font-weight: 700;
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+    padding: 0;
+    margin-left: 4px;
+}
+
+.formLink:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+/* ─── Checkbox ─── */
+.checkboxGroup {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.checkbox {
+    width: 17px;
+    height: 17px;
+    margin-top: 2px;
+    accent-color: var(--brand-gold);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.checkboxLabel {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+.checkboxLabel a {
+    color: var(--brand-gold);
+    text-decoration: underline;
+}

@@ -1,0 +1,121 @@
+.iconBadge {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(201, 162, 39, 0.12);
+    border: 1px solid rgba(201, 162, 39, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-gold);
+    margin-bottom: 16px;
+}
+
+/* OTP digit boxes */
+.otpRow {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 24px 0 0;
+}
+
+.digitBox {
+    width: 52px;
+    height: 60px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    caret-color: var(--brand-gold);
+}
+
+.digitBox:focus {
+    border-color: var(--brand-gold);
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.digitError {
+    border-color: #F87171 !important;
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.2) !important;
+    animation: shake 0.35s ease;
+}
+
+.digitSuccess {
+    border-color: #34D399 !important;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15) !important;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-5px);
+    }
+
+    40% {
+        transform: translateX(5px);
+    }
+
+    60% {
+        transform: translateX(-4px);
+    }
+
+    80% {
+        transform: translateX(4px);
+    }
+}
+
+/* Resend row */
+.resendRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    font-size: 0.875rem;
+}
+
+.resendLabel {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.countdown {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.countdown strong {
+    color: var(--brand-gold);
+}
+
+.resendBtn {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--brand-gold);
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0;
+    transition: opacity var(--transition-fast);
+    font-family: inherit;
+}
+
+.resendBtn:hover:not(:disabled) {
+    opacity: 0.75;
+}
+
+.resendBtn:disabled {
+    color: rgba(255, 255, 255, 0.25);
+    cursor: not-allowed;
+}

@@ -1,0 +1,46 @@
+.authRoot {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #080808;
+    position: relative;
+    overflow: hidden;
+    padding: 24px 16px;
+}
+
+/* Dot-grid: gold dots at 5% opacity */
+.dotGrid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle,
+            rgba(201, 162, 39, 0.05) 1px,
+            transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Centred card */
+.authCard {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 440px;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(201, 162, 39, 0.06);
+    overflow: hidden;
+}
+
+/* Logo at top of card */
+.authLogo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}

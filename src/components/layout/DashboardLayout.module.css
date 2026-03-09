@@ -1,0 +1,108 @@
+.dashboardRoot {
+    display: flex;
+    min-height: 100vh;
+    background: var(--background);
+}
+
+.dashboardMain {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* Top bar */
+.topBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card-bg);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    font-size: 0.8rem;
+}
+
+.breadcrumbGroup {
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumbItem {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.breadcrumbItem:hover {
+    color: var(--text-primary);
+}
+
+.breadcrumbSep {
+    color: var(--border);
+    margin: 0 4px;
+}
+
+.breadcrumbCurrent {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+/* Top bar actions */
+.topBarActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bellBtn {
+    position: relative;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: var(--radius-md);
+    display: flex;
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.bellBtn:hover {
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.04);
+}
+
+body.dark-mode .bellBtn:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.bellDot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--brand-gold);
+    border: 1.5px solid var(--card-bg);
+}
+
+/* Dashboard content */
+.dashboardContent {
+    flex: 1;
+    padding: 28px;
+    overflow-y: auto;
+}

@@ -1,0 +1,54 @@
+.meter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.bars {
+    display: flex;
+    gap: 5px;
+    flex: 1;
+}
+
+.bar {
+    height: 4px;
+    flex: 1;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: background 0.3s ease;
+}
+
+.barWeak {
+    background: #F87171;
+}
+
+.barFair {
+    background: #FBBF24;
+}
+
+.barStrong {
+    background: #34D399;
+}
+
+.label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    min-width: 40px;
+    text-align: right;
+}
+
+.labelWeak {
+    color: #F87171;
+}
+
+.labelFair {
+    color: #FBBF24;
+}
+
+.labelStrong {
+    color: #34D399;
+}

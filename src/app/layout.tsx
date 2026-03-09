@@ -1,9 +1,19 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Syne, DM_Sans } from 'next/font/google';
 import './globals.css';
-import Navbar from '@/components/Navbar/Navbar';
+import PublicLayout from '@/components/layout/PublicLayout';
 
-const inter = Inter({ subsets: ['latin'] });
+const syne = Syne({
+    subsets: ['latin'],
+    variable: '--font-heading',
+    display: 'swap',
+});
+
+const dmSans = DM_Sans({
+    subsets: ['latin'],
+    variable: '--font-body',
+    display: 'swap',
+});
 
 export const metadata: Metadata = {
     title: 'Drop Along Logistics (DAL)',
@@ -15,8 +25,6 @@ export default function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
-    // Default to light mode, but system preference will be handled by CSS or JS if needed.
-    // We can add a script to avoid FOUC for dark mode later if we get advanced.
     return (
         <html lang="en">
             <head>
@@ -28,31 +36,17 @@ export default function RootLayout({
                                 const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
                                 if (theme === 'dark' || (!theme && systemTheme)) {
                                     document.documentElement.classList.add('dark-mode');
+                                    document.body && document.body.classList.add('dark-mode');
                                 }
                             } catch (e) {}
                         })();
                     `
                 }} />
             </head>
-            <body className={inter.className}>
-                <div style={{
-                    background: '#EF4444',
-                    color: 'white',
-                    padding: '8px',
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    position: 'fixed',
-                    top: 0,
-                    width: '100%',
-                    zIndex: 9999,
-                    fontSize: '14px'
-                }}>
-                    SYSTEM STATUS: VERSION 4.0 ACTIVATED - REFRESH IF YOU SEE THIS
-                </div>
-                <Navbar />
-                <main style={{ paddingTop: '40px' }}>
+            <body className={`${dmSans.className} ${syne.variable}`}>
+                <PublicLayout>
                     {children}
-                </main>
+                </PublicLayout>
             </body>
         </html>
     );
