@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { User, Phone, Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
+import { User, Phone, Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react';
 import styles from '../auth.module.css';
 
 const NIGERIAN_REGEX = /^(\+234|0)[789][01]\d{8}$/;
@@ -65,11 +65,11 @@ export default function RegisterForm() {
         setGlobalError('');
 
         try {
-            // Normalize phone
+            // Normalize phone — stored in profile but not SMS-verified
             const phone = fields.phone.replace(/\s/g, '');
             const normalizedPhone = phone.startsWith('+234') ? phone : '+234' + phone.replace(/^0/, '');
 
-            // 1. Create Supabase user
+            // 1. Create Supabase user — Supabase sends confirmation email (OTP or link)
             const { data: authData, error: signUpErr } = await supabase.auth.signUp({
                 email: fields.email,
                 password: fields.password,
@@ -78,30 +78,20 @@ export default function RegisterForm() {
                     emailRedirectTo: `${window.location.origin}/auth/callback`,
                 },
             });
+
             if (signUpErr) throw new Error(signUpErr.message);
 
+            // 2. Save phone to profile (no SMS verification — collected for future use)
             if (authData.user) {
-                // 2. Update profile with phone
                 await supabase.from('profiles').update({
                     full_name: fields.fullName,
                     phone: normalizedPhone,
                     email: fields.email,
                 }).eq('id', authData.user.id);
-
-                // 3. Send OTP
-                const otpRes = await fetch('/api/auth/send-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone: normalizedPhone }),
-                });
-                const otpData = await otpRes.json();
-                if (!otpData.success && !otpData.phone) {
-                    console.warn('OTP send warning:', otpData.error);
-                }
             }
 
-            // 4. Redirect to verify
-            router.push(`/auth/verify-otp?phone=${encodeURIComponent(normalizedPhone)}`);
+            // 3. Redirect to email OTP verification page
+            router.push(`/auth/verify-otp?email=${encodeURIComponent(fields.email)}`);
         } catch (err: any) {
             setGlobalError(err.message || 'Registration failed. Please try again.');
             setLoading(false);
@@ -138,7 +128,7 @@ export default function RegisterForm() {
                     {errors.fullName && <span className={styles.errorText}><AlertCircle size={12} />{errors.fullName}</span>}
                 </div>
 
-                {/* Phone */}
+                {/* Phone — collected but not SMS-verified */}
                 <div className={styles.fieldGroup}>
                     <label className={styles.label}>Phone Number</label>
                     <div className={styles.inputWrap}>
@@ -173,7 +163,10 @@ export default function RegisterForm() {
                             autoComplete="email"
                         />
                     </div>
-                    {errors.email && <span className={styles.errorText}><AlertCircle size={12} />{errors.email}</span>}
+                    {errors.email
+                        ? <span className={styles.errorText}><AlertCircle size={12} />{errors.email}</span>
+                        : <span className={styles.helperText}>A 6-digit code will be emailed to you</span>
+                    }
                 </div>
 
                 {/* Password */}
@@ -223,17 +216,27 @@ export default function RegisterForm() {
                         id="tos"
                         className={styles.checkbox}
                         checked={tosChecked}
-                        onChange={e => { setTosChecked(e.target.checked); if (errors.tos) setErrors(er => { const n = { ...er }; delete n.tos; return n; }); }}
+                        onChange={e => {
+                            setTosChecked(e.target.checked);
+                            if (errors.tos) setErrors(er => { const n = { ...er }; delete n.tos; return n; });
+                        }}
                     />
                     <label htmlFor="tos" className={styles.checkboxLabel}>
                         I agree to the <Link href="/terms" target="_blank">Terms of Service</Link> and{' '}
                         <Link href="/privacy" target="_blank">Privacy Policy</Link>
                     </label>
                 </div>
-                {errors.tos && <div style={{ marginTop: -12, marginBottom: 12 }}><span className={styles.errorText}><AlertCircle size={12} />{errors.tos}</span></div>}
+                {errors.tos && (
+                    <div style={{ marginTop: -12, marginBottom: 12 }}>
+                        <span className={styles.errorText}><AlertCircle size={12} />{errors.tos}</span>
+                    </div>
+                )}
 
                 <button type="submit" className={styles.submitBtn} disabled={loading}>
-                    {loading ? <><span className={styles.spinner} /> Sending OTP...</> : <>Create Account <ArrowRight size={16} /></>}
+                    {loading
+                        ? <><span className={styles.spinner} /> Creating account…</>
+                        : <>Create Account <ArrowRight size={16} /></>
+                    }
                 </button>
             </form>
 

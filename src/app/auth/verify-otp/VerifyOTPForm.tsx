@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { AlertCircle, CheckCircle2, RotateCcw, Lock } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
+import { AlertCircle, CheckCircle2, RotateCcw, Mail } from 'lucide-react';
 import styles from './verify-otp.module.css';
 import authStyles from '../auth.module.css';
 
@@ -12,7 +13,9 @@ const RESEND_SECONDS = 60;
 export default function VerifyOTPForm() {
     const router = useRouter();
     const params = useSearchParams();
-    const phone = params?.get('phone') || '';
+    // Email-based OTP: passed as ?email=... from register page
+    const email = params?.get('email') || '';
+    const supabase = createClient();
 
     const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''));
     const [status, setStatus] = useState<'idle' | 'error' | 'success' | 'locked'>('idle');
@@ -38,7 +41,7 @@ export default function VerifyOTPForm() {
         setDigits(next);
         setStatus('idle');
         if (char && idx < OTP_LENGTH - 1) focusInput(idx + 1);
-        // Auto-submit when all filled
+        // Auto-submit when all 6 digits filled
         if (char && idx === OTP_LENGTH - 1 && next.every(Boolean)) {
             submitCode(next.join(''));
         }
@@ -73,30 +76,27 @@ export default function VerifyOTPForm() {
     };
 
     const submitCode = useCallback(async (code: string) => {
-        if (!phone || code.length !== OTP_LENGTH) return;
+        if (!email || code.length !== OTP_LENGTH) return;
         setLoading(true);
         setMessage('');
 
         try {
-            const res = await fetch('/api/auth/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, code }),
+            // Verify using Supabase's built-in email OTP
+            const { error } = await supabase.auth.verifyOtp({
+                email,
+                token: code,
+                type: 'signup',
             });
-            const data = await res.json();
 
-            if (data.success) {
-                setStatus('success');
-                setMessage('Phone verified! Redirecting…');
-                setTimeout(() => router.push('/welcome'), 1200);
-            } else if (data.locked) {
-                setStatus('locked');
-                setMessage(data.error);
-            } else {
+            if (error) {
                 setStatus('error');
-                setMessage(data.error || 'Incorrect code. Please try again.');
+                setMessage(error.message || 'Incorrect code. Please try again.');
                 setDigits(Array(OTP_LENGTH).fill(''));
                 focusInput(0);
+            } else {
+                setStatus('success');
+                setMessage('Email verified! Welcome to DAL 🎉');
+                setTimeout(() => router.push('/welcome'), 1200);
             }
         } catch {
             setStatus('error');
@@ -104,7 +104,7 @@ export default function VerifyOTPForm() {
         } finally {
             setLoading(false);
         }
-    }, [phone, router]);
+    }, [email, router, supabase]);
 
     const handleManualSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -112,28 +112,29 @@ export default function VerifyOTPForm() {
     };
 
     const handleResend = async () => {
-        if (resendSeconds > 0 || !phone) return;
+        if (resendSeconds > 0 || !email) return;
         setResending(true);
         setMessage('');
         setStatus('idle');
         setDigits(Array(OTP_LENGTH).fill(''));
 
         try {
-            const res = await fetch('/api/auth/send-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone }),
+            // Resend confirmation email via Supabase
+            const { error } = await supabase.auth.resend({
+                type: 'signup',
+                email,
+                options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
             });
-            const data = await res.json();
-            if (data.success || data.phone) {
+
+            if (error) {
+                setStatus('error');
+                setMessage(error.message || 'Failed to resend. Try again.');
+            } else {
                 setResendSeconds(RESEND_SECONDS);
-                setMessage('New code sent! Check your messages.');
+                setMessage('New code sent! Check your inbox.');
                 setStatus('success');
                 setTimeout(() => { setMessage(''); setStatus('idle'); }, 3000);
                 focusInput(0);
-            } else {
-                setStatus('error');
-                setMessage(data.error || 'Failed to resend. Try again.');
             }
         } catch {
             setStatus('error');
@@ -143,58 +144,62 @@ export default function VerifyOTPForm() {
         }
     };
 
-    const maskedPhone = phone
-        ? phone.slice(0, 5) + '****' + phone.slice(-4)
-        : 'your phone';
+    // Mask email for display: em***@ex***.com
+    const maskedEmail = email
+        ? email.replace(/(.{2})[^@]+(@.{2}).+(\..+)/, '$1***$2***$3')
+        : 'your email';
 
     return (
         <div className={authStyles.formCard}>
             <div className={styles.iconBadge}>
-                <Lock size={22} />
+                <Mail size={22} />
             </div>
-            <h1 className={authStyles.formTitle}>Verify Your Phone</h1>
+            <h1 className={authStyles.formTitle}>Check Your Email</h1>
             <p className={authStyles.formSubtitle}>
-                We sent a 6-digit code to <strong style={{ color: 'rgba(255,255,255,0.75)' }}>{maskedPhone}</strong>.
+                We sent a 6-digit code to{' '}
+                <strong style={{ color: 'rgba(255,255,255,0.75)' }}>{maskedEmail}</strong>.
+                Enter it below to verify your account.
             </p>
 
             {message && (
                 <div className={`${authStyles.alertBanner} ${status === 'success' ? authStyles.alertSuccess : authStyles.alertError}`}>
-                    {status === 'success' ? <CheckCircle2 size={16} style={{ flexShrink: 0 }} /> : <AlertCircle size={16} style={{ flexShrink: 0 }} />}
+                    {status === 'success'
+                        ? <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
+                        : <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                    }
                     <span>{message}</span>
                 </div>
             )}
 
-            {status !== 'locked' && (
-                <form onSubmit={handleManualSubmit}>
-                    <div className={styles.otpRow} onPaste={handlePaste}>
-                        {digits.map((d, i) => (
-                            <input
-                                key={i}
-                                ref={el => { inputRefs.current[i] = el; }}
-                                type="text"
-                                inputMode="numeric"
-                                maxLength={1}
-                                value={d}
-                                onChange={e => handleDigitChange(i, e.target.value)}
-                                onKeyDown={e => handleKeyDown(i, e)}
-                                className={`${styles.digitBox} ${status === 'error' ? styles.digitError : ''} ${status === 'success' ? styles.digitSuccess : ''}`}
-                                autoFocus={i === 0}
-                                disabled={loading || status === 'success'}
-                                aria-label={`Digit ${i + 1}`}
-                            />
-                        ))}
-                    </div>
+            <form onSubmit={handleManualSubmit}>
+                <div className={styles.otpRow} onPaste={handlePaste}>
+                    {digits.map((d, i) => (
+                        <input
+                            key={i}
+                            ref={el => { inputRefs.current[i] = el; }}
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={1}
+                            value={d}
+                            onChange={e => handleDigitChange(i, e.target.value)}
+                            onKeyDown={e => handleKeyDown(i, e)}
+                            className={`${styles.digitBox} ${status === 'error' ? styles.digitError : ''} ${status === 'success' ? styles.digitSuccess : ''}`}
+                            autoFocus={i === 0}
+                            disabled={loading || status === 'success'}
+                            aria-label={`Digit ${i + 1}`}
+                        />
+                    ))}
+                </div>
 
-                    <button
-                        type="submit"
-                        className={authStyles.submitBtn}
-                        disabled={loading || digits.some(d => !d) || status === 'success'}
-                        style={{ marginTop: 24 }}
-                    >
-                        {loading ? <><span className={authStyles.spinner} /> Verifying…</> : 'Confirm Code'}
-                    </button>
-                </form>
-            )}
+                <button
+                    type="submit"
+                    className={authStyles.submitBtn}
+                    disabled={loading || digits.some(d => !d) || status === 'success'}
+                    style={{ marginTop: 24 }}
+                >
+                    {loading ? <><span className={authStyles.spinner} /> Verifying…</> : 'Confirm Code'}
+                </button>
+            </form>
 
             <div className={styles.resendRow}>
                 <span className={styles.resendLabel}>Didn't receive it?</span>
@@ -206,13 +211,17 @@ export default function VerifyOTPForm() {
                     <button
                         className={styles.resendBtn}
                         onClick={handleResend}
-                        disabled={resending || resendSeconds > 0}
+                        disabled={resending}
                     >
                         <RotateCcw size={13} style={{ marginRight: 4 }} />
                         {resending ? 'Sending…' : 'Resend Code'}
                     </button>
                 )}
             </div>
+
+            <p style={{ textAlign: 'center', marginTop: 16, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', lineHeight: 1.5 }}>
+                Check your spam folder if the email doesn't arrive within a minute.
+            </p>
         </div>
     );
 }
