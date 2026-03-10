@@ -100,7 +100,7 @@ export default function LoginClient() {
                 <div className={`${styles.header} ${styles.staggerEntry}`}>
                     <h1 className={styles.title}>{isSignUp ? 'Create Your Account' : 'Welcome to Drop Along'}</h1>
                     <p className={styles.subtitle}>
-                        {isSignUp ? 'Join the community moving Port Harcourt smarter' : 'Sign into your intelligent road transit dashboard'}
+                        Move smarter. Send faster. Live easier.
                     </p>
                 </div>
 

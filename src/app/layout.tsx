@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
     title: 'Drop Along Logistics (DAL)',
     description: 'Intelligent Urban Routing & Mobility Platform',
-    icons: { icon: '/dal-logo.png' },
+    icons: { icon: '/dal-logo-light.png' },
 };
 
 export default function RootLayout({

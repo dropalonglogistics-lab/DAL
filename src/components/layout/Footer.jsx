@@ -69,11 +69,11 @@ export default function Footer() {
                 <div className={styles.top}>
                     <div className={styles.brand}>
                         <Image
-                            src="/dal-logo.png"
+                            src="/dal-logo-light.png"
                             alt="Drop Along Logistics"
                             height={38}
                             width={150}
-                            style={{ objectFit: 'contain', objectPosition: 'left' }}
+                            style={{ objectFit: 'contain', objectPosition: 'left', marginTop: '24px', marginBottom: '24px' }}
                         />
                         <p className={styles.tagline}>
                             Intelligent urban routing &amp; mobility for Port Harcourt and beyond.

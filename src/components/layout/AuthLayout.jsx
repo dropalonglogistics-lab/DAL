@@ -12,13 +12,10 @@ export default function AuthLayout({ children }) {
                 {/* Logo centred at top */}
                 <div className={styles.authLogo}>
                     <Link href="/">
-                        <Image
-                            src="/dal-logo.png"
+                        <img
+                            src="/dal-logo-light.png"
                             alt="Drop Along Logistics"
-                            height={44}
-                            width={176}
-                            style={{ objectFit: 'contain' }}
-                            priority
+                            className={styles.authImage}
                         />
                     </Link>
                 </div>

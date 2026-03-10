@@ -12,11 +12,11 @@ export default function WelcomePage() {
                     </svg>
                 </div>
                 <Image
-                    src="/dal-logo.png"
+                    src="/dal-logo-dark.png"
                     alt="Drop Along Logistics"
                     height={40}
                     width={160}
-                    style={{ objectFit: 'contain', marginBottom: 8 }}
+                    style={{ objectFit: 'contain', marginBottom: 16 }}
                 />
                 <h1 className={styles.title}>You're all set!</h1>
                 <p className={styles.subtitle}>
