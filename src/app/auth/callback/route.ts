@@ -4,6 +4,9 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { getBaseUrl } from '@/utils/url'
 
+// reminder: configure Google provider in the Supabase dashboard
+// under Authentication -> Providers -> Google using:
+// Client ID: 383104353649-332sdusnt8pgv1da3498rer32jea1n2b.apps.googleusercontent.com
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')

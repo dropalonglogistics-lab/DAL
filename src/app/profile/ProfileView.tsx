@@ -10,6 +10,7 @@ import styles from './profile.module.css'
 
 import { fetchAdminStats } from '@/components/Admin/actions'
 import AdminStats from '@/components/Admin/AdminStats'
+import Spinner from '@/components/UI/Spinner'
 
 export default function ProfileClient() {
     const [profile, setProfile] = useState<any>(null)
@@ -19,10 +20,9 @@ export default function ProfileClient() {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [uploadProgress, setUploadProgress] = useState(0)
     const [viewMode, setViewMode] = useState<'profile' | 'admin'>('profile')
-    const [debugLog, setDebugLog] = useState<string[]>([])
     const [adminStats, setAdminStats] = useState<any>(null)
     const [counts, setCounts] = useState({ routes: 0, reports: 0 })
-    const addLog = (msg: string) => setDebugLog(prev => [...prev.slice(-10), msg])
+    const addLog = (msg: string) => { } // Diagnostic logging disabled
 
     const supabase = useState(() => createClient())[0]
     const router = useRouter()
@@ -266,50 +266,8 @@ export default function ProfileClient() {
 
     if (loading) {
         return (
-            <div className={styles.container}>
-                <div className={styles.header}>
-                    <div className={`${styles.skeleton} ${styles.skeletonTitle}`} />
-                    <div className={`${styles.skeleton} ${styles.skeletonText}`} />
-                </div>
-                <div className={styles.card}>
-                    <div className={styles.avatarSection}>
-                        <div className={`${styles.skeleton} ${styles.skeletonCircle}`} />
-                        <div className={styles.avatarInfo}>
-                            <div className={`${styles.skeleton} ${styles.skeletonTitle}`} />
-                            <div className={`${styles.skeleton} ${styles.skeletonText}`} />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Debug Console */}
-                <div style={{
-                    marginTop: '32px',
-                    padding: '16px',
-                    background: '#1E293B',
-                    color: '#94A3B8',
-                    borderRadius: '8px',
-                    fontSize: '0.75rem',
-                    fontFamily: 'monospace',
-                    maxHeight: '200px',
-                    overflowY: 'auto'
-                }}>
-                    <div style={{ fontWeight: 'bold', borderBottom: '1px solid #334155', paddingBottom: '8px', marginBottom: '8px', color: '#F8FAFC' }}>
-                        🔍 Real-time Diagnostic Log
-                    </div>
-                    {debugLog.length === 0 && <div>Waiting for process...</div>}
-                    {debugLog.map((log, i) => (
-                        <div key={i} style={{ marginBottom: '2px' }}>{log}</div>
-                    ))}
-                </div>
-
-                <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                    <button onClick={handleEmergencySignOut} className={styles.signOutBtn} style={{ background: 'var(--color-error)', color: 'white' }}>
-                        <LogOut size={16} /> Force Sign Out
-                    </button>
-                    <button onClick={() => window.location.reload()} className={styles.toggleBtn}>
-                        Retry Loading
-                    </button>
-                </div>
+            <div className={styles.container} style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Spinner size="lg" />
             </div>
         )
     }

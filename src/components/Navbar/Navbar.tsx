@@ -30,6 +30,7 @@ export default function Navbar() {
     const pathname = usePathname();
     const supabase = createClient();
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const navbarRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
         // Scroll listener for backdrop-blur intensity
@@ -99,6 +100,9 @@ export default function Navbar() {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
                 setIsAvatarDropdownOpen(false);
             }
+            if (navbarRef.current && !navbarRef.current.contains(e.target as Node)) {
+                setIsMobileMenuOpen(false);
+            }
         };
         document.addEventListener('mousedown', handleClickOutside);
 
@@ -122,10 +126,8 @@ export default function Navbar() {
         }
     }, [isDarkMode]);
 
-    // Lock scroll when mobile menu open
     useEffect(() => {
-        document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
-        return () => { document.body.style.overflow = ''; };
+        // Scroll lock removed because a dropdown shouldn't lock scroll
     }, [isMobileMenuOpen]);
 
     const handleSignOut = async () => {
@@ -153,7 +155,7 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`}>
+            <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`} ref={navbarRef}>
                 <div className={styles.navContainer}>
                     {/* Logo */}
                     <Link href="/" className={styles.logo}>
@@ -287,63 +289,50 @@ export default function Navbar() {
                         </button>
                     </div>
                 </div>
-            </nav>
-
-            {/* Full-screen mobile drawer */}
-            <div className={`${styles.mobileDrawer} ${isMobileMenuOpen ? styles.drawerOpen : ''}`}>
-                <div className={styles.drawerHeader}>
-                    <Image src="/images/dal-logo-full.png" alt="DAL" height={36} width={140} style={{ objectFit: 'contain' }} />
-                    <button className={styles.drawerClose} onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
-                        <X size={24} />
-                    </button>
-                </div>
-
-                <nav className={styles.drawerNav}>
-                    {NAV_LINKS.map(({ href, label, icon: Icon }) => (
-                        <Link
-                            key={href}
-                            href={href}
-                            className={`${styles.drawerLink} ${isActive(href) ? styles.drawerLinkActive : ''}`}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                            <Icon size={20} />
-                            {label}
-                        </Link>
-                    ))}
-                    {profile?.is_admin && (
-                        <Link href="/admin" className={`${styles.drawerLink} ${styles.drawerAdminLink}`} onClick={() => setIsMobileMenuOpen(false)}>
-                            <Shield size={20} /> Admin Portal
-                        </Link>
-                    )}
-                </nav>
-
-                <div className={styles.drawerFooter}>
-                    {showGoPremium && (
-                        <button className={`${styles.goPremiumBtn} ${styles.goPremiumFull}`} disabled>
-                            <Star size={14} fill="currentColor" /> Go Premium
-                        </button>
-                    )}
-                    {user ? (
-                        <>
-                            <Link href="/profile" className={styles.drawerLink} onClick={() => setIsMobileMenuOpen(false)}>
-                                <User size={20} /> Profile
+                {/* Full-width mobile dropdown */}
+                <div className={`${styles.mobileDropdown} ${isMobileMenuOpen ? styles.mobileDropdownOpen : ''}`}>
+                    <div className={styles.dropdownNav}>
+                        {NAV_LINKS.map(({ href, label, icon: Icon }) => (
+                            <Link
+                                key={href}
+                                href={href}
+                                className={`${styles.dropdownNavLink} ${isActive(href) ? styles.dropdownNavLinkActive : ''}`}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                <Icon size={20} />
+                                {label}
                             </Link>
-                            <button className={`${styles.drawerLink} ${styles.drawerSignOut}`} onClick={handleSignOut}>
-                                <LogOut size={20} /> Sign Out
-                            </button>
-                        </>
-                    ) : (
-                        <Link href="/login" className={styles.drawerSignIn} onClick={() => setIsMobileMenuOpen(false)}>
-                            Sign In
-                        </Link>
-                    )}
-                </div>
-            </div>
+                        ))}
+                        {profile?.is_admin && (
+                            <Link href="/admin" className={`${styles.dropdownNavLink} ${styles.dropdownAdminLink}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                <Shield size={20} /> Admin Portal
+                            </Link>
+                        )}
+                    </div>
 
-            {/* Drawer backdrop */}
-            {isMobileMenuOpen && (
-                <div className={styles.drawerBackdrop} onClick={() => setIsMobileMenuOpen(false)} />
-            )}
+                    <div className={styles.dropdownFooterMobile}>
+                        {showGoPremium && (
+                            <button className={`${styles.goPremiumBtn} ${styles.goPremiumFull}`} disabled>
+                                <Star size={14} fill="currentColor" /> Go Premium
+                            </button>
+                        )}
+                        {user ? (
+                            <>
+                                <Link href="/profile" className={styles.dropdownNavLink} onClick={() => setIsMobileMenuOpen(false)}>
+                                    <User size={20} /> Profile
+                                </Link>
+                                <button className={`${styles.dropdownNavLink} ${styles.dropdownSignOutMobile}`} onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }}>
+                                    <LogOut size={20} /> Sign Out
+                                </button>
+                            </>
+                        ) : (
+                            <Link href="/login" className={styles.dropdownSignIn} onClick={() => setIsMobileMenuOpen(false)}>
+                                Sign In
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            </nav>
         </>
     );
 }

@@ -31,14 +31,18 @@ export async function signup(formData: FormData) {
         email: formData.get('email') as string,
         password: formData.get('password') as string,
         full_name: formData.get('fullName') as string,
+        phone: formData.get('phone') as string,
+        role: formData.get('role') as string,
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { data: authData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
             data: {
                 full_name: data.full_name,
+                phone: data.phone,
+                role: data.role,
             },
             emailRedirectTo: `${getBaseUrl()}/auth/callback`,
         },
@@ -46,6 +50,16 @@ export async function signup(formData: FormData) {
 
     if (error) {
         return { error: error.message }
+    }
+
+    if (authData?.user) {
+        await supabase.from('profiles').upsert({
+            id: authData.user.id,
+            email: data.email,
+            full_name: data.full_name,
+            phone: data.phone,
+            role: data.role
+        }, { onConflict: 'id' })
     }
 
     revalidatePath('/', 'layout')

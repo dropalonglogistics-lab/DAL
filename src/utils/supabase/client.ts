@@ -20,6 +20,7 @@ export function createClient() {
                 persistSession: true,
                 autoRefreshToken: true,
                 detectSessionInUrl: true,
+                flowType: 'pkce',
                 storage: {
                     getItem: (key) => {
                         if (typeof window === 'undefined') return null
