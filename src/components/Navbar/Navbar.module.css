@@ -364,9 +364,8 @@
     top: 100%;
     left: 0;
     width: 100%;
-    background: var(--brand-black);
+    background: #0D0D0D;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 2px solid rgba(201, 162, 39, 0.3);
     display: flex;
     flex-direction: column;
     transform-origin: top;
@@ -384,43 +383,32 @@
 }
 
 .dropdownNav {
-    overflow-y: auto;
-    padding: 16px 20px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
 }
 
 .dropdownNavLink {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 15px 16px;
+    display: block;
+    padding: 16px;
     font-size: 1.05rem;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.75);
+    color: #C9A227;
     text-decoration: none;
-    border-radius: var(--radius-md);
     border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     background: none;
     cursor: pointer;
     width: 100%;
     text-align: left;
-    transition: color var(--transition-fast), background var(--transition-fast);
+    transition: background 0.2s;
 }
 
 .dropdownNavLink:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.dropdownNavLinkActive {
-    color: var(--brand-gold) !important;
-    background: rgba(201, 162, 39, 0.08);
+    background: rgba(201, 162, 39, 0.05);
 }
 
 .dropdownAdminLink {
-    color: var(--brand-gold) !important;
+    color: #C9A227 !important;
 }
 
 .dropdownSignOutMobile {

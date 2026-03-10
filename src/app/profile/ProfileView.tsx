@@ -22,7 +22,6 @@ export default function ProfileClient() {
     const [viewMode, setViewMode] = useState<'profile' | 'admin'>('profile')
     const [adminStats, setAdminStats] = useState<any>(null)
     const [counts, setCounts] = useState({ routes: 0, reports: 0 })
-    const addLog = (msg: string) => { } // Diagnostic logging disabled
 
     const supabase = useState(() => createClient())[0]
     const router = useRouter()
@@ -31,70 +30,20 @@ export default function ProfileClient() {
         let isMounted = true
 
         async function loadProfile() {
-            const loadId = Math.random().toString(36).substring(7)
-            addLog(`[${loadId}] 1. INIT - VERSION: 2026-03-04-V4`)
             setLoading(true)
-
-            // Emergency clear of legacy localStorage that might be causing hangs
-            if (typeof window !== 'undefined') {
-                Object.keys(localStorage).forEach(key => {
-                    if (key.startsWith('sb-')) {
-                        console.log('Clearing legacy storage key:', key)
-                        localStorage.removeItem(key)
-                    }
-                })
-            }
 
             try {
                 // 1. Get Session / User
-                addLog(`[${loadId}] 2. Checking authentication (timeout: 5s)...`)
+                const { data: { user: authUser }, error: userError } = await supabase.auth.getUser()
 
-                // Wrap getSession in a timeout to prevent library-level hangs
-                const sessionPromise = supabase.auth.getSession()
-                const timeoutPromise = new Promise<{ data: { session: null }, error: any }>((_, reject) =>
-                    setTimeout(() => reject(new Error('Auth Library Hang')), 5000)
-                )
-
-                let session: any = null
-                let sessionError: any = null
-
-                try {
-                    addLog(`[${loadId}] 2.1 Triggering getSession...`)
-                    const result = await Promise.race([sessionPromise, timeoutPromise])
-                    session = result.data?.session
-                    sessionError = result.error
-                    addLog(`[${loadId}] 2.2 getSession responded.`)
-                } catch (e: any) {
-                    addLog(`[${loadId}] 2.3 getSession HANG detected: ${e.message}`)
+                if (userError || !authUser) {
+                    if (isMounted) router.push('/login')
+                    return
                 }
 
-                if (sessionError) {
-                    addLog(`[${loadId}] Session error: ${sessionError.message}`)
-                }
-
-                let user = session?.user
-                if (!user) {
-                    addLog(`[${loadId}] 3. No session or hang, trying direct network fetch (getUser)...`)
-                    try {
-                        const { data: { user: authUser }, error: userError } = await supabase.auth.getUser()
-                        if (userError || !authUser) {
-                            addLog(`[${loadId}] 3.1 No user found via network. Redirecting...`)
-                            if (isMounted) router.push('/login')
-                            return
-                        }
-                        user = authUser
-                        addLog(`[${loadId}] 3.2 Network fetch success!`)
-                    } catch (netErr: any) {
-                        addLog(`[${loadId}] 3.3 Network fetch failed: ${netErr.message}`)
-                        if (isMounted) router.push('/login')
-                        return
-                    }
-                }
-
-                addLog(`[${loadId}] 4. Authenticated! ID: ${user.id.substring(0, 8)}...`)
+                let user = authUser
 
                 // 2. Fetch Profile
-                addLog(`[${loadId}] 5. Searching for profile record...`)
                 let { data: profileData, error: profileError } = await supabase
                     .from('profiles')
                     .select('*')
@@ -103,7 +52,6 @@ export default function ProfileClient() {
 
                 // 3. Handle Missing Profile (Auto-Create)
                 if (profileError || !profileData) {
-                    addLog(`[${loadId}] Profile not found or error. Attempting creation...`)
                     const { data: neu, error: insErr } = await supabase.from('profiles').insert([{
                         id: user.id,
                         email: user.email,
@@ -112,8 +60,6 @@ export default function ProfileClient() {
                     }]).select().single()
 
                     if (insErr) {
-                        addLog(`Creation failed: ${insErr.message}`)
-                        // If it fails because it actually exists (race condition), try fetching one last time
                         const { data: retryData } = await supabase.from('profiles').select('*').eq('id', user.id).single()
                         if (retryData) {
                             profileData = retryData
@@ -121,25 +67,21 @@ export default function ProfileClient() {
                             throw insErr
                         }
                     } else {
-                        addLog("Profile created successfully")
                         profileData = neu
                     }
                 }
 
                 // 4. Admin Stats
                 if (profileData?.is_admin) {
-                    addLog("User is admin, fetching stats...")
                     try {
                         const stats = await fetchAdminStats()
                         if (isMounted) setAdminStats(stats)
-                        addLog("Admin stats loaded")
                     } catch (err: any) {
-                        addLog(`Stats failed: ${err.message}`)
+                        // ignore
                     }
                 }
 
                 // 5. Fetch User Counts (Parallel)
-                addLog("Fetching contribution counts...")
                 try {
                     const [{ count: rCount }, { count: repCount }] = await Promise.all([
                         supabase.from('community_routes').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
@@ -147,16 +89,14 @@ export default function ProfileClient() {
                     ])
                     if (isMounted) setCounts({ routes: rCount || 0, reports: repCount || 0 })
                 } catch (err) {
-                    addLog("Counts fetch failed, using defaults")
+                    // ignore
                 }
 
                 if (isMounted) {
                     setProfile(profileData)
                     setPreviewUrl(profileData?.avatar_url)
-                    addLog("Loading complete")
                 }
             } catch (err: any) {
-                addLog(`CRITICAL ERROR: ${err.message}`)
                 if (isMounted) setMessage({ type: 'error', text: err.message })
             } finally {
                 if (isMounted) setLoading(false)
@@ -266,8 +206,9 @@ export default function ProfileClient() {
 
     if (loading) {
         return (
-            <div className={styles.container} style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className={styles.container} style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
                 <Spinner size="lg" />
+                <p style={{ color: 'var(--text-secondary)', fontWeight: 500, margin: 0 }}>Loading your dashboard...</p>
             </div>
         )
     }

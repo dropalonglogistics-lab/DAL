@@ -10,16 +10,48 @@ import { getBaseUrl } from '@/utils/url'
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')
-    const next = searchParams.get('next') ?? '/'
+    const origin = request.nextUrl.origin
 
     if (code) {
         const supabase = await createClient()
         const { error } = await supabase.auth.exchangeCodeForSession(code)
+
         if (!error) {
-            return NextResponse.redirect(`${getBaseUrl()}${next}`)
+            const { data: { user } } = await supabase.auth.getUser()
+
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single()
+
+                if (!profile) {
+                    await supabase.from('profiles').insert({
+                        id: user.id,
+                        full_name: user.user_metadata?.full_name || '',
+                        email: user.email,
+                        role: 'user',
+                        avatar_url: user.user_metadata?.avatar_url || ''
+                    })
+                    return NextResponse.redirect(`${origin}/dashboard`)
+                }
+
+                const roleRedirects: Record<string, string> = {
+                    user: '/dashboard',
+                    rider: '/become-a-rider',
+                    errand_worker: '/become-an-errand-worker',
+                    driver: '/become-a-driver',
+                    admin: '/admin',
+                    super_admin: '/super-admin'
+                }
+
+                const destination = roleRedirects[profile.role] || '/dashboard'
+                return NextResponse.redirect(`${origin}${destination}`)
+            }
         }
     }
 
     // return the user to an error page with instructions
-    return NextResponse.redirect(`${getBaseUrl()}/auth/auth-error`)
+    return NextResponse.redirect(`${origin}/auth/auth-error`)
 }

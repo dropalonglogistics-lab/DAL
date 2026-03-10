@@ -338,58 +338,120 @@
     animation-delay: 0.3s;
 }
 
-/* Profile Styles */
-.avatarLarge {
-    width: 80px;
-    height: 80px;
-    background-color: var(--color-primary);
-    color: white;
-    border-radius: 50%;
+/* Divider Spec */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--text-secondary);
+    margin: 4px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border);
+}
+
+.divider::before {
+    margin-right: .5em;
+}
+
+.divider::after {
+    margin-left: .5em;
+}
+
+/* Google Button Spec */
+.googleBtn {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0 auto 16px auto;
-}
-
-.profileDetails {
-    margin-bottom: 24px;
-    background-color: var(--background);
-    padding: 16px;
-    border-radius: var(--radius-md);
-}
-
-.detailRow {
-    display: flex;
-    align-items: center;
     gap: 12px;
-    color: var(--text-primary);
-    font-size: 1rem;
-}
-
-.iconStatic {
-    color: var(--text-secondary);
-}
-
-.signOutBtn {
     width: 100%;
-    background-color: var(--background);
-    border: 1px solid var(--border);
-    color: var(--color-error);
-    padding: 12px;
-    border-radius: var(--radius-md);
+    background-color: #FFFFFF;
+    color: #0D0D0D;
+    border: 1px solid #E0E0E0;
+    padding: 14px;
+    border-radius: 10px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
     transition: all 0.2s;
+    height: 52px;
+    /* Same approximate height as inputs */
 }
 
-.signOutBtn:hover {
-    background-color: rgba(239, 68, 68, 0.05);
-    border-color: var(--color-error);
+.googleBtn:hover {
+    background-color: #F5F5F5;
+}
+
+/* Radio Cards */
+.radioGroup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 480px) {
+    .radioGroup {
+        grid-template-columns: 1fr;
+    }
+}
+
+.radioCard {
+    background: #1A1A1A;
+    border: 1px solid #2A2A2A;
+    border-radius: var(--radius-md);
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.radioCard:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.radioCard.active {
+    background: rgba(201, 162, 39, 0.1);
+    border-color: #C9A227;
+}
+
+.emojiIcon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    line-height: 1;
+}
+
+.radioBody {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.radioHeader {
+    font-weight: 700;
+    color: #FFFFFF;
+    font-size: 1.05rem;
+}
+
+.radioDesc {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.3;
+}
+
+.checkIcon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    color: #C9A227;
+    animation: authFadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

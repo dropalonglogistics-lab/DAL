@@ -193,20 +193,36 @@ export default function LoginClient() {
                     {isSignUp && (
                         <div className={`${styles.radioGroup} ${styles.staggerEntry} ${styles.delay_3}`}>
                             <div className={`${styles.radioCard} ${role === 'user' ? styles.active : ''}`} onClick={() => setRole('user')}>
-                                <div className={styles.radioHeader}>Regular User <span>🗺️</span></div>
-                                <div className={styles.radioDesc}>I want routes, alerts and deliveries</div>
+                                <div className={styles.emojiIcon}>🗺️</div>
+                                <div className={styles.radioBody}>
+                                    <div className={styles.radioHeader}>Regular User</div>
+                                    <div className={styles.radioDesc}>Routes, alerts & deliveries</div>
+                                </div>
+                                {role === 'user' && <CheckCircle2 className={styles.checkIcon} size={20} />}
                             </div>
                             <div className={`${styles.radioCard} ${role === 'rider' ? styles.active : ''}`} onClick={() => setRole('rider')}>
-                                <div className={styles.radioHeader}>Delivery Rider <span>🏍️</span></div>
-                                <div className={styles.radioDesc}>I want to earn delivering packages</div>
+                                <div className={styles.emojiIcon}>🏍️</div>
+                                <div className={styles.radioBody}>
+                                    <div className={styles.radioHeader}>Delivery Rider</div>
+                                    <div className={styles.radioDesc}>Earn delivering packages</div>
+                                </div>
+                                {role === 'rider' && <CheckCircle2 className={styles.checkIcon} size={20} />}
                             </div>
                             <div className={`${styles.radioCard} ${role === 'errand_worker' ? styles.active : ''}`} onClick={() => setRole('errand_worker')}>
-                                <div className={styles.radioHeader}>Errand Worker <span>🛒</span></div>
-                                <div className={styles.radioDesc}>I want to earn doing errands</div>
+                                <div className={styles.emojiIcon}>🛒</div>
+                                <div className={styles.radioBody}>
+                                    <div className={styles.radioHeader}>Errand Worker</div>
+                                    <div className={styles.radioDesc}>Earn doing errands</div>
+                                </div>
+                                {role === 'errand_worker' && <CheckCircle2 className={styles.checkIcon} size={20} />}
                             </div>
                             <div className={`${styles.radioCard} ${role === 'driver' ? styles.active : ''}`} onClick={() => setRole('driver')}>
-                                <div className={styles.radioHeader}>Driver <span>🚗</span></div>
-                                <div className={styles.radioDesc}>I want road intelligence and errand income</div>
+                                <div className={styles.emojiIcon}>🚗</div>
+                                <div className={styles.radioBody}>
+                                    <div className={styles.radioHeader}>Driver</div>
+                                    <div className={styles.radioDesc}>Road intelligence & errand income</div>
+                                </div>
+                                {role === 'driver' && <CheckCircle2 className={styles.checkIcon} size={20} />}
                             </div>
                         </div>
                     )}
@@ -227,7 +243,7 @@ export default function LoginClient() {
                         onClick={async () => {
                             await supabase.auth.signInWithOAuth({
                                 provider: 'google',
-                                options: { redirectTo: `${window.location.origin}/auth/callback` }
+                                options: { redirectTo: 'https://dal-three.vercel.app/auth/callback' }
                             });
                         }}
                     >
