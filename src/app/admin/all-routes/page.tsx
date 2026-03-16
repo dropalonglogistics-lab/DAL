@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import styles from '../admin.module.css'
+import styles from '../Admin.module.css'
 import { MapPin, Clock, MoreHorizontal, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react'
 import { deleteRoute, updateRouteStatus } from '../actions'
 import Link from 'next/link'

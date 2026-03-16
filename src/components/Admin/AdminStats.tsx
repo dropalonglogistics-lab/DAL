@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Users, AlertCircle, Map, TrendingUp } from 'lucide-react'
-import styles from '@/app/admin/admin.module.css'
+import styles from '@/app/admin/Admin.module.css'
 
 interface AdminStatsProps {
     userCount: number

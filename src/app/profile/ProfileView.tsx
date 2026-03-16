@@ -186,20 +186,17 @@ export default function ProfileClient() {
     }
 
     const handleEmergencySignOut = async () => {
-        addLog("🚨 Triggering Emergency Sign Out...")
         try {
             // 1. Client-side sign out
             await supabase.auth.signOut()
             // 2. Clear local storage
             localStorage.clear()
             sessionStorage.clear()
-            addLog("Local data cleared! Redirecting to login...")
             // 3. Hard redirect
             setTimeout(() => {
                 window.location.href = '/login'
             }, 1000)
         } catch (e: any) {
-            addLog(`Sign out error: ${e.message}`)
             window.location.href = '/' // Force move
         }
     }

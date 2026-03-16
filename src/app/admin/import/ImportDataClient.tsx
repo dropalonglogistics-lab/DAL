@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { UploadCloud, FileJson, FileSpreadsheet, CheckCircle, AlertCircle, Loader, X } from 'lucide-react';
-import styles from '../admin.module.css';
+import styles from '../Admin.module.css';
 
 interface ImportResult {
     success: number;
