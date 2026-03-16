@@ -1,0 +1,564 @@
+.container {
+    padding: 24px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    margin-bottom: 24px;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--brand-gold);
+}
+
+.subtitle {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: #111;
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.filterWrap {
+    display: flex;
+    gap: 12px;
+}
+
+.selectInput {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    cursor: pointer;
+    min-width: 180px;
+}
+
+.selectInput:focus {
+    outline: none;
+    border-color: var(--brand-gold);
+}
+
+.selectInput option {
+    background: #111;
+    color: white;
+}
+
+.searchBox {
+    position: relative;
+    width: 350px;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.searchInput {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 16px 10px 40px;
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 0.95rem;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--brand-gold);
+}
+
+/* Main Layout */
+.mainLayout {
+    display: flex;
+    gap: 24px;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Table styling */
+.tableWrap {
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    overflow: auto;
+    flex: 1;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.table th {
+    padding: 16px 20px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+.trHover {
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.trHover:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.trActive {
+    background: rgba(201, 162, 39, 0.05) !important;
+    border-left: 3px solid var(--brand-gold);
+}
+
+.riderInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatarWrap {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--brand-gold);
+    position: relative;
+}
+
+.statusDot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #111;
+}
+
+.dotOnline {
+    background: #10B981;
+}
+
+.dotOffline {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.dotPending {
+    background: #F59E0B;
+}
+
+.dotSuspended {
+    background: #EF4444;
+}
+
+.riderName {
+    font-weight: 700;
+    color: white;
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.riderId {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: monospace;
+}
+
+.contactRow,
+.vehicleRow {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 4px;
+}
+
+.vehicleRow {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.locRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.perfWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ratingText {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #F59E0B;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.tripText {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badgeVerified {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.badgePending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #F59E0B;
+    border: 1px dashed rgba(245, 158, 11, 0.3);
+}
+
+.iconBtn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+}
+
+.iconBtn:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.emptyTable {
+    text-align: center;
+    padding: 100px 20px !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.emptyIcon {
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* Side Panel */
+.sidePanel {
+    width: 400px;
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.panelHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panelHeader h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.closeBtn:hover {
+    color: white;
+}
+
+.panelBody {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.profileHero {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.heroAvatar {
+    width: 64px;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-gold);
+    position: relative;
+}
+
+.heroStatusWrap {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+}
+
+.heroStatusWrap .statusDot {
+    width: 16px;
+    height: 16px;
+    border-width: 3px;
+    position: static;
+}
+
+.heroName {
+    margin: 0 0 4px 0;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.heroId {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: monospace;
+}
+
+.verifyBoxSuccess,
+.verifyBoxPending {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+}
+
+.verifyBoxSuccess {
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #10B981;
+}
+
+.verifyBoxSuccess p,
+.verifyBoxPending p {
+    margin: 4px 0 0 0;
+    font-size: 0.85rem;
+}
+
+.verifyBoxSuccess p {
+    color: rgba(16, 185, 129, 0.8);
+}
+
+.verifyBoxPending {
+    background: rgba(245, 158, 11, 0.05);
+    border: 1px dashed rgba(245, 158, 11, 0.3);
+    color: #F59E0B;
+}
+
+.verifyBoxPending p {
+    color: rgba(245, 158, 11, 0.8);
+}
+
+.btnReviewDocs {
+    background: #F59E0B;
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    align-self: center;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.statBox {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 16px 12px;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.statLabel {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.statValueStar,
+.statValueRoute {
+    font-size: 1.5rem;
+    font-weight: 800;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.statValueStar {
+    color: #F59E0B;
+}
+
+.statValueRoute {
+    color: white;
+}
+
+.sectionWrap {
+    margin-bottom: 32px;
+}
+
+.sectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px 0;
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
+}
+
+.tripRow {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+}
+
+.tripInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tripInfo strong {
+    font-size: 0.95rem;
+    color: white;
+}
+
+.tripId {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: monospace;
+}
+
+.tripDate {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+}
+
+.emptyText {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.actionsWrapPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btnDanger,
+.btnSuccess {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.2s;
+    font-size: 0.95rem;
+}
+
+.btnDanger:hover,
+.btnSuccess:hover {
+    filter: brightness(1.1);
+}
+
+.btnDanger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btnSuccess {
+    background: #10B981;
+    color: white;
+}

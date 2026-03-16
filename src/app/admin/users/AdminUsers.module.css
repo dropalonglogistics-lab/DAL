@@ -1,0 +1,467 @@
+.container {
+    padding: 24px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    margin-bottom: 24px;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--brand-gold);
+}
+
+.subtitle {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: #111;
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.filterWrap {
+    display: flex;
+    gap: 12px;
+}
+
+.selectInput {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    cursor: pointer;
+    min-width: 180px;
+}
+
+.selectInput:focus {
+    outline: none;
+    border-color: var(--brand-gold);
+}
+
+.selectInput option {
+    background: #111;
+    color: white;
+}
+
+.searchBox {
+    position: relative;
+    width: 350px;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.searchInput {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 16px 10px 40px;
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 0.95rem;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--brand-gold);
+}
+
+/* Main Layout */
+.mainLayout {
+    display: flex;
+    gap: 24px;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Table styling */
+.tableWrap {
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    overflow: auto;
+    flex: 1;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.table th {
+    padding: 16px 20px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+.trHover {
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.trHover:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.trActive {
+    background: rgba(201, 162, 39, 0.05) !important;
+    border-left: 3px solid var(--brand-gold);
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatarWrap {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.userName {
+    font-weight: 700;
+    color: white;
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.userEmail {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.roleWrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badgeAdmin {
+    background: rgba(245, 158, 11, 0.15);
+    color: #F59E0B;
+}
+
+.badgeUser {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.premiumStar {
+    color: var(--brand-gold);
+    display: flex;
+}
+
+.ptsWrap {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.ptsWrap strong {
+    color: var(--brand-gold);
+    font-size: 1.1rem;
+}
+
+.statusBadge {
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.statusActive {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.statusSuspended {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
+.iconBtn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+}
+
+.iconBtn:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.emptyTable {
+    text-align: center;
+    padding: 100px 20px !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.emptyIcon {
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* Side Panel */
+.sidePanel {
+    width: 400px;
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.panelHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panelHeader h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.closeBtn:hover {
+    color: white;
+}
+
+.panelBody {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.profileHero {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.heroAvatar {
+    width: 64px;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.heroName {
+    margin: 0 0 4px 0;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.heroId {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: monospace;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.statBox {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 16px 12px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.statLabel {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.statValueAuth {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--brand-gold);
+}
+
+.statValueInfo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #34D399;
+}
+
+.statValueRoute {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #60A5FA;
+}
+
+.sectionWrap {
+    margin-bottom: 32px;
+}
+
+.sectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px 0;
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
+}
+
+.orderRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.orderDate {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+}
+
+.emptyText {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.actionsWrapPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btnDanger,
+.btnSuccess,
+.btnWarning {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.2s;
+    font-size: 0.95rem;
+}
+
+.btnDanger:hover,
+.btnSuccess:hover,
+.btnWarning:hover {
+    filter: brightness(1.1);
+}
+
+.btnDanger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btnSuccess {
+    background: #10B981;
+    color: white;
+}
+
+.btnWarning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}

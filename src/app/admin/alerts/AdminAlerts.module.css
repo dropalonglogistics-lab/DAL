@@ -1,0 +1,337 @@
+.container {
+    padding: 24px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    margin-bottom: 24px;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--brand-gold);
+}
+
+.subtitle {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: #111;
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.filterWrap {
+    display: flex;
+    gap: 12px;
+}
+
+.selectInput {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    cursor: pointer;
+    min-width: 180px;
+}
+
+.selectInput:focus {
+    outline: none;
+    border-color: var(--brand-gold);
+}
+
+.selectInput option {
+    background: #111;
+    color: white;
+}
+
+.searchBox {
+    position: relative;
+    width: 350px;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.searchInput {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 16px 10px 40px;
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 0.95rem;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--brand-gold);
+}
+
+/* Table styling */
+.tableWrap {
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    overflow: auto;
+    flex: 1;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.table th {
+    padding: 16px 20px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: top;
+}
+
+.trHover {
+    transition: background 0.2s;
+}
+
+.trHover:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.cellMain {
+    min-width: 250px;
+    max-width: 350px;
+}
+
+.typeWrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.typeIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iconNormal {
+    background: rgba(245, 158, 11, 0.1);
+    color: #F59E0B;
+}
+
+.iconHigh {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
+.typeText {
+    font-weight: 700;
+    color: white;
+    font-size: 1.05rem;
+}
+
+.idText {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: monospace;
+}
+
+.descText {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+}
+
+.metaRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.metaRow:last-child {
+    margin-bottom: 0;
+}
+
+.metaIcon {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.metaMain {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.metaSub {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.statusWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badgePending {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.badgeVerified {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.badgeDismissed {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.badgeEscalated {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
+.upvoteWrap {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    background: rgba(52, 211, 153, 0.05);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.upvoteCount {
+    color: #34D399;
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+.upvoteLabel {
+    color: rgba(52, 211, 153, 0.7);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.actionsBox {
+    text-align: right;
+    min-width: 280px;
+}
+
+.actionGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.actionBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.btnVerify {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.btnVerify:hover {
+    background: #10B981;
+    color: white;
+}
+
+.btnDismiss {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.btnDismiss:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btnEscalate {
+    grid-column: 1 / -1;
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.btnEscalate:hover {
+    background: #EF4444;
+    color: white;
+}
+
+.resolvedText {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.emptyTable {
+    text-align: center;
+    padding: 100px 20px !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.emptyIcon {
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.2);
+}

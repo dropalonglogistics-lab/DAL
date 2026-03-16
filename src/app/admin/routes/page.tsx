@@ -1,101 +1,221 @@
-import { createClient } from '@/utils/supabase/server'
-import styles from '../admin.module.css'
-import { approveRoute, rejectRoute } from '../actions'
-import { CheckCircle, XCircle, MapPin, Clock } from 'lucide-react'
+'use client';
 
-export const dynamic = 'force-dynamic'
+import { useState } from 'react';
+import { Search, Map, Navigation, User, Calendar, ThumbsUp, Eye, Check, X, AlertCircle } from 'lucide-react';
+import styles from './AdminRoutes.module.css';
 
-export default async function RouteApprovals() {
-    const supabase = await createClient()
-    const { data: routes } = await supabase
-        .from('community_routes')
-        .select(`
-            *,
-            profiles(full_name, email)
-        `)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false })
+const MOCK_ROUTES = [
+    {
+        id: 'RT-1002', name: 'GRA Phase 2 Bypass', from: 'Rumuola Road', to: 'Tombia Street',
+        submitter: 'Alex O.', upvotes: 45, date: '2026-03-15', status: 'pending',
+        desc: 'Quickest way to avoid the evening gridlock around Rumuola junction by passing through the inner GRA streets.'
+    },
+    {
+        id: 'RT-0998', name: 'Peter Odili Safe Route', from: 'Trans-Amadi', to: 'Slaughter',
+        submitter: 'Kingsley E.', upvotes: 12, date: '2026-03-14', status: 'pending',
+        desc: 'Avoids the main bad spots on the road.'
+    },
+    {
+        id: 'RT-0950', name: 'NTA Road Shortcut', from: 'Choba', to: 'Rumuokwuta',
+        submitter: 'Sarah M.', upvotes: 110, date: '2026-03-10', status: 'approved',
+        desc: 'Very efficient route missing the market traffic.'
+    },
+];
 
-    async function handleApprove(formData: FormData) {
-        'use server'
-        await approveRoute(formData)
-    }
+export default function AdminRoutesPage() {
+    const [activeTab, setActiveTab] = useState('pending');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedRoute, setSelectedRoute] = useState<any>(null);
 
-    async function handleReject(formData: FormData) {
-        'use server'
-        await rejectRoute(formData)
-    }
+    const tabs = [
+        { id: 'pending', label: 'Pending Review' },
+        { id: 'approved', label: 'Approved Routes' },
+        { id: 'denied', label: 'Denied' }
+    ];
+
+    const filteredRoutes = MOCK_ROUTES.filter(r =>
+        r.status === activeTab &&
+        (r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            r.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            r.to.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
     return (
-        <div className="animate-fade-in">
-            <h1 className={styles.title}>Route Approvals</h1>
-            <p className={styles.subtitle} style={{ marginBottom: '24px' }}>
-                Review routes suggested by the community before they appear in public search.
-            </p>
-
-            <div className={styles.grid}>
-                {(!routes || routes.length === 0) ? (
-                    <div className={styles.emptyState} style={{ gridColumn: '1 / -1', padding: '40px', background: 'var(--card-bg)' }}>
-                        <CheckCircle size={40} color="var(--color-success)" style={{ marginBottom: '16px' }} />
-                        <h3>All Caught Up!</h3>
-                        <p>There are no pending routes to review at this time.</p>
-                    </div>
-                ) : (
-                    routes.map((route) => (
-                        <div key={route.id} className={styles.card} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <div>
-                                    <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.1rem' }}>{route.origin} to {route.destination}</h3>
-                                    <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                                        Suggested by: {route.profiles?.full_name || 'Unknown User'}
-                                    </p>
-                                </div>
-                                <span className={styles.badge} style={{ background: 'rgba(245, 158, 11, 0.1)', color: 'var(--color-warning)' }}>
-                                    Pending
-                                </span>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'rgba(0,0,0,0.1)', padding: '12px', borderRadius: '8px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <MapPin size={14} /> {route.vehicle_type || 'Various'}
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Clock size={14} /> {route.duration_minutes || '?'} mins
-                                </div>
-                                <div>
-                                    ₦{route.price_estimated || '?'}
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 style={{ fontSize: '0.85rem', margin: '0 0 8px', color: 'var(--text-primary)' }}>Stops ({route.itinerary?.length || 0})</h4>
-                                <div style={{ maxHeight: '120px', overflowY: 'auto', paddingRight: '4px' }}>
-                                    {route.itinerary?.map((stop: any, idx: number) => (
-                                        <div key={idx} style={{ padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: '0.8rem' }}>
-                                            <strong>{stop.location}</strong> - <span>{stop.instruction}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '8px', marginTop: 'auto', paddingTop: '16px', borderTop: '1px dashed var(--border)' }}>
-                                <form action={handleApprove} style={{ flex: 1 }}>
-                                    <input type="hidden" name="routeId" value={route.id} />
-                                    <button type="submit" className={styles.saveBtn} style={{ padding: '8px', fontSize: '0.9rem', width: '100%', background: 'var(--color-success)' }}>
-                                        Approve
-                                    </button>
-                                </form>
-                                <form action={handleReject} style={{ flex: 1 }}>
-                                    <input type="hidden" name="routeId" value={route.id} />
-                                    <button type="submit" className={styles.signOutBtn} style={{ padding: '8px', fontSize: '0.9rem', width: '100%' }}>
-                                        Reject
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    ))
-                )}
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <div className={styles.headerLeft}>
+                    <h1 className={styles.title}>Route Submissions</h1>
+                    <p className={styles.subtitle}>Review community proposed routes for integration into the core map.</p>
+                </div>
             </div>
+
+            <div className={styles.toolbar}>
+                <div className={styles.tabsWrap}>
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            className={`${styles.tabBtn} ${activeTab === tab.id ? styles.tabActive : ''}`}
+                            onClick={() => setActiveTab(tab.id)}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+
+                <div className={styles.actionsWrap}>
+                    <div className={styles.searchBox}>
+                        <Search size={16} className={styles.searchIcon} />
+                        <input
+                            type="text"
+                            placeholder="Search routes..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className={styles.searchInput}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Bulk Actions Placeholder */}
+            {activeTab === 'pending' && filteredRoutes.length > 0 && (
+                <div className={styles.bulkActions}>
+                    <label className={styles.checkboxLabel}>
+                        <input type="checkbox" className={styles.checkbox} /> Select All
+                    </label>
+                    <button className={styles.bulkApproveBtn} disabled>
+                        <Check size={16} /> Approve Selected
+                    </button>
+                </div>
+            )}
+
+            {/* Table */}
+            <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            {activeTab === 'pending' && <th className={styles.checkCol}></th>}
+                            <th>Route Name</th>
+                            <th>Path (From - To)</th>
+                            <th>Submitted By</th>
+                            <th>Upvotes</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredRoutes.length > 0 ? filteredRoutes.map(route => (
+                            <tr key={route.id} className={styles.trHover}>
+                                {activeTab === 'pending' && (
+                                    <td className={styles.checkCol}>
+                                        <input type="checkbox" className={styles.checkbox} onClick={(e) => e.stopPropagation()} />
+                                    </td>
+                                )}
+                                <td className={styles.cellMain}>
+                                    <div className={styles.routeName}>{route.name}</div>
+                                    <div className={styles.routeId}>{route.id}</div>
+                                </td>
+                                <td>
+                                    <div className={styles.pathData}>
+                                        <span className={styles.pathNode}>{route.from}</span>
+                                        <Navigation size={12} className={styles.pathArrow} />
+                                        <span className={styles.pathNode}>{route.to}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className={styles.iconData}>
+                                        <User size={14} className={styles.dataIcon} /> {route.submitter}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className={styles.successData}>
+                                        <ThumbsUp size={14} className={styles.dataIconInfo} /> {route.upvotes}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className={styles.iconData}>
+                                        <Calendar size={14} className={styles.dataIcon} /> {route.date}
+                                    </div>
+                                </td>
+                                <td>
+                                    <button className={styles.actionBtn} onClick={() => setSelectedRoute(route)}>
+                                        <Eye size={16} /> Review
+                                    </button>
+                                </td>
+                            </tr>
+                        )) : (
+                            <tr>
+                                <td colSpan={activeTab === 'pending' ? 7 : 6} className={styles.emptyTable}>
+                                    <Map size={32} className={styles.emptyIcon} />
+                                    <p>No routes found in this queue.</p>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Modal Review Panel */}
+            {selectedRoute && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <div className={styles.modalHeader}>
+                            <h2>Review Route Submission</h2>
+                            <button className={styles.closeBtn} onClick={() => setSelectedRoute(null)}>
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className={styles.modalBody}>
+                            <div className={styles.modalTopMetrics}>
+                                <div className={styles.metricSquare}>
+                                    <span>Route Name</span>
+                                    <strong>{selectedRoute.name}</strong>
+                                </div>
+                                <div className={styles.metricSquare}>
+                                    <span>Submitted By</span>
+                                    <a href="#" className={styles.userLink}>{selectedRoute.submitter}</a>
+                                </div>
+                                <div className={styles.metricSquare}>
+                                    <span>Community Trust</span>
+                                    <strong className={styles.textSuccess}>{selectedRoute.upvotes} Upvotes</strong>
+                                </div>
+                            </div>
+
+                            <div className={styles.descBox}>
+                                <h3>Description & Reason</h3>
+                                <p>{selectedRoute.desc}</p>
+                            </div>
+
+                            <div className={styles.mapMockup}>
+                                <div className={styles.mapOverlay}>
+                                    <Map size={24} />
+                                    <span>Mapbox Preview (Coordinates Loaded)</span>
+                                </div>
+                                {/* CSS Path Drawing Mockup */}
+                                <svg className={styles.mockPath} viewBox="0 0 100 50">
+                                    <path d="M10,40 Q30,20 50,30 T90,10" fill="none" stroke="var(--brand-gold)" strokeWidth="3" strokeDasharray="5,5" />
+                                    <circle cx="10" cy="40" r="4" fill="#3B82F6" />
+                                    <circle cx="90" cy="10" r="4" fill="#10B981" />
+                                </svg>
+                            </div>
+
+                            {selectedRoute.status === 'pending' && (
+                                <div className={styles.actionPanel}>
+                                    <button className={styles.btnApprove}>
+                                        <Check size={18} /> Approve to Core Map
+                                    </button>
+                                    <button className={styles.btnEdit}>
+                                        <AlertCircle size={18} /> Request Edit (Reason)
+                                    </button>
+                                    <button className={styles.btnDeny}>
+                                        <X size={18} /> Deny Route (Reason)
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-    )
+    );
 }
