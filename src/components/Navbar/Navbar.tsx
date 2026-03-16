@@ -196,7 +196,7 @@ export default function Navbar() {
                         {/* Theme toggle */}
                         <button
                             onClick={() => setIsDarkMode(p => !p)}
-                            className={styles.iconBtn}
+                            className={`${styles.iconBtn} ${styles.themeToggleBtn}`}
                             aria-label="Toggle theme"
                         >
                             <div className={styles.iconWrapper}>
@@ -207,26 +207,34 @@ export default function Navbar() {
                             </div>
                         </button>
 
+                        {/* Go Premium (mobile compact) */}
+                        {showGoPremium && (
+                            <div className={`${styles.goPremiumBtn} ${styles.goPremiumMobile} ${styles.mobileOnly}`} aria-hidden="true">
+                                <Star size={13} fill="currentColor" />
+                                Premium
+                            </div>
+                        )}
+
                         {user ? (
                             <>
-                                {/* Points badge */}
+                                {/* Points badge (desktop only) */}
                                 {profile && (
-                                    <div className={styles.pointsBadge}>
+                                    <div className={`${styles.pointsBadge} ${styles.desktopOnly}`}>
                                         <Coins size={13} className={styles.coinIcon} />
                                         <span>{profile.points ?? 0}</span>
                                     </div>
                                 )}
 
-                                {/* Go Premium (non-premium logged-in) */}
+                                {/* Go Premium (desktop only) */}
                                 {showGoPremium && (
-                                    <button className={styles.goPremiumBtn} disabled>
+                                    <button className={`${styles.goPremiumBtn} ${styles.desktopOnly}`} disabled>
                                         <Star size={13} fill="currentColor" />
                                         Go Premium
                                     </button>
                                 )}
 
-                                {/* Avatar dropdown */}
-                                <div className={styles.avatarWrap} ref={dropdownRef}>
+                                {/* Avatar dropdown (desktop only) */}
+                                <div className={`${styles.avatarWrap} ${styles.desktopOnly}`} ref={dropdownRef}>
                                     <button
                                         className={styles.avatarBtn}
                                         onClick={() => setIsAvatarDropdownOpen(p => !p)}
@@ -264,73 +272,119 @@ export default function Navbar() {
                                         </div>
                                     )}
                                 </div>
+
+                                {/* Unified Mobile Menu Button (logged in) */}
+                                <button
+                                    className={`${styles.unifiedMenuBtn} ${styles.mobileOnly}`}
+                                    onClick={() => setIsMobileMenuOpen(p => !p)}
+                                    aria-label="Mobile Menu"
+                                >
+                                    {user.user_metadata?.avatar_url ? (
+                                        <img src={user.user_metadata.avatar_url} alt="Avatar" className={styles.avatarImg} />
+                                    ) : (
+                                        <span className={styles.avatarInitials}>{getInitials()}</span>
+                                    )}
+                                </button>
                             </>
                         ) : (
                             <>
+                                {/* Go Premium (desktop only) */}
                                 {showGoPremium && (
-                                    <button className={styles.goPremiumBtn} disabled>
+                                    <button className={`${styles.goPremiumBtn} ${styles.desktopOnly}`} disabled>
                                         <Star size={13} fill="currentColor" />
                                         Go Premium
                                     </button>
                                 )}
-                                <Link href="/login" className={styles.signInBtn}>
+
+                                {/* Sign In (desktop only) */}
+                                <Link href="/login" className={`${styles.signInBtn} ${styles.desktopOnly}`}>
                                     Sign In
                                 </Link>
+
+                                {/* Unified Mobile Menu Button (logged out) */}
+                                <button
+                                    className={`${styles.unifiedMenuBtn} ${styles.mobileOnly}`}
+                                    onClick={() => setIsMobileMenuOpen(p => !p)}
+                                    aria-label="Mobile Menu"
+                                >
+                                    <Menu size={24} />
+                                </button>
                             </>
                         )}
-
-                        {/* Mobile hamburger */}
-                        <button
-                            className={styles.mobileMenuBtn}
-                            onClick={() => setIsMobileMenuOpen(p => !p)}
-                            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-                        >
-                            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-                        </button>
                     </div>
                 </div>
                 {/* Full-width mobile dropdown */}
                 <div className={`${styles.mobileDropdown} ${isMobileMenuOpen ? styles.mobileDropdownOpen : ''}`}>
-                    <div className={styles.dropdownNav}>
-                        {NAV_LINKS.map(({ href, label, icon: Icon }) => (
+                    {/* Close button X top right */}
+                    <button className={styles.closeDropdownBtn} onClick={() => setIsMobileMenuOpen(false)}>
+                        <X size={24} />
+                    </button>
+
+                    {/* Logged in header block */}
+                    {user && profile && (
+                        <>
+                            <div className={styles.dropdownProfileHeader}>
+                                <div className={styles.largeAvatar}>
+                                    {user.user_metadata?.avatar_url ? (
+                                        <img src={user.user_metadata.avatar_url} alt="Avatar" className={styles.largeAvatarImg} />
+                                    ) : (
+                                        <span className={styles.largeAvatarInitials}>{getInitials()}</span>
+                                    )}
+                                </div>
+                                <div className={styles.dropdownProfileName}>{profile.full_name || user.email?.split('@')[0]}</div>
+                                <div className={styles.dropdownProfileEmail}>{user.email}</div>
+                            </div>
+                            <div className={styles.dividerLine} />
+                        </>
+                    )}
+
+                    <div className={styles.dropdownLinksGroup}>
+                        {NAV_LINKS.map(({ href, label }) => (
                             <Link
                                 key={href}
                                 href={href}
-                                className={`${styles.dropdownNavLink} ${isActive(href) ? styles.dropdownNavLinkActive : ''}`}
+                                className={`${styles.mobileNavLink} ${isActive(href) ? styles.mobileNavLinkActive : ''}`}
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
-                                <Icon size={20} />
                                 {label}
                             </Link>
                         ))}
                         {profile?.is_admin && (
-                            <Link href="/admin" className={`${styles.dropdownNavLink} ${styles.dropdownAdminLink}`} onClick={() => setIsMobileMenuOpen(false)}>
-                                <Shield size={20} /> Admin Portal
+                            <Link href="/admin" className={`${styles.mobileNavLink} ${isActive('/admin') ? styles.mobileNavLinkActive : ''}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                Admin Portal
                             </Link>
                         )}
                     </div>
 
-                    <div className={styles.dropdownFooterMobile}>
-                        {showGoPremium && (
-                            <button className={`${styles.goPremiumBtn} ${styles.goPremiumFull}`} disabled>
-                                <Star size={14} fill="currentColor" /> Go Premium
+                    <div className={styles.dividerLine} />
+
+                    {/* Footer / Auth actions block */}
+                    {user ? (
+                        <div className={styles.dropdownLinksGroup}>
+                            <Link href="/dashboard" className={`${styles.mobileNavLink} ${isActive('/dashboard') ? styles.mobileNavLinkActive : ''}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                My Dashboard
+                            </Link>
+                            <Link href="/dashboard/points" className={`${styles.mobileNavLink} ${isActive('/dashboard/points') ? styles.mobileNavLinkActive : ''}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                My Points: {profile?.points ?? 0}
+                            </Link>
+                            <Link href="/dashboard/settings" className={`${styles.mobileNavLink} ${isActive('/dashboard/settings') ? styles.mobileNavLinkActive : ''}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                Settings
+                            </Link>
+                            <div className={styles.dividerLine} />
+                            <button className={`${styles.mobileNavLink} ${styles.mobileSignOutLink}`} onClick={handleSignOut}>
+                                Sign Out
                             </button>
-                        )}
-                        {user ? (
-                            <>
-                                <Link href="/profile" className={styles.dropdownNavLink} onClick={() => setIsMobileMenuOpen(false)}>
-                                    <User size={20} /> Profile
-                                </Link>
-                                <button className={`${styles.dropdownNavLink} ${styles.dropdownSignOutMobile}`} onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }}>
-                                    <LogOut size={20} /> Sign Out
-                                </button>
-                            </>
-                        ) : (
-                            <Link href="/login" className={styles.dropdownSignIn} onClick={() => setIsMobileMenuOpen(false)}>
+                        </div>
+                    ) : (
+                        <div className={styles.mobileAuthActions}>
+                            <Link href="/login" className={styles.mobileActionSignIn} onClick={() => setIsMobileMenuOpen(false)}>
                                 Sign In
                             </Link>
-                        )}
-                    </div>
+                            <Link href="/register" className={styles.mobileActionJoin} onClick={() => setIsMobileMenuOpen(false)}>
+                                Join Now
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </nav>
         </>

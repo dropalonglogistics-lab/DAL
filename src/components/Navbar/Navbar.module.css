@@ -382,64 +382,203 @@
     visibility: visible;
 }
 
-.dropdownNav {
-    display: flex;
-    flex-direction: column;
-}
-
-.dropdownNavLink {
-    display: block;
-    padding: 16px;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #C9A227;
-    text-decoration: none;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+.closeDropdownBtn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
     background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
     cursor: pointer;
-    width: 100%;
-    text-align: left;
-    transition: background 0.2s;
-}
-
-.dropdownNavLink:hover {
-    background: rgba(201, 162, 39, 0.05);
-}
-
-.dropdownAdminLink {
-    color: #C9A227 !important;
-}
-
-.dropdownSignOutMobile {
-    color: #F87171;
-}
-
-.dropdownSignOutMobile:hover {
-    background: rgba(248, 113, 113, 0.08);
-    color: #F87171;
-}
-
-.dropdownSignIn {
+    z-index: 10;
+    padding: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 14px 20px;
-    background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
-    color: var(--brand-black);
-    font-weight: 800;
-    font-size: 1rem;
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    margin-top: 8px;
 }
 
-.dropdownFooterMobile {
-    padding: 10px 20px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+.closeDropdownBtn:hover {
+    color: white;
+}
+
+.dropdownProfileHeader {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    padding: 40px 20px 20px;
+    text-align: center;
+}
+
+.largeAvatar {
+    margin-bottom: 12px;
+}
+
+.largeAvatarInitials {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
+    color: var(--brand-black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.6rem;
+    border: 2px solid rgba(201, 162, 39, 0.5);
+}
+
+.largeAvatarImg {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(201, 162, 39, 0.5);
+}
+
+.dropdownProfileName {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: white;
+}
+
+.dropdownProfileEmail {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 4px;
+}
+
+.dividerLine {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    width: 100%;
+}
+
+.dropdownLinksGroup {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.mobileNavLink {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 18px 20px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    border-left: 4px solid transparent;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+    cursor: pointer;
+}
+
+.mobileNavLinkActive {
+    border-left-color: var(--brand-gold);
+    background: rgba(201, 162, 39, 0.04);
+}
+
+.mobileSignOutLink {
+    color: #F87171;
+}
+
+.mobileSignOutLink:hover {
+    background: rgba(248, 113, 113, 0.08);
+}
+
+.mobileAuthActions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px 20px;
+}
+
+.mobileActionSignIn,
+.mobileActionJoin {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+}
+
+.mobileActionSignIn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.mobileActionJoin {
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
+    color: var(--brand-black);
+}
+
+/* ─── Utilities for Mobile Overlay ───────────────────────────────── */
+.mobileOnly {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .desktopOnly {
+        display: none !important;
+    }
+
+    .mobileOnly {
+        display: flex;
+        align-items: center;
+    }
+
+    .mobileOnly.goPremiumMobile {
+        display: inline-flex;
+    }
+
+    .actions {
+        gap: 8px;
+        /* Tighter spacing so 4 items fit */
+    }
+
+    .goPremiumMobile {
+        padding: 6px 12px;
+        background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
+        color: var(--brand-black);
+        border: none;
+        border-radius: var(--radius-full);
+        font-size: 0.8rem;
+        font-weight: 800;
+        gap: 4px;
+        cursor: default;
+        white-space: nowrap;
+        order: 1;
+    }
+
+    .themeToggleBtn {
+        order: 2;
+        margin-left: 0;
+    }
+
+    .unifiedMenuBtn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        color: white;
+        order: 3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 4px;
+        /* Small push off the theme toggle */
+    }
+
+    .unifiedMenuBtn:hover {
+        opacity: 0.85;
+    }
 }
 
 @media (min-width: 768px) {
