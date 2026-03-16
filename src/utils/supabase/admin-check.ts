@@ -15,3 +15,19 @@ export async function isAdmin() {
 
     return !!profile?.is_admin || profile?.role === 'admin' || profile?.role === 'superadmin'
 }
+
+export async function isSuperAdmin() {
+    const supabase = await createClient()
+    const { data: authData } = await supabase.auth.getUser()
+    const user = authData?.user
+
+    if (!user) return false
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    return profile?.role === 'superadmin'
+}

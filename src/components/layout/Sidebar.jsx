@@ -10,7 +10,7 @@ import {
     Briefcase, DollarSign, Clock, CheckSquare, TrendingUp,
     Users, AlertTriangle, Shield, Building, ShoppingCart,
     BarChart2, Megaphone, Coins, UserCheck, Globe,
-    Navigation, LogOut, Zap
+    Navigation, LogOut, Zap, SlidersHorizontal, FileText
 } from 'lucide-react';
 import Badge from '@/components/UI/Badge';
 import styles from './Sidebar.module.css';
@@ -44,11 +44,11 @@ const NAV_BY_ROLE = {
         { href: '/dashboard/settings', label: 'Settings', icon: Settings },
     ],
     business: [
-        { href: '/dashboard', label: 'Overview', icon: TrendingUp },
-        { href: '/dashboard/products', label: 'Products', icon: ShoppingCart },
-        { href: '/dashboard/orders', label: 'Orders', icon: Package },
-        { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart2 },
-        { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+        { href: '/business', label: 'Overview', icon: TrendingUp },
+        { href: '/business/products', label: 'Products', icon: ShoppingCart },
+        { href: '/business/orders', label: 'Orders', icon: Package },
+        { href: '/business/analytics', label: 'Analytics', icon: BarChart2 },
+        { href: '/business/settings', label: 'Settings', icon: Settings },
     ],
     admin: [
         { href: '/admin', label: 'Overview', icon: LayoutDashboard },
@@ -59,7 +59,7 @@ const NAV_BY_ROLE = {
         { href: '/admin/riders', label: 'Riders', icon: UserCheck },
         { href: '/admin/community', label: 'Community', icon: Globe },
     ],
-    super_admin: [
+    superadmin: [
         { href: '/admin', label: 'Overview', icon: LayoutDashboard },
         { href: '/admin/routes', label: 'Routes', icon: Map },
         { href: '/admin/alerts', label: 'Alerts', icon: AlertTriangle },
@@ -67,11 +67,11 @@ const NAV_BY_ROLE = {
         { href: '/admin/businesses', label: 'Businesses', icon: Building },
         { href: '/admin/riders', label: 'Riders', icon: UserCheck },
         { href: '/admin/community', label: 'Community', icon: Globe },
-        { href: '/admin/roles', label: 'Roles', icon: Shield },
-        { href: '/admin/platform-settings', label: 'Platform Settings', icon: Settings },
-        { href: '/admin/financials', label: 'Financials', icon: DollarSign },
-        { href: '/admin/broadcast', label: 'Broadcast', icon: Megaphone },
-        { href: '/admin/points-log', label: 'Points Log', icon: Coins },
+        { href: '/superadmin/roles', label: 'Roles', icon: Shield },
+        { href: '/superadmin/settings', label: 'Platform Settings', icon: SlidersHorizontal },
+        { href: '/superadmin/financials', label: 'Financials', icon: DollarSign },
+        { href: '/superadmin/broadcast', label: 'Broadcast', icon: Megaphone },
+        { href: '/superadmin/points-log', label: 'Points Log', icon: FileText },
     ],
 };
 
@@ -82,7 +82,7 @@ const ROLE_BADGE_VARIANT = {
     driver: 'amber',
     business: 'gold',
     admin: 'red',
-    super_admin: 'red',
+    superadmin: 'red',
 };
 
 const ROLE_LABELS = {
@@ -92,7 +92,7 @@ const ROLE_LABELS = {
     driver: 'Driver',
     business: 'Business',
     admin: 'Admin',
-    super_admin: 'Super Admin',
+    superadmin: 'Super Admin',
 };
 
 export default function Sidebar() {
@@ -126,12 +126,12 @@ export default function Sidebar() {
 
     // Determine effective role
     const role = profile?.is_admin
-        ? (profile?.role === 'super_admin' ? 'super_admin' : 'admin')
+        ? (profile?.role === 'superadmin' ? 'superadmin' : 'admin')
         : (profile?.role || 'user');
 
     const navItems = NAV_BY_ROLE[role] || NAV_BY_ROLE.user;
 
-    const isActive = (href) => pathname === href || (href !== '/admin' && href !== '/dashboard' && pathname?.startsWith(href));
+    const isActive = (href) => pathname === href || (href !== '/admin' && href !== '/dashboard' && href !== '/business' && pathname?.startsWith(href));
 
     const getInitials = () => {
         if (profile?.full_name) return profile.full_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
