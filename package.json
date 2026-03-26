@@ -12,6 +12,7 @@
         "lint": "next lint"
     },
     "dependencies": {
+        "@react-email/components": "^1.0.10",
         "@supabase/ssr": "^0.8.0",
         "@supabase/supabase-js": "^2.93.3",
         "leaflet": "^1.9.4",
@@ -21,7 +22,9 @@
         "react": "19.0.0",
         "react-dom": "19.0.0",
         "react-hot-toast": "^2.6.0",
-        "react-leaflet": "^5.0.0"
+        "react-leaflet": "^5.0.0",
+        "react-onesignal": "^3.5.1",
+        "resend": "^6.9.4"
     },
     "devDependencies": {
         "@tailwindcss/postcss": "^4.2.1",

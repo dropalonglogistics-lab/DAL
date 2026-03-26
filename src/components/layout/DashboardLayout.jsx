@@ -4,6 +4,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Bell, ChevronRight } from 'lucide-react';
+import NotificationBell from '@/components/Notifications/NotificationBell';
 import styles from './DashboardLayout.module.css';
 
 function Breadcrumb({ pathname }) {
@@ -41,10 +42,7 @@ export default function DashboardLayout({ children }) {
                 <header className={styles.topBar}>
                     <Breadcrumb pathname={pathname} />
                     <div className={styles.topBarActions}>
-                        <button className={styles.bellBtn} aria-label="Notifications">
-                            <Bell size={19} />
-                            <span className={styles.bellDot} />
-                        </button>
+                        <NotificationBell />
                     </div>
                 </header>
 

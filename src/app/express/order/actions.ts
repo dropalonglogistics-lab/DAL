@@ -53,6 +53,33 @@ export async function submitExpressOrder(formData: any) {
         await supabase.from('express_orders').update({ status: 'paid' }).eq('id', data.id);
     }
 
+    // Fire Order Confirmation Email
+    if (user && user.email) {
+        // Note: In prod, replace dal-three.vercel.app with dynamic origin or absolute URL if using fetch from server action.
+        // Actually, since it's a server action, it's cleaner to just instantiate Resend directly or call our API via absolute URL.
+        // I will use fetch to the API route to decouple.
+        try {
+            await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/notifications/email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    to: user.email,
+                    template: 'order-confirmation',
+                    userId: user.id,
+                    data: {
+                        refCode: `EXP-${data.id.substring(0, 5).toUpperCase()}`,
+                        from: pickup_address,
+                        to: dropoff_address,
+                        item: package_size,
+                        fee: `₦${total_fee}`
+                    }
+                })
+            });
+        } catch (e) {
+            console.error('Email trigger failed', e);
+        }
+    }
+
     revalidatePath('/dashboard');
     return { success: true, id: data.id };
 }

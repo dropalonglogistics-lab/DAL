@@ -34,6 +34,15 @@ export async function GET(request: NextRequest) {
                         role: 'user',
                         avatar_url: user.user_metadata?.avatar_url || ''
                     })
+                    
+                    if (user.email) {
+                        fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/notifications/email`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ to: user.email, template: 'welcome', userId: user.id, data: { name: user.user_metadata?.full_name || 'User' } })
+                        }).catch(console.error);
+                    }
+                    
                     return NextResponse.redirect(`${origin}/dashboard`)
                 }
 

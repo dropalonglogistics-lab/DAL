@@ -32,5 +32,23 @@ export async function POST(req: Request) {
     console.log(`[Notification] Dispatching WhatsApp match confirmation to customer for order ${orderId}`);
     console.log(`[Notification] Dispatching Push Notification to worker ${mockWorker.full_name}`);
 
+    // Fire OneSignal Push Notification to the Customer
+    const { data: order } = await supabase.from('errand_orders').select('user_id').eq('id', orderId).single();
+    if (order?.user_id) {
+        try {
+            await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/notifications/push`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: order.user_id,
+                    title: 'Worker Assigned ✅',
+                    body: `${mockWorker.full_name} is on the way! 🏍️`
+                })
+            });
+        } catch (e) {
+            console.error('Push trigger failed', e);
+        }
+    }
+
     return NextResponse.json({ assigned: true, worker: mockWorker });
 }
