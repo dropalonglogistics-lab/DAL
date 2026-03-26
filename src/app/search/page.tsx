@@ -11,25 +11,27 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     const supabase = await createClient();
     const params = await searchParams;
 
-    const origin = typeof params.origin === 'string' ? params.origin : '';
+    const start_location = typeof params.start_location === 'string' ? params.start_location : '';
     const destination = typeof params.destination === 'string' ? params.destination : '';
 
-    const cleanOrigin = origin.trim();
+    const cleanOrigin = start_location.trim();
     const cleanDest = destination.trim();
 
-    let query = supabase.from('routes').select('*');
+    const ROUTE_COLUMNS = 'id, route_title, start_location, destination, stops_along_the_way, vehicle_type_used, estimated_travel_time_min, estimated_travel_time_max, fare_price_range_min, fare_price_range_max, difficulty_level, detailed_directions, tips_and_warnings, created_at';
+
+    let query = supabase.from('routes').select(ROUTE_COLUMNS);
 
     if (cleanOrigin && cleanDest) {
-        query = query.or(`origin.ilike.%${cleanOrigin}%,destination.ilike.%${cleanDest}%,origin.ilike.%${cleanDest}%,destination.ilike.%${cleanOrigin}%`);
+        query = query.or(`start_location.ilike.%${cleanOrigin}%,destination.ilike.%${cleanDest}%,start_location.ilike.%${cleanDest}%,destination.ilike.%${cleanOrigin}%`);
     } else if (cleanOrigin || cleanDest) {
         const term = cleanOrigin || cleanDest;
-        query = query.or(`origin.ilike.%${term}%,destination.ilike.%${term}%`);
+        query = query.or(`start_location.ilike.%${term}%,destination.ilike.%${term}%`);
     }
 
     let { data: routes } = await query;
 
     if (!routes || routes.length === 0) {
-        const { data: allRoutes } = await supabase.from('routes').select('*').limit(10);
+        const { data: allRoutes } = await supabase.from('routes').select(ROUTE_COLUMNS).limit(20);
         routes = allRoutes;
     }
 

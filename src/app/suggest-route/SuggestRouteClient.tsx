@@ -38,7 +38,7 @@ export default function SuggestRouteClient() {
     const [errors, setErrors] = useState<FormErrors>({});
 
     // Form state
-    const [origin, setOrigin] = useState('');
+    const [start_location, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
     const [legs, setLegs] = useState<Leg[]>([{ from: '', to: '', vehicle: 'keke', description: '' }]);
     const [timeMin, setTimeMin] = useState('');
@@ -46,7 +46,7 @@ export default function SuggestRouteClient() {
     const [fareMin, setFareMin] = useState('');
     const [fareMax, setFareMax] = useState('');
     const [tips, setTips] = useState('');
-    const [activeField, setActiveField] = useState<string>('origin');
+    const [activeField, setActiveField] = useState<string>('start_location');
 
     const router = useRouter();
     const supabase = createClient();
@@ -55,14 +55,14 @@ export default function SuggestRouteClient() {
         supabase.auth.getUser().then(({ data }: any) => setUser(data?.user));
     }, [supabase]);
 
-    // Populate first leg from when origin changes
+    // Populate first leg from when start_location changes
     useEffect(() => {
         setLegs(prev => {
             const updated = [...prev];
-            if (updated.length > 0) updated[0] = { ...updated[0], from: origin };
+            if (updated.length > 0) updated[0] = { ...updated[0], from: start_location };
             return updated;
         });
-    }, [origin]);
+    }, [start_location]);
 
     // Populate last leg to when destination changes
     useEffect(() => {
@@ -93,7 +93,7 @@ export default function SuggestRouteClient() {
 
     const validate = (): boolean => {
         const e: FormErrors = {};
-        if (!origin.trim()) e.origin = 'Start location required';
+        if (!start_location.trim()) e.start_location = 'Start location required';
         if (!destination.trim()) e.destination = 'Destination required';
         if (legs.some(l => !l.from.trim() || !l.to.trim())) e.legs = 'All leg from/to fields are required';
         if (!timeMin || !timeMax) e.time = 'Both min and max time are required';
@@ -109,12 +109,12 @@ export default function SuggestRouteClient() {
 
         const formData = new FormData();
         formData.append('type', 'route');
-        formData.append('origin', origin);
+        formData.append('start_location', start_location);
         formData.append('destination', destination);
         formData.append('fareMax', fareMax);
         formData.append('durationMinutes', timeMax);
 
-        const itinerary = legs.map((leg, i) => ({
+        const stops_along_the_way = legs.map((leg, i) => ({
             id: String(i + 1),
             location: leg.from,
             instructions: leg.description || `Take ${leg.vehicle} from ${leg.from} to ${leg.to}`,
@@ -122,9 +122,9 @@ export default function SuggestRouteClient() {
             fare: '',
         }));
         // Add destination as final stop
-        itinerary.push({ id: String(legs.length + 1), location: destination, instructions: 'Arrive at destination', vehicle: '', fare: '' });
+        stops_along_the_way.push({ id: String(legs.length + 1), location: destination, instructions: 'Arrive at destination', vehicle: '', fare: '' });
 
-        formData.append('stopsJSON', JSON.stringify(itinerary));
+        formData.append('stopsJSON', JSON.stringify(stops_along_the_way));
         if (tips) formData.append('proTips', tips);
 
         const result = await suggestRoute(formData);
@@ -177,12 +177,12 @@ export default function SuggestRouteClient() {
                             <label className={styles.label}>Route Start <span className={styles.req}>*</span></label>
                             <div className={styles.inputIcon}>
                                 <Navigation size={16} />
-                                <input className={`${styles.input} ${errors.origin ? styles.inputError : ''}`}
+                                <input className={`${styles.input} ${errors.start_location ? styles.inputError : ''}`}
                                     placeholder="e.g. Mile 3 Motor Park"
-                                    onFocus={() => setActiveField('origin')}
-                                    value={origin} onChange={e => { setOrigin(e.target.value); if (errors.origin) { const er = { ...errors }; delete er.origin; setErrors(er); } }} />
+                                    onFocus={() => setActiveField('start_location')}
+                                    value={start_location} onChange={e => { setOrigin(e.target.value); if (errors.start_location) { const er = { ...errors }; delete er.start_location; setErrors(er); } }} />
                             </div>
-                            {errors.origin && <span className={styles.errorText}>{errors.origin}</span>}
+                            {errors.start_location && <span className={styles.errorText}>{errors.start_location}</span>}
                         </div>
                         <div className={styles.fieldGroup}>
                             <label className={styles.label}>Destination <span className={styles.req}>*</span></label>
@@ -283,7 +283,7 @@ export default function SuggestRouteClient() {
                 <aside className={styles.sidebar}>
                     <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '24px', overflow: 'hidden', marginBottom: '24px', boxShadow: '0 4px 16px var(--color-shadow)' }}>
                         <InteractiveMapWrapper onLocationSelect={(loc) => {
-                            if (activeField === 'origin') setOrigin(loc);
+                            if (activeField === 'start_location') setOrigin(loc);
                             else if (activeField === 'destination') setDestination(loc);
                             else if (activeField.startsWith('leg-')) {
                                 const parts = activeField.split('-');
@@ -298,10 +298,10 @@ export default function SuggestRouteClient() {
                     <div className={styles.previewCard}>
                         <h3 className={styles.previewTitle}>Route Preview</h3>
                         <div className={styles.previewBody}>
-                            {origin && (
+                            {start_location && (
                                 <div className={styles.previewRow}>
                                     <span className={styles.previewLabel}>From</span>
-                                    <span className={styles.previewValue}>{origin}</span>
+                                    <span className={styles.previewValue}>{start_location}</span>
                                 </div>
                             )}
                             {destination && (

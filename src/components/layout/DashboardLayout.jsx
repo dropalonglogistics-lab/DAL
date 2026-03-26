@@ -2,8 +2,9 @@
 
 import Sidebar from '@/components/layout/Sidebar';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Bell, ChevronRight } from 'lucide-react';
+import { Bell, ChevronRight, Menu } from 'lucide-react';
 import NotificationBell from '@/components/Notifications/NotificationBell';
 import styles from './DashboardLayout.module.css';
 
@@ -33,14 +34,24 @@ function Breadcrumb({ pathname }) {
 
 export default function DashboardLayout({ children }) {
     const pathname = usePathname();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    useEffect(() => {
+        setIsSidebarOpen(false);
+    }, [pathname]);
 
     return (
         <div className={styles.dashboardRoot}>
-            <Sidebar />
+            <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
             <div className={styles.dashboardMain}>
                 {/* Top bar */}
                 <header className={styles.topBar}>
-                    <Breadcrumb pathname={pathname} />
+                    <div className={styles.topBarLeft}>
+                        <button className={styles.mobileMenuBtn} onClick={() => setIsSidebarOpen(true)}>
+                            <Menu size={20} />
+                        </button>
+                        <Breadcrumb pathname={pathname} />
+                    </div>
                     <div className={styles.topBarActions}>
                         <NotificationBell />
                     </div>

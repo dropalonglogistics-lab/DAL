@@ -56,13 +56,13 @@ export async function suggestRoute(formData: FormData) {
     }
 
     const stopsJSON = formData.get('stopsJSON') as string
-    let itinerary: any[] = [];
+    let stops_along_the_way: any[] = [];
     const vehicleTypes = new Set<string>();
 
     if (stopsJSON) {
         try {
             const stops = JSON.parse(stopsJSON);
-            itinerary = stops.map((stop: any, index: number) => {
+            stops_along_the_way = stops.map((stop: any, index: number) => {
                 let type: 'start' | 'stop' | 'switch' | 'end' = 'stop';
                 if (index === 0) type = 'start';
                 if (index === stops.length - 1) type = 'end';
@@ -87,16 +87,16 @@ export async function suggestRoute(formData: FormData) {
 
     const routeData: any = {
         user_id: userId,
-        origin: formData.get('origin') as string,
+        start_location: formData.get('start_location') as string,
         destination: formData.get('destination') as string,
-        vehicle_type: Array.from(vehicleTypes).join(', ') || 'Various',
-        price_estimated: parseFloat(formData.get('fareMax') as string) || null,
-        duration_minutes: parseInt(formData.get('durationMinutes') as string) || null,
-        itinerary: itinerary,
+        vehicle_type_used: Array.from(vehicleTypes).join(', ') || 'Various',
+        fare_price_range_min: parseFloat(formData.get('fareMax') as string) || null,
+        estimated_travel_time_min: parseInt(formData.get('durationMinutes') as string) || null,
+        stops_along_the_way: stops_along_the_way,
         status: 'pending' // For admin approval workflow
     }
 
-    if (!routeData.origin || !routeData.destination) {
+    if (!routeData.start_location || !routeData.destination) {
         return { error: 'Origin and destination are required.' }
     }
 
@@ -125,7 +125,7 @@ export async function suggestRoute(formData: FormData) {
     }
 
     // Conceptual AI Learning
-    await learnNewRoutePattern(routeData.origin, routeData.destination, routeData.vehicle_type, routeData.itinerary || [])
+    await learnNewRoutePattern(routeData.start_location, routeData.destination, routeData.vehicle_type_used, routeData.stops_along_the_way || [])
 
     revalidatePath('/')
     revalidatePath('/community')

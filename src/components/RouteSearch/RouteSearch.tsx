@@ -21,19 +21,19 @@ export default function RouteSearch({ showTitle = true }: { showTitle?: boolean 
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [origin, setOrigin] = useState('');
+    const [start_location, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
     const [areas, setAreas] = useState<Area[]>([]);
     const [originSugg, setOriginSugg] = useState<Area[]>([]);
     const [destSugg, setDestSugg] = useState<Area[]>([]);
     const [geoLoading, setGeoLoading] = useState(false);
-    const [activeField, setActiveField] = useState<'origin' | 'destination' | null>(null);
+    const [activeField, setActiveField] = useState<'start_location' | 'destination' | null>(null);
 
     const originRef = useRef<HTMLInputElement>(null);
     const destRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        setOrigin(searchParams.get('origin') || '');
+        setOrigin(searchParams.get('start_location') || '');
         setDestination(searchParams.get('destination') || '');
     }, [searchParams]);
 
@@ -73,7 +73,7 @@ export default function RouteSearch({ showTitle = true }: { showTitle?: boolean 
     const handleSearch = (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         const params = new URLSearchParams();
-        if (origin.trim()) params.set('origin', origin.trim());
+        if (start_location.trim()) params.set('start_location', start_location.trim());
         if (destination.trim()) params.set('destination', destination.trim());
         router.push(`/search?${params.toString()}`);
     };
@@ -127,10 +127,10 @@ export default function RouteSearch({ showTitle = true }: { showTitle?: boolean 
                         type="text"
                         placeholder="Start location"
                         className={styles.input}
-                        value={origin}
+                        value={start_location}
                         autoComplete="off"
                         onChange={(e) => handleOriginChange(e.target.value)}
-                        onFocus={() => setActiveField('origin')}
+                        onFocus={() => setActiveField('start_location')}
                     />
                     {/* Near Me button */}
                     <button
@@ -185,7 +185,7 @@ export default function RouteSearch({ showTitle = true }: { showTitle?: boolean 
                     <Search size={20} />
                     {showTitle ? 'Find Best Route' : 'Search'}
                 </button>
-                {(origin || destination) && showTitle && (
+                {(start_location || destination) && showTitle && (
                     <button type="button" className={styles.clearBtn} onClick={handleClear}>
                         Reset Search
                     </button>

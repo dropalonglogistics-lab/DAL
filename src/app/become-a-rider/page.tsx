@@ -128,7 +128,7 @@ export default function BecomeARiderPage() {
                 address: formData.address,
                 home_area: formData.area,
 
-                vehicle_type: formData.vehicleType,
+                vehicle_type_used: formData.vehicleType,
                 vehicle_reg_number: formData.vehicleReg,
                 vehicle_year: formData.vehicleYear,
                 vehicle_make_model: formData.vehicleMake,

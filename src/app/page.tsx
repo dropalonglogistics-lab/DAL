@@ -39,7 +39,7 @@ export default async function Home() {
     // Trending routes — 3 most recently updated community routes
     const { data: trending } = await supabase
         .from('community_routes')
-        .select('id, origin, destination, vehicle_type, price_estimated, fare_min')
+        .select('id, start_location, destination, vehicle_type_used, fare_price_range_min, fare_price_range_min')
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(3);
@@ -137,20 +137,20 @@ export default async function Home() {
                         {trending.map((route, i) => (
                             <Link
                                 key={route.id}
-                                href={`/search?origin=${encodeURIComponent(route.origin)}&destination=${encodeURIComponent(route.destination)}`}
+                                href={`/search?start_location=${encodeURIComponent(route.start_location)}&destination=${encodeURIComponent(route.destination)}`}
                                 className={styles.trendingCard}
                             >
                                 <div className={styles.trendingRank}>#{i + 1}</div>
                                 <div className={styles.trendingRoute}>
-                                    <span className={styles.trendingFrom}>{route.origin}</span>
+                                    <span className={styles.trendingFrom}>{route.start_location}</span>
                                     <ChevronRight size={14} className={styles.trendingArrow} />
                                     <span className={styles.trendingTo}>{route.destination}</span>
                                 </div>
                                 <div className={styles.trendingMeta}>
-                                    <span className={styles.trendingVehicle}>{route.vehicle_type}</span>
-                                    {(route.price_estimated || route.fare_min) && (
+                                    <span className={styles.trendingVehicle}>{route.vehicle_type_used}</span>
+                                    {(route.fare_price_range_min || route.fare_price_range_min) && (
                                         <span className={styles.trendingFare}>
-                                            ₦{(route.price_estimated || route.fare_min)?.toLocaleString()}
+                                            ₦{(route.fare_price_range_min || route.fare_price_range_min)?.toLocaleString()}
                                         </span>
                                     )}
                                 </div>

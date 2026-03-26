@@ -18,6 +18,7 @@ type Config = {
     f2_launch?: ConfigSection;
     f3_launch?: ConfigSection;
     admin_launch_control?: ConfigSection;
+    show_route_map?: ConfigSection;
 };
 
 const DEFAULT_PRICING = { baseFee: 1500, perKm: 100, premiumFull: 3000, premiumDiscount: 2000, businessListing: 5000 };
@@ -45,6 +46,7 @@ export default function PlatformSettingsPage() {
     const [launchExpress, setLaunchExpress] = useState<Record<string, unknown>>(DEFAULT_F2);
     const [launchShopper, setLaunchShopper] = useState<Record<string, unknown>>(DEFAULT_F3);
     const [adminLaunchControl, setAdminLaunchControl] = useState(false);
+    const [showRouteMap, setShowRouteMap] = useState(true);
     const [showLaunchModal, setShowLaunchModal] = useState<string | null>(null);
     const [savedSections, setSavedSections] = useState<Record<string, boolean>>({});
 
@@ -73,6 +75,7 @@ export default function PlatformSettingsPage() {
                 if (c.f2_launch?.value) setLaunchExpress(c.f2_launch.value as typeof DEFAULT_F2);
                 if (c.f3_launch?.value) setLaunchShopper(c.f3_launch.value as typeof DEFAULT_F3);
                 if (c.admin_launch_control?.value !== undefined) { const v = c.admin_launch_control.value as unknown; setAdminLaunchControl(v === true || v === 'true'); }
+                if (c.show_route_map?.value !== undefined) { const v = c.show_route_map.value as unknown; setShowRouteMap(v === true || v === 'true'); }
             }
         } catch (err) {
             console.error('Failed to fetch config:', err);
@@ -326,6 +329,32 @@ export default function PlatformSettingsPage() {
                             </label>
                         );
                     })}
+                </div>
+            </div>
+
+            {/* SECTION: F1 ROUTE INTELLIGENCE */}
+            <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                    <div>
+                        <h2 className={styles.sectionTitle}><Navigation size={20} /> F1 Route Intelligence</h2>
+                        <p className={styles.sectionDesc}>Manage settings for the F1 road intelligence data and route maps.</p>
+                    </div>
+                </div>
+                <div className={styles.grid2}>
+                    <label className={styles.toggleCard}>
+                        <div className={styles.toggleInfo}>
+                            <h4>Interactive Route Map</h4>
+                            <p>Show the Mapbox route map on the F1 search results page.</p>
+                        </div>
+                        <div className={styles.switch}>
+                            <input type="checkbox" checked={showRouteMap} onChange={async () => {
+                                 const newVal = !showRouteMap;
+                                setShowRouteMap(newVal);
+                                await saveSection('show_route_map', newVal as unknown as Record<string, unknown>, 'Route Map');
+                            }} />
+                            <span className={styles.slider}></span>
+                        </div>
+                    </label>
                 </div>
             </div>
 

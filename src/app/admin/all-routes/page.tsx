@@ -60,7 +60,7 @@ export default async function AllRoutesPage() {
                             <div key={route.id} className={styles.card} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                     <div>
-                                        <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.1rem' }}>{route.origin} to {route.destination}</h3>
+                                        <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.1rem' }}>{route.start_location} to {route.destination}</h3>
                                         <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                                             Suggested by: {route.profiles?.full_name || 'Unknown User'}
                                         </p>
@@ -72,20 +72,20 @@ export default async function AllRoutesPage() {
 
                                 <div style={{ display: 'flex', gap: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'rgba(0,0,0,0.1)', padding: '12px', borderRadius: '8px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <MapPin size={14} /> {route.vehicle_type || 'Various'}
+                                        <MapPin size={14} /> {route.vehicle_type_used || 'Various'}
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <Clock size={14} /> {route.duration_minutes || '?'} mins
+                                        <Clock size={14} /> {route.estimated_travel_time_min || '?'} mins
                                     </div>
                                     <div>
-                                        ₦{route.price_estimated || route.fare_min || '?'}
+                                        ₦{route.fare_price_range_min || route.fare_price_range_min || '?'}
                                     </div>
                                 </div>
 
                                 <div>
-                                    <h4 style={{ fontSize: '0.85rem', margin: '0 0 8px', color: 'var(--text-primary)' }}>Stops ({route.itinerary?.length || 0})</h4>
+                                    <h4 style={{ fontSize: '0.85rem', margin: '0 0 8px', color: 'var(--text-primary)' }}>Stops ({route.stops_along_the_way?.length || 0})</h4>
                                     <div style={{ maxHeight: '120px', overflowY: 'auto', paddingRight: '4px' }}>
-                                        {route.itinerary?.map((stop: any, idx: number) => (
+                                        {route.stops_along_the_way?.map((stop: any, idx: number) => (
                                             <div key={idx} style={{ padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: '0.8rem' }}>
                                                 <strong>{stop.location}</strong> - <span>{stop.instruction}</span>
                                                 {stop.fare && <span style={{ marginLeft: '4px', color: 'var(--color-primary)' }}>(₦{stop.fare})</span>}

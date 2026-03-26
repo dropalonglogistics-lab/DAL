@@ -172,18 +172,18 @@ export async function updateRouteStatus(formData: FormData) {
 export async function updateRouteDetails(formData: FormData) {
     try {
         const routeId = formData.get('routeId') as string
-        const origin = formData.get('origin') as string
+        const start_location = formData.get('start_location') as string
         const destination = formData.get('destination') as string
         const status = formData.get('status') as string
-        const vehicle_type = formData.get('vehicle_type') as string
-        const duration_minutes = formData.get('duration_minutes') ? parseInt(formData.get('duration_minutes') as string) : null
-        const fare_min = formData.get('fare_max') ? parseInt(formData.get('fare_max') as string) : null // we'll use fare_min for the estimated total
+        const vehicle_type_used = formData.get('vehicle_type_used') as string
+        const estimated_travel_time_min = formData.get('estimated_travel_time_min') ? parseInt(formData.get('estimated_travel_time_min') as string) : null
+        const fare_price_range_min = formData.get('fare_price_range_max') ? parseInt(formData.get('fare_price_range_max') as string) : null // we'll use fare_price_range_min for the estimated total
         const itineraryStr = formData.get('stopsJSON') as string
 
-        let itinerary = []
+        let stops_along_the_way = []
         if (itineraryStr) {
             try {
-                itinerary = JSON.parse(itineraryStr)
+                stops_along_the_way = JSON.parse(itineraryStr)
             } catch (e) { /* ignore */ }
         }
 
@@ -197,17 +197,17 @@ export async function updateRouteDetails(formData: FormData) {
         if (!actorProfile?.is_admin) return { error: 'Unauthorized' }
 
         const updates: any = {
-            origin,
+            start_location,
             destination,
-            vehicle_type,
-            itinerary,
+            vehicle_type_used,
+            stops_along_the_way,
             status
         }
 
-        if (duration_minutes !== null) updates.duration_minutes = duration_minutes
-        if (fare_min !== null) {
-            updates.fare_min = fare_min
-            updates.price_estimated = fare_min
+        if (estimated_travel_time_min !== null) updates.estimated_travel_time_min = estimated_travel_time_min
+        if (fare_price_range_min !== null) {
+            updates.fare_price_range_min = fare_price_range_min
+            updates.fare_price_range_min = fare_price_range_min
         }
 
         const { error } = await supabase.from('community_routes').update(updates).eq('id', routeId)

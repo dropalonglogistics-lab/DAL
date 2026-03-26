@@ -398,6 +398,12 @@
     .radioGroup {
         grid-template-columns: 1fr;
     }
+    .container {
+        padding: 12px;
+    }
+    .card {
+        padding: 32px 24px;
+    }
 }
 
 .radioCard {

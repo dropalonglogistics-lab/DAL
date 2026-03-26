@@ -15,13 +15,13 @@ function parseCSV(text: string): any[] {
 
 function mapRow(row: any) {
     return {
-        origin: row.origin || row.from || row.start || '',
+        start_location: row.start_location || row.from || row.start || '',
         destination: row.destination || row.to || row.end || '',
-        vehicle_type: row.vehicle_type || row.vehicle || row.transport || 'Various',
-        duration_minutes: parseInt(row.duration_minutes || row.duration || '0') || null,
-        price_estimated: parseFloat(row.price_estimated || row.fare || row.price || '0') || null,
+        vehicle_type_used: row.vehicle_type_used || row.vehicle || row.transport || 'Various',
+        estimated_travel_time_min: parseInt(row.estimated_travel_time_min || row.duration || '0') || null,
+        fare_price_range_min: parseFloat(row.fare_price_range_min || row.fare || row.price || '0') || null,
         status: 'approved',
-        itinerary: [],
+        stops_along_the_way: [],
     };
 }
 
@@ -73,8 +73,8 @@ export async function POST(req: NextRequest) {
         const batch = rows.slice(i, i + BATCH);
         const mapped = batch.map((row, idx) => {
             const m = mapRow(row);
-            if (!m.origin || !m.destination) {
-                errors.push(`Row ${i + idx + 1}: missing origin or destination`);
+            if (!m.start_location || !m.destination) {
+                errors.push(`Row ${i + idx + 1}: missing start_location or destination`);
                 failed++;
                 return null;
             }

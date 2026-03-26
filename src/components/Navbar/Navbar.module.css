@@ -7,6 +7,8 @@
     z-index: 1000;
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    overflow: hidden;
 }
 
 .navbar.scrolled {
@@ -22,14 +24,32 @@
     align-items: center;
     max-width: 1280px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 16px;
     height: 64px;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .navContainer {
+        padding: 0 24px;
+    }
 }
 
 /* Logo */
 .logo {
     display: flex;
     align-items: center;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+.logo img {
+    max-height: 36px;
+    width: auto;
+    max-width: 120px;
+    object-fit: contain;
     flex-shrink: 0;
 }
 
@@ -119,7 +139,9 @@
 .actions {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
+    flex-shrink: 0;
+    min-width: 0;
 }
 
 .iconBtn {
@@ -529,51 +551,37 @@
         display: none !important;
     }
 
+    /* On mobile, ONLY show the hamburger button — hide everything else in the actions row */
     .mobileOnly {
         display: flex;
         align-items: center;
     }
 
     .mobileOnly.goPremiumMobile {
-        display: inline-flex;
+        display: none !important; /* Hide the compact premium badge on mobile top bar */
+    }
+
+    /* Hide theme toggle and cart from mobile top bar — they live in the dropdown */
+    .themeToggleBtn,
+    .cartIconBtn {
+        display: none !important;
     }
 
     .actions {
-        gap: 8px;
-        /* Tighter spacing so 4 items fit */
-    }
-
-    .goPremiumMobile {
-        padding: 6px 12px;
-        background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
-        color: var(--brand-black);
-        border: none;
-        border-radius: var(--radius-full);
-        font-size: 0.8rem;
-        font-weight: 800;
         gap: 4px;
-        cursor: default;
-        white-space: nowrap;
-        order: 1;
-    }
-
-    .themeToggleBtn {
-        order: 2;
-        margin-left: 0;
     }
 
     .unifiedMenuBtn {
         background: none;
         border: none;
         cursor: pointer;
-        padding: 0;
+        padding: 8px;
         color: white;
         order: 3;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-left: 4px;
-        /* Small push off the theme toggle */
+        flex-shrink: 0;
     }
 
     .unifiedMenuBtn:hover {
@@ -601,3 +609,33 @@
     align-items: center;
     box-shadow: 0 2px 8px rgba(201, 162, 39, 0.4);
 }
+
+/* Mobile utility row (theme toggle + cart) shown at bottom of mobile dropdown */
+.mobileUtilityRow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 8px 0 16px;
+}
+
+.mobileUtilityBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    min-height: 48px;
+    transition: background 0.2s;
+}
+
+.mobileUtilityBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}

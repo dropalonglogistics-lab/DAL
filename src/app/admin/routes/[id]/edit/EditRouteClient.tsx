@@ -23,14 +23,14 @@ interface RouteStop {
 
 export default function EditRouteClient({ routeData }: { routeData: any }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [origin, setOrigin] = useState(routeData.origin || '');
+    const [start_location, setOrigin] = useState(routeData.start_location || '');
     const [destination, setDestination] = useState(routeData.destination || '');
-    const [vehicleType, setVehicleType] = useState(routeData.vehicle_type || '');
+    const [vehicleType, setVehicleType] = useState(routeData.vehicle_type_used || '');
     const [status, setStatus] = useState(routeData.status || 'pending');
 
-    // Parse itinerary from JSONb to state array
-    const initialStops = routeData.itinerary && routeData.itinerary.length > 0
-        ? routeData.itinerary.map((stop: any, idx: number) => ({
+    // Parse stops_along_the_way from JSONb to state array
+    const initialStops = routeData.stops_along_the_way && routeData.stops_along_the_way.length > 0
+        ? routeData.stops_along_the_way.map((stop: any, idx: number) => ({
             id: Date.now().toString() + idx,
             location: stop.location || '',
             instructions: stop.instruction || stop.instructions || '',
@@ -41,8 +41,8 @@ export default function EditRouteClient({ routeData }: { routeData: any }) {
 
     const [stops, setStops] = useState<RouteStop[]>(initialStops);
 
-    const [totalFare, setTotalFare] = useState(routeData.price_estimated || routeData.fare_min || '');
-    const [duration, setDuration] = useState(routeData.duration_minutes || '');
+    const [totalFare, setTotalFare] = useState(routeData.fare_price_range_min || routeData.fare_price_range_min || '');
+    const [duration, setDuration] = useState(routeData.estimated_travel_time_min || '');
 
     const router = useRouter();
 
@@ -66,12 +66,12 @@ export default function EditRouteClient({ routeData }: { routeData: any }) {
 
         const formData = new FormData();
         formData.append('routeId', routeData.id);
-        formData.append('origin', origin);
+        formData.append('start_location', start_location);
         formData.append('destination', destination);
         formData.append('status', status);
-        formData.append('vehicle_type', vehicleType);
-        formData.append('fare_max', totalFare.toString());
-        formData.append('duration_minutes', duration.toString());
+        formData.append('vehicle_type_used', vehicleType);
+        formData.append('fare_price_range_max', totalFare.toString());
+        formData.append('estimated_travel_time_min', duration.toString());
 
         // Format stops back to JSON correctly
         const formattedStops = stops.map(stop => ({
@@ -117,7 +117,7 @@ export default function EditRouteClient({ routeData }: { routeData: any }) {
                                 <Navigation size={18} className={styles.inputIcon} />
                                 <input
                                     type="text"
-                                    value={origin}
+                                    value={start_location}
                                     onChange={(e) => setOrigin(e.target.value)}
                                     className={styles.inputWithIcon}
                                     required

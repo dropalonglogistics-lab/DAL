@@ -6,9 +6,9 @@
  * or a background job that processes user inputs, search patterns, and incident reports.
  */
 
-export async function learnNewRoutePattern(origin: string, destination: string, vehicleType: string, itinerary: any[]) {
-    console.log(`[AI LEARNING]: Analyzing new route pattern from ${origin} to ${destination}`);
-    console.log(`[AI LEARNING]: Clustering itinerary segments: ${JSON.stringify(itinerary)}`);
+export async function learnNewRoutePattern(start_location: string, destination: string, vehicleType: string, stops_along_the_way: any[]) {
+    console.log(`[AI LEARNING]: Analyzing new route pattern from ${start_location} to ${destination}`);
+    console.log(`[AI LEARNING]: Clustering stops_along_the_way segments: ${JSON.stringify(stops_along_the_way)}`);
 
     // Simulate probability-based verification
     const isReliable = Math.random() > 0.3;

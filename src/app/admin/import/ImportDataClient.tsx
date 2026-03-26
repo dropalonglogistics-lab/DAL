@@ -79,11 +79,11 @@ export default function ImportDataClient() {
                         </div>
                         <pre style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', fontSize: '0.75rem', overflowX: 'auto', color: 'var(--text-secondary)' }}>{`[
   {
-    "origin": "Mile 1",
+    "start_location": "Mile 1",
     "destination": "Rumuola",
-    "vehicle_type": "Keke",
-    "duration_minutes": 20,
-    "price_estimated": 200
+    "vehicle_type_used": "Keke",
+    "estimated_travel_time_min": 20,
+    "fare_price_range_min": 200
   }
 ]`}</pre>
                     </div>
@@ -91,7 +91,7 @@ export default function ImportDataClient() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--color-gold)' }}>
                             <FileSpreadsheet size={16} /> <strong>CSV</strong>
                         </div>
-                        <pre style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', fontSize: '0.75rem', overflowX: 'auto', color: 'var(--text-secondary)' }}>{`origin,destination,vehicle_type,duration_minutes,price_estimated
+                        <pre style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', fontSize: '0.75rem', overflowX: 'auto', color: 'var(--text-secondary)' }}>{`start_location,destination,vehicle_type_used,estimated_travel_time_min,fare_price_range_min
 Mile 1,Rumuola,Keke,20,200
 Choba,UNIPORT,Bus,30,150`}</pre>
                     </div>

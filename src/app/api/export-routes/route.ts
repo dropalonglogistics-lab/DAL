@@ -12,11 +12,11 @@ export async function GET(request: Request) {
             .from('community_routes')
             .select(`
                 id,
-                origin,
+                start_location,
                 destination,
-                vehicle_type,
-                price_estimated,
-                duration_minutes,
+                vehicle_type_used,
+                fare_price_range_min,
+                estimated_travel_time_min,
                 status,
                 created_at,
                 profiles(full_name, email)
@@ -35,11 +35,11 @@ export async function GET(request: Request) {
         const csvRows = data.map((route: any) => {
             return [
                 route.id,
-                `"${route.origin}"`,
+                `"${route.start_location}"`,
                 `"${route.destination}"`,
-                `"${route.vehicle_type || ''}"`,
-                route.price_estimated || '',
-                route.duration_minutes || '',
+                `"${route.vehicle_type_used || ''}"`,
+                route.fare_price_range_min || '',
+                route.estimated_travel_time_min || '',
                 route.status,
                 new Date(route.created_at).toISOString().split('T')[0],
                 `"${route.profiles?.full_name || 'Anonymous'}"`,

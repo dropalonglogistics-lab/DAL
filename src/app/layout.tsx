@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import PublicLayout from '@/components/layout/PublicLayout';
@@ -11,6 +11,11 @@ export const metadata: Metadata = {
     title: 'Drop Along Logistics (DAL)',
     description: 'Intelligent Urban Routing & Mobility Platform',
     icons: { icon: '/dal-logo-light.png' },
+};
+
+export const viewport: Viewport = {
+    width: 'device-width',
+    initialScale: 1,
 };
 
 export default function RootLayout({

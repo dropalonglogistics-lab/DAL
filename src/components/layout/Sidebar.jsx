@@ -10,7 +10,7 @@ import {
     Briefcase, DollarSign, Clock, CheckSquare, TrendingUp,
     Users, AlertTriangle, Shield, Building, ShoppingCart,
     BarChart2, Megaphone, Coins, UserCheck, Globe,
-    Navigation, LogOut, Zap, SlidersHorizontal, FileText
+    Navigation, LogOut, Zap, SlidersHorizontal, FileText, X
 } from 'lucide-react';
 import Badge from '@/components/UI/Badge';
 import styles from './Sidebar.module.css';
@@ -95,7 +95,7 @@ const ROLE_LABELS = {
     superadmin: 'Super Admin',
 };
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
     const [user, setUser] = useState(null);
     const [profile, setProfile] = useState(null);
     const pathname = usePathname();
@@ -139,19 +139,24 @@ export default function Sidebar() {
     };
 
     return (
-        <aside className={styles.sidebar}>
-            {/* Logo */}
-            <div className={styles.sidebarLogo}>
-                <Link href="/">
-                    <Image
-                        src="/dal-logo-light.png"
-                        alt="DAL"
-                        height={36}
-                        width={36}
-                        style={{ objectFit: 'contain', paddingBottom: '16px' }}
-                    />
-                </Link>
-            </div>
+        <>
+            {isOpen && <div className={styles.overlay} onClick={onClose} />}
+            <aside className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''}`}>
+                {/* Logo */}
+                <div className={styles.sidebarLogo}>
+                    <Link href="/">
+                        <Image
+                            src="/dal-logo-light.png"
+                            alt="DAL"
+                            height={36}
+                            width={36}
+                            style={{ objectFit: 'contain', paddingBottom: '16px' }}
+                        />
+                    </Link>
+                    <button className={styles.mobileCloseBtn} onClick={onClose}>
+                        <X size={20} />
+                    </button>
+                </div>
 
             {/* Navigation */}
             <nav className={styles.sidebarNav}>
@@ -189,5 +194,6 @@ export default function Sidebar() {
                 </button>
             </div>
         </aside>
+    </>
     );
 }

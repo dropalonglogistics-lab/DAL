@@ -172,9 +172,9 @@ export default function Navbar() {
                         <Image
                             src="/dal-logo-light.png"
                             alt="Drop Along Logistics"
-                            height={40}
-                            width={160}
-                            style={{ objectFit: 'contain', objectPosition: 'left', padding: '8px' }}
+                            height={36}
+                            width={120}
+                            style={{ objectFit: 'contain', objectPosition: 'left', maxHeight: '36px', width: 'auto' }}
                             priority
                         />
                     </Link>
@@ -221,7 +221,7 @@ export default function Navbar() {
 
                         <button
                             onClick={() => setIsCartOpen(true)}
-                            className={styles.iconBtn}
+                            className={`${styles.iconBtn} ${styles.cartIconBtn}`}
                             aria-label="Open cart"
                         >
                             <div className={styles.iconWrapper}>
@@ -409,6 +409,27 @@ export default function Navbar() {
                             </Link>
                         </div>
                     )}
+
+                    {/* Mobile-only utility row: theme toggle + cart */}
+                    <div className={styles.dividerLine} />
+                    <div className={styles.mobileUtilityRow}>
+                        <button
+                            onClick={() => { setIsDarkMode(p => !p); }}
+                            className={styles.mobileUtilityBtn}
+                            aria-label="Toggle theme"
+                        >
+                            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                            <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                        </button>
+                        <button
+                            onClick={() => { setIsCartOpen(true); setIsMobileMenuOpen(false); }}
+                            className={styles.mobileUtilityBtn}
+                            aria-label="Open cart"
+                        >
+                            <ShoppingBag size={18} />
+                            <span>Cart</span>
+                        </button>
+                    </div>
                 </div>
 
                 <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />

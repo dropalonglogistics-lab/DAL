@@ -27,6 +27,30 @@
     z-index: 10;
 }
 
+.topBarLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mobileMenuBtn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: var(--radius-md);
+}
+
+.mobileMenuBtn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .mobileMenuBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
 /* Breadcrumb */
 .breadcrumb {
     display: flex;
@@ -105,4 +129,28 @@ body.dark-mode .bellBtn:hover {
     flex: 1;
     padding: 28px;
     overflow-y: auto;
+    overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+    .dashboardContent {
+        padding: 16px;
+    }
+    
+    .mobileMenuBtn {
+        display: flex;
+    }
+}
+
+/* Make tables visually clear and force scrolling gracefully */
+:global(table) {
+    width: 100%;
+}
+
+:global(.table-responsive), 
+:global([data-table-wrapper="true"]),
+.dashboardContent > :global(div:has(table)) {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }

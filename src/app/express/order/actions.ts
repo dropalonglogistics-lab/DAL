@@ -56,7 +56,7 @@ export async function submitExpressOrder(formData: any) {
 
     // Fire Order Confirmation Email
     if (user && user.email) {
-        // Note: In prod, replace dal-three.vercel.app with dynamic origin or absolute URL if using fetch from server action.
+        // Note: In prod, replace dal-three.vercel.app with dynamic start_location or absolute URL if using fetch from server action.
         // Actually, since it's a server action, it's cleaner to just instantiate Resend directly or call our API via absolute URL.
         // I will use fetch to the API route to decouple.
         try {
