@@ -8,12 +8,15 @@ import { createClient } from '@/utils/supabase/client';
 import {
     Moon, Sun, Menu, X, Map, AlertTriangle, Users,
     Navigation, LogOut, Shield, Coins, User, ChevronDown,
-    Star, Bell
+    Star, Bell, ShoppingBag, Package
 } from 'lucide-react';
 import styles from './Navbar.module.css';
+import CartSidebar from '../shop/CartSidebar';
 
 const NAV_LINKS = [
     { href: '/search', label: 'Route Search', icon: Map },
+    { href: '/express', label: 'Express', icon: Package },
+    { href: '/shopper', label: 'Errand Worker', icon: ShoppingBag },
     { href: '/alerts', label: 'Alerts', icon: AlertTriangle },
     { href: '/community', label: 'Community', icon: Users },
     { href: '/suggest-route', label: 'Suggest Route', icon: Navigation },
@@ -23,7 +26,10 @@ export default function Navbar() {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isAvatarDropdownOpen, setIsAvatarDropdownOpen] = useState(false);
+    const [isCartOpen, setIsCartOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [f2Live, setF2Live] = useState(false);
+    const [f3Live, setF3Live] = useState(false);
     const [user, setUser] = useState<any>(null);
     const [profile, setProfile] = useState<any>(null);
     const router = useRouter();
@@ -36,6 +42,10 @@ export default function Navbar() {
         // Scroll listener for backdrop-blur intensity
         const handleScroll = () => setIsScrolled(window.scrollY > 10);
         window.addEventListener('scroll', handleScroll, { passive: true });
+
+        // Gates
+        fetch('/api/config?key=f2_express_live').then(res => res.json()).then(data => setF2Live(data.f2_express_live)).catch(() => {});
+        fetch('/api/config?key=f3_shopper_live').then(res => res.json()).then(data => setF3Live(data.f3_shopper_live)).catch(() => {});
 
         // Theme
         const saved = localStorage.getItem('theme');
@@ -178,6 +188,8 @@ export default function Navbar() {
                                 className={`${styles.navLink} ${isActive(href) ? styles.navLinkActive : ''}`}
                             >
                                 {label}
+                                {href === '/express' && !f2Live && <span className={styles.soonBadgeNav}>Soon</span>}
+                                {href === '/shopper' && !f3Live && <span className={styles.soonBadgeNav}>Soon</span>}
                             </Link>
                         ))}
                         {profile?.is_admin && (
@@ -204,6 +216,16 @@ export default function Navbar() {
                                     ? <Sun size={19} className={styles.sunIcon} />
                                     : <Moon size={19} className={styles.moonIcon} />
                                 }
+                            </div>
+                        </button>
+
+                        <button
+                            onClick={() => setIsCartOpen(true)}
+                            className={styles.iconBtn}
+                            aria-label="Open cart"
+                        >
+                            <div className={styles.iconWrapper}>
+                                <ShoppingBag size={19} />
                             </div>
                         </button>
 
@@ -347,6 +369,8 @@ export default function Navbar() {
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 {label}
+                                {href === '/express' && !f2Live && <span className={styles.soonBadgeNav}>Soon</span>}
+                                {href === '/shopper' && !f3Live && <span className={styles.soonBadgeNav}>Soon</span>}
                             </Link>
                         ))}
                         {profile?.is_admin && (
@@ -386,6 +410,8 @@ export default function Navbar() {
                         </div>
                     )}
                 </div>
+
+                <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
             </nav>
         </>
     );

@@ -1,0 +1,517 @@
+.pageWrap {
+    min-height: 100vh;
+    background-color: #050505;
+    color: white;
+}
+
+/* ─── Landing ─────────────────────────────────────────────────── */
+.landingWrap {
+    width: 100%;
+}
+
+.heroSection {
+    padding: 100px 24px 80px;
+    background: radial-gradient(circle at center top, rgba(201, 162, 39, 0.15) 0%, transparent 60%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.83v58.34h-58.34l-.83-.83V0h58.34zM29.582 23.497c-3.32-.98-6.19-2.096-8.526-3.313-2.31-1.196-4.04-2.67-5.11-4.364-1.054-1.666-1.554-3.518-1.503-5.496.052-2.022.685-3.877 1.905-5.556 1.258-1.737 3.024-3.13 5.3-4.17 2.308-1.048 5.097-1.66 8.368-1.832 3.23-.172 6.64.12 10.218.887 3.61.765 7.03 2.012 10.26 3.738l-2.042 5.01c-2.924-1.508-6.002-2.584-9.227-3.23-3.187-.636-6.195-.87-9.018-.707-2.738.164-5.068.65-6.993 1.465-1.905.8-3.367 1.88-4.385 3.233-.996 1.332-1.466 2.766-1.41 4.303.056 1.554.646 2.947 1.77 4.18 1.137 1.233 2.722 2.296 4.755 3.19s4.35 1.603 6.953 2.12c2.628.528 5.253.972 7.87 1.33 2.634.363 5.163.784 7.585 1.267 2.446.49 4.675 1.114 6.69 1.875 2.03.766 3.76 1.73 5.196 2.894 1.442 1.18 2.516 2.613 3.218 4.3.714 1.7.994 3.722.843 6.062-.172 2.623-.925 4.965-2.257 7.025-1.353 2.086-3.23 3.76-5.633 5.024-2.427 1.28-5.323 2.146-8.68 2.602-3.336.452-6.914.472-10.74.062-3.864-.42-7.8-1.356-11.802-2.812l2.31-5.12c3.705 1.487 7.37 2.457 10.998 2.908s7.054.347 10.28.006c3.18-.5 5.922-1.35 8.23-2.553 2.316-1.2 4.093-2.725 5.334-4.577 1.246-1.85 1.84-3.957 1.782-6.324-.052-2.21-.564-4.08-1.536-5.61-1.026-1.536-2.457-2.816-4.298-3.84-1.854-1.042-4.046-1.853-6.58-2.435-2.552-.592-5.35-1.05-8.396-1.378-3.033-.318-6.19-.64-9.47-1.033z' fill='%23ffffff' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E");
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.heroContent {
+    max-width: 800px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.badge {
+    background: rgba(201, 162, 39, 0.15);
+    color: var(--brand-gold);
+    padding: 6px 16px;
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    border: 1px solid rgba(201, 162, 39, 0.3);
+}
+
+.heroTitle {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    background: linear-gradient(to right, #fff, #a0a0a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.heroSubtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+    margin-bottom: 40px;
+    max-width: 600px;
+}
+
+.pricingCard {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    padding: 20px 40px;
+    margin-bottom: 40px;
+    backdrop-filter: blur(10px);
+}
+
+.pricingPrice {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--brand-gold);
+    margin-bottom: 4px;
+}
+
+.pricingNote {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.95rem;
+}
+
+.ctaButton {
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
+    color: var(--brand-black);
+    border: none;
+    padding: 16px 36px;
+    border-radius: var(--radius-full);
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 30px rgba(201, 162, 39, 0.3);
+}
+
+.ctaButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(201, 162, 39, 0.4);
+}
+
+.heroSmall {
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.benefitsSection {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 24px;
+}
+
+.sectionTitle {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 50px;
+}
+
+.benefitsGrid {
+    display: grid;
+    grid-template-columns: repeat(autofit, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+.benefitCard {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    transition: transform 0.2s;
+}
+
+.benefitCard:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.benefitIconWrap {
+    width: 60px;
+    height: 60px;
+    background: rgba(201, 162, 39, 0.1);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.benefitIcon {
+    color: var(--brand-gold);
+}
+
+.benefitTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: white;
+}
+
+.benefitDesc {
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+
+/* ─── Application Form ────────────────────────────────────────── */
+.appWrap {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 24px 100px;
+}
+
+.backBtn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.backBtn:hover {
+    color: white;
+}
+
+.appContainer {
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-xl);
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.stepper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 50px;
+    position: relative;
+}
+
+.stepIndicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+}
+
+.stepCircle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #222;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s;
+}
+
+.stepActive .stepCircle {
+    background: var(--brand-gold);
+    border-color: var(--brand-gold);
+    color: var(--brand-black);
+}
+
+.stepLabel {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+}
+
+.stepActive .stepLabel {
+    color: white;
+}
+
+.stepLine {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: -1;
+}
+
+.stepActive .stepLine {
+    background: var(--brand-gold);
+}
+
+.formArea {
+    min-height: 300px;
+}
+
+.stepTitle {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.stepDesc {
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 30px;
+}
+
+.inputGroup {
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.inputGroup label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.inputGroup input,
+.inputGroup select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 1rem;
+    width: 100%;
+}
+
+.inputGroup input:focus,
+.inputGroup select:focus {
+    outline: none;
+    border-color: var(--brand-gold);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.chipGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.chip {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.chip:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.chipActive {
+    background: rgba(201, 162, 39, 0.15);
+    border-color: var(--brand-gold);
+    color: var(--brand-gold);
+}
+
+.uploadBox {
+    position: relative;
+    border: 2px dashed rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.02);
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.uploadBox:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.fileInput {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.uploadLabel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.uploadIcon {
+    opacity: 0.5;
+}
+
+.logoPreviewImg {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+}
+
+.galleryPreviewGrid {
+    display: flex;
+    gap: 12px;
+}
+
+.galleryPreviewImg {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+}
+
+.verifyCard {
+    background: rgba(201, 162, 39, 0.08);
+    border: 1px solid rgba(201, 162, 39, 0.2);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.verifyIcon {
+    color: var(--brand-gold);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.verifyTitle {
+    color: var(--brand-gold);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.verifyDesc {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.termsWrap {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.checkboxLabel input {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    accent-color: var(--brand-gold);
+    margin-top: 2px;
+}
+
+.checkboxText {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+}
+
+.linkText {
+    color: var(--brand-gold);
+    text-decoration: underline;
+    text-decoration-color: rgba(201, 162, 39, 0.3);
+}
+
+.formActions {
+    display: flex;
+    align-items: center;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btnPrimary {
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
+    color: var(--brand-black);
+    border: none;
+    padding: 14px 32px;
+    border-radius: var(--radius-full);
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btnPrimary:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.btnPrimary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnSecondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 14px 32px;
+    border-radius: var(--radius-full);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btnSecondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+    .heroTitle {
+        font-size: 2.5rem;
+    }
+
+    .row {
+        grid-template-columns: 1fr;
+    }
+
+    .appContainer {
+        padding: 24px 20px;
+    }
+
+    .stepper {
+        overflow-x: auto;
+        padding-bottom: 20px;
+    }
+}

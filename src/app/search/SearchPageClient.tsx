@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import RouteSearch from '@/components/RouteSearch/RouteSearch';
 import RouteResultCard from '@/components/RouteResults/RouteResultCard';
 import RouteMap from '@/components/Map/RouteMap';
@@ -13,6 +13,24 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
     const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
     const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
     const [expandedRouteId, setExpandedRouteId] = useState<string | null>(null);
+    const [allAlerts, setAllAlerts] = useState<any[]>([]);
+
+    useEffect(() => {
+        fetch('/api/alerts').then(r => r.json()).then(data => setAllAlerts(data.alerts || [])).catch(() => {});
+    }, []);
+
+    const getAlertsForRoute = useCallback((route: any) => {
+        if (!route) return [];
+        const areas = new Set([route.origin.toLowerCase(), route.destination.toLowerCase()]);
+        route.itinerary?.forEach((step: any) => areas.add(step.location.toLowerCase()));
+        return allAlerts.filter(a => a.area && areas.has(a.area.toLowerCase()));
+    }, [allAlerts]);
+
+    const getTrafficForRoute = useCallback((routeAlerts: any[]) => {
+        if (routeAlerts.some(a => a.severity === 'critical')) return 'heavy';
+        if (routeAlerts.some(a => a.severity === 'warning')) return 'moderate';
+        return 'clear';
+    }, []);
 
     const handleRouteSelect = (route: any) => {
         setSelectedRoute(route);
@@ -56,7 +74,8 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
                                         time={`${route.duration_minutes} min`}
                                         fare_min={route.fare_min || route.price_estimated}
                                         fare_max={route.fare_max || route.price_estimated}
-                                        traffic="clear"
+                                        traffic={getTrafficForRoute(getAlertsForRoute(route))}
+                                        routeAlerts={getAlertsForRoute(route)}
                                         isRecommended={true}
                                         itinerary={route.itinerary}
                                         isGlobalMode={true}
@@ -94,6 +113,7 @@ export default function SearchPageClient({ initialRoutes, initialTitle }: { init
                                     city: 'Port Harcourt',
                                     type: step.type
                                 })) || []}
+                                traffic={getTrafficForRoute(getAlertsForRoute(selectedRoute))}
                             />
                             <div className={styles.mapOverlayInfo}>
                                 <div className={styles.overlayHeader}>

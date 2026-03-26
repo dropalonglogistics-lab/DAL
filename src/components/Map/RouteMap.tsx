@@ -11,10 +11,12 @@ const DynamicMap = dynamic(() => import('./DynamicMap'), {
 
 export default function RouteMap({
     locations,
-    activeStepIndex
+    activeStepIndex,
+    traffic
 }: {
     locations: { title: string; desc: string; city: string; type?: string }[];
     activeStepIndex?: number | null;
+    traffic?: 'clear' | 'moderate' | 'heavy';
 }) {
-    return <DynamicMap locations={locations} activeStepIndex={activeStepIndex} />;
+    return <DynamicMap locations={locations} activeStepIndex={activeStepIndex} traffic={traffic} />;
 }

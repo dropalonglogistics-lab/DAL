@@ -1,0 +1,315 @@
+.container {
+    padding: 24px;
+    color: white;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--brand-gold);
+}
+
+.subtitle {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.dateSelector {
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.dateSelector:focus {
+    outline: none;
+    border-color: var(--brand-gold);
+}
+
+/* Metrics Grid */
+.metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.metricCard {
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.metricCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border-color: rgba(201, 162, 39, 0.3);
+}
+
+.metricHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.metricLabel {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.metricIconWrap {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.metricIcon {
+    color: white;
+}
+
+.metricBody {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.metricValue {
+    font-size: 2rem;
+    font-weight: 800;
+    color: white;
+}
+
+.metricTrend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+}
+
+.trendUp {
+    color: #34D399;
+    background: rgba(52, 211, 153, 0.1);
+}
+
+.trendDown {
+    color: #F87171;
+    background: rgba(248, 113, 113, 0.1);
+}
+
+/* Charts */
+.chartsRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.chartCard {
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.cardHeader h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.mockChartArea {
+    flex: 1;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+}
+
+/* Bar Chart */
+.chartBars {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    height: 200px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.barWrap {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    align-items: flex-end;
+}
+
+.bar {
+    width: 30px;
+    background: linear-gradient(to top, rgba(201, 162, 39, 0.4), var(--brand-gold));
+    border-radius: 4px 4px 0 0;
+    transition: height 1s ease-out;
+}
+
+.chartLabels {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.chartLabels span {
+    flex: 1;
+    text-align: center;
+}
+
+/* Line Chart */
+.svgLineChart {
+    width: 100%;
+    height: 100%;
+}
+
+/* Bottom Row */
+.bottomRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 1024px) {
+    .bottomRow {
+        grid-template-columns: 1fr;
+    }
+}
+
+.topProductsCard,
+.heatmapCard {
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    min-height: 350px;
+}
+
+.productList {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.productRow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.productDetails {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.productName {
+    font-weight: 600;
+    color: white;
+}
+
+.productStats {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.productProgressWrap {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.productProgressBar {
+    height: 100%;
+    background: var(--brand-gold);
+    border-radius: 3px;
+}
+
+/* Heatmap Mockup */
+.heatmapMockup {
+    width: 100%;
+    height: 250px;
+    background: #0a0a0a;
+    border-radius: var(--radius-md);
+    position: relative;
+    overflow: hidden;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.mapDot {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, var(--brand-gold) 0%, rgba(201, 162, 39, 0) 70%);
+    border-radius: 50%;
+}
+
+.mapOverlay {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+.badge {
+    background: rgba(248, 113, 113, 0.15);
+    color: #F87171;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}

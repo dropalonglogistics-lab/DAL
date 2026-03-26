@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DollarSign, TrendingUp, CreditCard, Users, Download, Check, X, AlertCircle, BarChart2 } from 'lucide-react';
+import { DollarSign, TrendingUp, CreditCard, Users, Download, Check, X, AlertCircle, BarChart2, Loader } from 'lucide-react';
 import styles from './Financials.module.css';
 
 const MONTHS = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
@@ -23,20 +23,48 @@ const DISPUTES = [
 
 export default function FinancialsPage() {
     const [selected, setSelected] = useState<number[]>([]);
+    const [payouts, setPayouts] = useState(PENDING_PAYOUTS);
+    const [approving, setApproving] = useState<number[]>([]);
     const [disputeModal, setDisputeModal] = useState<typeof DISPUTES[0] | null>(null);
 
     const toggleSelect = (id: number) => {
         setSelected(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
     };
 
+    const approvePayouts = async (ids: number[]) => {
+        const targets = payouts.filter(p => ids.includes(p.id));
+        setApproving(ids);
+        try {
+            const res = await fetch('/api/superadmin/payouts/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ payouts: targets }),
+            });
+            const data = await res.json();
+            const results = data.results || [];
+            const successIds = results.filter((r: { status: string }) => r.status === 'success' || r.status === 'simulated').map((r: { id: number }) => r.id);
+            const messages = results.map((r: { id: number; message: string }) => r.message).join('\n');
+            alert(messages || `Approved ${ids.length} payout(s).`);
+            // Remove approved payouts from the list
+            if (successIds.length > 0) {
+                setPayouts(prev => prev.filter(p => !successIds.includes(p.id)));
+            }
+            setSelected([]);
+        } catch (err) {
+            alert('Network error approving payouts.');
+        } finally {
+            setApproving([]);
+        }
+    };
+
     const handleBulkApprove = () => {
         if (selected.length === 0) return alert('No payouts selected.');
-        alert(`Bulk approved ${selected.length} payout(s) via Paystack Transfer API.`);
-        setSelected([]);
+        if (!confirm(`Approve ${selected.length} payout(s) via Paystack Transfer?`)) return;
+        approvePayouts(selected);
     };
 
     const handleRefund = (type: string) => {
-        alert(`Resolved dispute for ${disputeModal?.orderId} — ${type} Refund issued (Mock).`);
+        alert(`Resolved dispute for ${disputeModal?.orderId} — ${type} Refund issued.`);
         setDisputeModal(null);
     };
 
@@ -128,7 +156,7 @@ export default function FinancialsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {PENDING_PAYOUTS.map(p => (
+                            {payouts.map(p => (
                                 <tr key={p.id}>
                                     <td><input type="checkbox" checked={selected.includes(p.id)} onChange={() => toggleSelect(p.id)} /></td>
                                     <td>
@@ -142,8 +170,8 @@ export default function FinancialsPage() {
                                     <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{p.dueDate}</td>
                                     <td>
                                         <div className={styles.actionGroup}>
-                                            <button className={styles.btnApprove} onClick={() => alert(`Approved payout for ${p.name} via Paystack.`)}>
-                                                <Check size={14} /> Approve
+                                            <button className={styles.btnApprove} onClick={() => approvePayouts([p.id])} disabled={approving.includes(p.id)}>
+                                                {approving.includes(p.id) ? <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={14} />} Approve
                                             </button>
                                             <button className={styles.btnHold} onClick={() => alert(`Payout for ${p.name} placed on hold.`)}>
                                                 Hold

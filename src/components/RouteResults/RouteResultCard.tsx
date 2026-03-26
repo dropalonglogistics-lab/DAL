@@ -21,6 +21,7 @@ interface RouteResultProps {
     fare_min: number;
     fare_max: number;
     traffic: 'clear' | 'moderate' | 'heavy';
+    routeAlerts?: any[];
     warnings?: string[];
     isRecommended?: boolean;
     itinerary?: any[];
@@ -38,6 +39,7 @@ export default function RouteResultCard({
     fare_min,
     fare_max,
     traffic,
+    routeAlerts = [],
     warnings,
     isRecommended,
     itinerary = [],
@@ -180,6 +182,24 @@ export default function RouteResultCard({
                                 </div>
                             ))}
                         </div>
+
+                        {routeAlerts && routeAlerts.length > 0 && (
+                            <div className={styles.alertsSection}>
+                                <h4 className={styles.alertsHeading}>Alerts on this route</h4>
+                                {routeAlerts.map(alert => (
+                                    <div key={alert.id} className={`${styles.alertItem} ${styles[alert.severity || 'info']}`}>
+                                        <AlertTriangle size={16} className={styles.alertIcon} />
+                                        <div className={styles.alertContent}>
+                                            <div className={styles.alertHeader}>
+                                                <span className={styles.alertType}>{alert.type}</span>
+                                                {alert.area && <span className={styles.alertArea}>• {alert.area}</span>}
+                                            </div>
+                                            <p>{alert.description}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {!isGlobalMode && (
@@ -194,6 +214,7 @@ export default function RouteResultCard({
                                         type: step.type
                                     }))
                                 }
+                                traffic={traffic}
                             />
                         </div>
                     )}

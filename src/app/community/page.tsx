@@ -1,185 +1,124 @@
-import { Users, Trophy, MessageSquare, Heart, ShieldCheck, MapPin, Navigation } from 'lucide-react';
-import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
-import styles from './page.module.css';
+import CommunityClient from './CommunityClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function CommunityPage() {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    // 1. Fetch real stats
-    const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+    if (!user) {
+        // Show lock screen — no content for unauthenticated users
+        return <LockScreen />;
+    }
 
-    // Reports in last 24h
-    const yesterday = new Date();
-    yesterday.setHours(yesterday.getHours() - 24);
-    const { count: reportCount } = await supabase
-        .from('alerts')
-        .select('*', { count: 'exact', head: true })
-        .gt('created_at', yesterday.toISOString());
+    // Pre-fetch competition and user rank for SSR
+    const { data: activeComp } = await supabase
+        .from('competitions')
+        .select('*')
+        .eq('status', 'active')
+        .order('start_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-    const { count: verifiedCount } = await supabase
-        .from('community_routes')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'approved');
+    const { data: lastEnded } = await supabase
+        .from('competitions')
+        .select('*')
+        .eq('status', 'ended')
+        .order('end_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-    const { count: totalRoutes } = await supabase
-        .from('community_routes')
-        .select('*', { count: 'exact', head: true });
+    const competition = activeComp || lastEnded || null;
+    const state = activeComp ? 'active' : lastEnded ? 'ended' : 'none';
 
-    // 2. Fetch recent community suggestions
-    const { data: suggestions } = await supabase
-        .from('community_routes')
-        .select(`
-            *,
-            profiles:user_id (full_name)
-        `)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-    // 3. Fetch Top Contributors (Ordered by points, then by suggestion count)
-    // For now, we fetch by points; if most are 0, we'll just show the existing users
-    const { data: topUsers } = await supabase
+    // Leaderboard top 25
+    const { data: leaderboardRaw, count: totalCount } = await supabase
         .from('profiles')
-        .select('full_name, points')
+        .select('id, full_name, points, city', { count: 'exact' })
         .order('points', { ascending: false })
+        .limit(25);
+
+    const leaderboard = (leaderboardRaw ?? []).map((u, i) => {
+        const parts = (u.full_name || 'Anonymous').split(' ');
+        const firstName = parts[0];
+        const lastInitial = parts.length > 1 ? parts[1].charAt(0) + '.' : '';
+        return {
+            rank: i + 1,
+            id: u.id,
+            name: lastInitial ? `${firstName} ${lastInitial}` : firstName,
+            points: u.points ?? 0,
+            location: u.city || 'Port Harcourt',
+        };
+    });
+
+    // User rank
+    const { data: myProfile } = await supabase.from('profiles').select('points').eq('id', user.id).single();
+    const myPoints = myProfile?.points ?? 0;
+    const { count: aboveMe } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).gt('points', myPoints);
+    const myRank = (aboveMe ?? 0) + 1;
+
+    // Top 25 threshold
+    const top25Threshold = leaderboard.length >= 25 ? leaderboard[24].points : 0;
+
+    // Past competitions
+    const { data: pastComps } = await supabase
+        .from('competitions')
+        .select('*')
+        .eq('status', 'ended')
+        .order('end_date', { ascending: false })
         .limit(5);
-
-    const stats = [
-        { label: 'Active Users', value: `${userCount || 0}+`, icon: <Users size={24} /> },
-        { label: 'Reports Today', value: `${reportCount || 0}`, icon: <MessageSquare size={24} /> },
-        { label: 'Routes Verified', value: `${verifiedCount || 0}`, icon: <ShieldCheck size={24} /> },
-        { label: 'Community Impact', value: `${(totalRoutes || 0) * 12}K`, icon: <Heart size={24} /> },
-    ];
-
-    const contributors = topUsers?.map((u, i) => ({
-        name: u.full_name || 'Anonymous Contributor',
-        points: u.points || 0,
-        rank: i + 1
-    })) || [];
-
-    const getAvatarColor = (name: string) => {
-        const colors = [
-            '#4361EE', '#3A0CA3', '#7209B7', '#B5179E',
-            '#F72585', '#4CC9F0', '#4895EF', '#480CA8'
-        ];
-        let hash = 0;
-        for (let i = 0; i < name.length; i++) {
-            hash = name.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        return colors[Math.abs(hash) % colors.length];
-    };
 
     return (
-        <div className={styles.container}>
-            {/* Hero Section */}
-            <section className={styles.hero}>
-                <h1 className={styles.heroTitle}>Community Hub</h1>
-                <p>
-                    Join {userCount || 'thousands of'} commuters making Port Harcourt movement smarter and safer through
-                    real-time reporting and cooperative route verification.
+        <CommunityClient
+            competition={competition}
+            competitionState={state}
+            leaderboard={leaderboard}
+            totalParticipants={totalCount ?? 0}
+            myRank={myRank}
+            myPoints={myPoints}
+            top25Threshold={top25Threshold}
+            pastCompetitions={pastComps ?? []}
+        />
+    );
+}
+
+function LockScreen() {
+    return (
+        <div style={{
+            minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'radial-gradient(ellipse at 50% 40%, #181818 0%, #000 100%)',
+            flexDirection: 'column', gap: '24px', padding: '40px 20px', textAlign: 'center',
+        }}>
+            <div style={{ fontSize: '64px', lineHeight: 1 }}>🔒</div>
+            <div>
+                <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3.2rem)', fontWeight: 900, background: 'linear-gradient(135deg, #fff 20%, #C9A227 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: '12px', fontFamily: "'Syne', sans-serif" }}>
+                    Join the Competition
+                </h1>
+                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1.05rem', maxWidth: '420px', lineHeight: 1.6 }}>
+                    Sign in to see where you rank on DAL&apos;s leaderboard and compete for monthly prizes.
                 </p>
-                <div className={styles.heroActions}>
-                    <Link href="/suggest-route" className={styles.primaryBtn}>
-                        <Navigation size={18} /> Suggest a Route
-                    </Link>
-                    <Link href="/alerts" className={styles.secondaryBtn}>
-                        Share an Alert
-                    </Link>
-                </div>
-            </section>
-
-            {/* Stats Grid */}
-            <div className={styles.statsGrid}>
-                {stats.map((stat, index) => (
-                    <div key={index} className={styles.statCard}>
-                        <div className={styles.statIcon}>{stat.icon}</div>
-                        <span className={styles.statValue}>{stat.value}</span>
-                        <span className={styles.statLabel}>{stat.label}</span>
-                    </div>
-                ))}
             </div>
-
-            <div className={styles.mainGrid}>
-                {/* Content Section */}
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>
-                        <Trophy size={24} className={styles.iconStatic} />
-                        Top Contributors
-                    </h2>
-                    <div className={styles.leaderboard}>
-                        {contributors.length > 0 ? contributors.map((user, index) => {
-                            const avatarColor = getAvatarColor(user.name);
-                            return (
-                                <div key={index} className={styles.leaderboardItem}>
-                                    <div className={styles.userInfo}>
-                                        <span className={styles.rank}>#{user.rank}</span>
-                                        <div
-                                            className={styles.avatar}
-                                            style={{ backgroundColor: avatarColor, color: 'white', borderColor: 'transparent' }}
-                                        >
-                                            {user.name.charAt(0)}
-                                        </div>
-                                        <span className={styles.userName}>{user.name}</span>
-                                    </div>
-                                    <span className={styles.userPoints}>{user.points} pts</span>
-                                </div>
-                            );
-                        }) : (
-                            <div className={styles.emptyState} style={{ padding: '20px' }}>
-                                <p>No contributors yet. Be the first!</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Suggestions Section */}
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>
-                        <MapPin size={24} className={styles.iconStatic} />
-                        Latest Suggestions
-                    </h2>
-                    <div className={styles.suggestionsList}>
-                        {suggestions && suggestions.length > 0 ? (
-                            suggestions.map((route, idx) => (
-                                <div key={route.id} className={styles.suggestionCard}>
-                                    <div className={styles.suggestionHeader}>
-                                        <div className={styles.routeInfo}>
-                                            <strong>{route.origin} → {route.destination}</strong>
-                                            {idx === 0 && <span className={styles.trendingTag}>Trending</span>}
-                                        </div>
-                                        <span className={styles.suggestionBadge}>{route.vehicle_type}</span>
-                                    </div>
-                                    <p className={styles.proTips}>{route.pro_tips ? `"${route.pro_tips}"` : 'Direct route through major stops.'}</p>
-                                    <div className={styles.suggestionFooter}>
-                                        <span>By {route.created_by_admin ? 'DAL Team' : ((route.profiles as any)?.full_name || 'Anonymous')}</span>
-                                        <span className={styles.priceTag}>₦{route.price_estimated || route.fare_min}</span>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className={styles.emptyState}>
-                                <p>No community suggestions yet. Be the first!</p>
-                                <Link href="/suggest-route">Start suggesting</Link>
-                            </div>
-                        )}
-                    </div>
-                </div>
+            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <a href="/auth/login?next=/community" style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                    background: 'linear-gradient(135deg, #C9A227, #D97706)', color: '#000',
+                    padding: '14px 32px', borderRadius: '100px', fontWeight: 800, fontSize: '1rem',
+                    textDecoration: 'none', boxShadow: '0 10px 30px rgba(201,162,39,0.35)',
+                    transition: 'transform 0.2s',
+                }}>
+                    Sign In
+                </a>
+                <a href="/auth/register?next=/community" style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                    border: '1.5px solid rgba(201,162,39,0.5)', color: '#C9A227',
+                    padding: '14px 32px', borderRadius: '100px', fontWeight: 700, fontSize: '1rem',
+                    textDecoration: 'none', transition: 'all 0.2s', background: 'transparent',
+                }}>
+                    Create Account
+                </a>
             </div>
-
-            {/* CTA Section */}
-            <section className={styles.cta}>
-                <h2>Your Voice Matters</h2>
-                <p>
-                    Verified contributors earn points towards Premium features.
-                </p>
-                <div className={styles.ctaButtons}>
-                    <Link href="/suggest-route" className={styles.ctaButton}>
-                        Share Route Knowledge
-                    </Link>
-                </div>
-            </section>
         </div>
     );
 }

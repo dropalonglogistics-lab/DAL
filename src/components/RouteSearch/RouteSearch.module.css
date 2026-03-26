@@ -22,6 +22,11 @@
     text-align: center;
 }
 
+/* ── Field wrapper for positioning suggestions ── */
+.fieldWrap {
+    position: relative;
+}
+
 .inputGroup {
     display: flex;
     align-items: center;
@@ -29,6 +34,7 @@
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 14px 20px;
+    gap: 8px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -44,11 +50,12 @@
 }
 
 .iconWrapper {
-    margin-right: 14px;
+    margin-right: 6px;
     display: flex;
     align-items: center;
     color: var(--text-secondary);
     transition: color 0.3s ease;
+    flex-shrink: 0;
 }
 
 .inputGroup:focus-within .iconWrapper {
@@ -63,7 +70,8 @@
 .input {
     border: none;
     background: none;
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     font-size: 1.1rem;
     color: var(--text-primary);
     font-weight: 600;
@@ -90,37 +98,79 @@
     border-radius: 50%;
 }
 
-.vehicleSelector {
-    display: flex;
-    gap: 12px;
-    margin: 24px 0;
-}
-
-.vehicleBtn {
-    flex: 1;
-    padding: 12px;
+/* ── Suggestion list ── */
+.suggList {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
     border: 1px solid var(--border);
-    background-color: var(--card-bg);
-    color: var(--text-secondary);
     border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    z-index: 100;
+    overflow: hidden;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.suggItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 16px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--border);
     cursor: pointer;
-    font-weight: 700;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: left;
     font-size: 0.9rem;
-}
-
-.vehicleBtn:hover {
-    border-color: var(--color-gold);
     color: var(--text-primary);
+    transition: background 0.15s;
+}
+.suggItem:last-child { border-bottom: none; }
+.suggItem:hover { background: rgba(201,162,39,0.08); }
+
+/* ── Near Me button ── */
+.nearMeBtn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border: 1px solid rgba(201,162,39,0.5);
+    background: rgba(201,162,39,0.08);
+    color: var(--color-gold);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+.nearMeBtn:hover { background: rgba(201,162,39,0.18); }
+.nearMeBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (max-width: 500px) {
+    .nearMeLabel { display: none; }
 }
 
-.vehicleBtn.active {
-    background-color: var(--color-gold);
-    color: #000;
-    border-color: var(--color-gold);
-    box-shadow: 0 8px 20px rgba(180, 83, 9, 0.2);
+/* ── Clear field button ── */
+.clearFieldBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
+.clearFieldBtn:hover { color: var(--text-primary); }
 
+/* ── Button group ── */
 .buttonGroup {
     display: flex;
     gap: 12px;
@@ -144,16 +194,26 @@
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     box-shadow: 0 10px 30px rgba(180, 83, 9, 0.3);
 }
-
 .searchBtn:hover {
     transform: translateY(-4px);
     box-shadow: 0 15px 40px rgba(180, 83, 9, 0.4);
 }
+.searchBtn:active { transform: translateY(-1px); }
 
-.searchBtn:active {
-    transform: translateY(-1px);
+.clearBtn {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
 }
+.clearBtn:hover { border-color: var(--color-gold); color: var(--text-primary); }
 
+/* ── Compact variant (in search header) ── */
 .compact {
     max-width: none;
     padding: 0;
@@ -163,9 +223,7 @@
     margin: 0;
 }
 
-.compact .title {
-    display: none;
-}
+.compact .title { display: none; }
 
 .compact .inputGroup {
     padding: 10px 16px;
@@ -177,22 +235,9 @@
     background: rgba(15, 23, 42, 0.04);
 }
 
-.compact .input {
-    font-size: 0.95rem;
-}
+.compact .input { font-size: 0.95rem; }
 
-.compact .vehicleSelector {
-    margin: 12px 0;
-    gap: 8px;
-}
-
-.compact .vehicleBtn {
-    padding: 8px;
-}
-
-.compact .buttonGroup {
-    margin-top: 16px;
-}
+.compact .buttonGroup { margin-top: 16px; }
 
 .compact .searchBtn {
     padding: 12px;

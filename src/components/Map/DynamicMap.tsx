@@ -88,10 +88,12 @@ const getMarkerIcon = (type: string, isActive: boolean) => {
 
 export default function DynamicMap({
     locations,
-    activeStepIndex
+    activeStepIndex,
+    traffic
 }: {
     locations: { title: string; desc: string; city: string; type?: string }[];
     activeStepIndex?: number | null;
+    traffic?: 'clear' | 'moderate' | 'heavy';
 }) {
     const [coordinates, setCoordinates] = useState<Array<{ lat: number; lng: number; title: string; desc: string; type?: string }>>([]);
     const [loading, setLoading] = useState(true);
@@ -146,6 +148,8 @@ export default function DynamicMap({
         setMapKey(prev => prev + 1);
     };
 
+    const polylineColor = traffic === 'heavy' ? '#ef4444' : traffic === 'moderate' ? '#f59e0b' : '#d4af37';
+
     return (
         <div className={styles.mapContainer}>
             {loading && (
@@ -190,7 +194,7 @@ export default function DynamicMap({
                 {pathPositions.length > 1 && (
                     <Polyline
                         positions={pathPositions}
-                        color="#d4af37"
+                        color={polylineColor}
                         weight={6}
                         opacity={0.9}
                         lineJoin="round"

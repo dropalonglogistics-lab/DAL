@@ -1,6 +1,9 @@
-import { Search, Navigation, Users, Bell, Shield, Info, MapPin, AlertTriangle, TrafficCone, Coins, Sparkles, ChevronRight } from 'lucide-react';
+import { Search, Navigation, Users, Bell, Shield, Info, MapPin, AlertTriangle, TrafficCone, Coins, Sparkles, ChevronRight, TrendingUp, ShieldCheck, Package } from 'lucide-react';
 import Link from 'next/link';
 import RouteSearch from '@/components/RouteSearch/RouteSearch';
+import HomeTicker from '@/components/HomeTicker';
+import HomepageExpressTile from '@/components/Express/HomepageExpressTile';
+import HomepageShopperTile from '@/components/Shopper/HomepageShopperTile';
 import { createClient } from '@/utils/supabase/server';
 import styles from './page.module.css';
 
@@ -19,15 +22,68 @@ export default async function Home() {
         .from('community_routes')
         .select('*', { count: 'exact', head: true });
 
+    const { count: verifiedCount } = await supabase
+        .from('community_routes')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'approved');
+
+    const { count: alertCount } = await supabase
+        .from('alerts')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+    const { count: memberCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+    // Trending routes — 3 most recently updated community routes
+    const { data: trending } = await supabase
+        .from('community_routes')
+        .select('id, origin, destination, vehicle_type, price_estimated, fare_min')
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+    const { data: configData } = await supabase
+        .from('platform_config')
+        .select('key, value')
+        .in('key', ['f2_express_live', 'f3_shopper_live']);
+    
+    const isF2Live = configData?.find(c => c.key === 'f2_express_live')?.value === 'true';
+    const isF3Live = configData?.find(c => c.key === 'f3_shopper_live')?.value === 'true';
+
     return (
         <div className={styles.page}>
+            {/* ── Live Ticker Banner ── */}
+            <HomeTicker />
+
             {/* ── Hero Section ── */}
             <section className={styles.hero}>
                 <div className={styles.heroInner}>
                     <h1 className={styles.heroTitle}>Move Smarter in Port Harcourt</h1>
-                    <p className={styles.heroSub}>Intelligent road transit routing. No manual vehicle selection needed.</p>
+                    <p className={styles.heroSub}>Intelligent road transit routing. Community-powered intelligence.</p>
                     <div className={styles.searchBox}>
                         <RouteSearch />
+                    </div>
+                </div>
+            </section>
+
+            {/* ── Community Stats Bar ── */}
+            <section className={styles.statsBar}>
+                <div className={styles.statsBarInner}>
+                    <div className={styles.statsBarItem}>
+                        <ShieldCheck size={18} />
+                        <span><strong>{verifiedCount ?? 0}</strong> routes verified</span>
+                    </div>
+                    <div className={styles.statsBarDivider} />
+                    <div className={styles.statsBarItem}>
+                        <Bell size={18} />
+                        <span><strong>{alertCount ?? 0}</strong> alerts today</span>
+                    </div>
+                    <div className={styles.statsBarDivider} />
+                    <div className={styles.statsBarItem}>
+                        <Users size={18} />
+                        <span><strong>{(memberCount ?? 0).toLocaleString()}</strong> members</span>
                     </div>
                 </div>
             </section>
@@ -62,8 +118,47 @@ export default async function Home() {
                             <span className={styles.statValue}>{communityCount || 0} active locales</span>
                         </div>
                     </Link>
+
+                    <HomepageExpressTile isLive={Boolean(isF2Live)} />
+                    <HomepageShopperTile isLive={Boolean(isF3Live)} />
                 </div>
             </section>
+
+            {/* ── Trending Routes ── */}
+            {trending && trending.length > 0 && (
+                <section className={styles.trendingSection}>
+                    <div className={styles.trendingHeader}>
+                        <h2 className={styles.sectionTitle}>
+                            <TrendingUp size={22} /> Trending Routes This Week
+                        </h2>
+                        <Link href="/search" className={styles.seeAll}>See all →</Link>
+                    </div>
+                    <div className={styles.trendingGrid}>
+                        {trending.map((route, i) => (
+                            <Link
+                                key={route.id}
+                                href={`/search?origin=${encodeURIComponent(route.origin)}&destination=${encodeURIComponent(route.destination)}`}
+                                className={styles.trendingCard}
+                            >
+                                <div className={styles.trendingRank}>#{i + 1}</div>
+                                <div className={styles.trendingRoute}>
+                                    <span className={styles.trendingFrom}>{route.origin}</span>
+                                    <ChevronRight size={14} className={styles.trendingArrow} />
+                                    <span className={styles.trendingTo}>{route.destination}</span>
+                                </div>
+                                <div className={styles.trendingMeta}>
+                                    <span className={styles.trendingVehicle}>{route.vehicle_type}</span>
+                                    {(route.price_estimated || route.fare_min) && (
+                                        <span className={styles.trendingFare}>
+                                            ₦{(route.price_estimated || route.fare_min)?.toLocaleString()}
+                                        </span>
+                                    )}
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             {/* ── Live Road Intelligence ── */}
             <section className={styles.intelSection}>

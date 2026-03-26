@@ -586,3 +586,18 @@
         display: none;
     }
 }
+
+.soonBadgeNav {
+    background: var(--color-gold);
+    color: var(--card-bg);
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 6px;
+    margin-left: 8px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(201, 162, 39, 0.4);
+}
