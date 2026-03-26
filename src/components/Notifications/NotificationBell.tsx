@@ -34,7 +34,7 @@ export default function NotificationBell() {
 
                 // Subscribe
                 supabase.channel('public:notifications')
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, payload => {
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, (payload: any) => {
                         setNotifications(prev => [payload.new as Notification, ...prev]);
                     })
                     .subscribe();

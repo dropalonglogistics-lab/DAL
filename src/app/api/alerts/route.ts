@@ -15,7 +15,7 @@ export async function GET(req: Request) {
             .from('alerts')
             .select('*', { count: 'exact', head: true })
             .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-        return NextResponse.json({ count: count ?? 0 })
+        return NextResponse.json({ count: count ?? 0 }, { headers: { 'Cache-Control': 'public, max-age=60' } })
     }
 
     let query = supabase
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
 
     const { data, error } = await query
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    return NextResponse.json({ alerts: data ?? [] })
+    return NextResponse.json({ alerts: data ?? [] }, { headers: { 'Cache-Control': 'public, max-age=300' } })
 }
 
 export async function POST(req: Request) {

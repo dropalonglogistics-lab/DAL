@@ -1,6 +1,11 @@
+import { Metadata } from 'next';
 import { createClient } from '@/utils/supabase/server';
 import ComingSoonExpress from '@/components/Express/ComingSoonExpress';
 import ExpressLanding from '@/components/Express/ExpressLanding';
+
+export const metadata: Metadata = {
+    title: 'Same-Hour Delivery Port Harcourt | DAL Express',
+};
 
 export const revalidate = 60; // Cache this route for 60 seconds globally
 

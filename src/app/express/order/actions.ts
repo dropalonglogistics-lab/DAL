@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
+import * as Sentry from '@sentry/nextjs';
 
 export async function submitExpressOrder(formData: any) {
     const supabase = await createClient();
@@ -75,8 +76,9 @@ export async function submitExpressOrder(formData: any) {
                     }
                 })
             });
-        } catch (e) {
+        } catch (e: any) {
             console.error('Email trigger failed', e);
+            Sentry.captureException(e, { extra: { context: 'order creation' } });
         }
     }
 

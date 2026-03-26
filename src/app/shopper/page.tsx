@@ -1,6 +1,11 @@
+import { Metadata } from 'next';
 import { createClient } from '@/utils/supabase/server';
 import ComingSoonShopper from '@/components/Shopper/ComingSoonShopper';
 import ShopperLanding from '@/components/Shopper/ShopperLanding';
+
+export const metadata: Metadata = {
+    title: 'Personal Shopper & Errands | DAL',
+};
 
 export const revalidate = 60; // 60s global cache
 

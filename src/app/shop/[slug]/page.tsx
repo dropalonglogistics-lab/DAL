@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search, MapPin, Clock, Star, Filter } from 'lucide-react';
 import styles from './Shop.module.css';
 import Navbar from '@/components/Navbar/Navbar';
@@ -108,7 +109,7 @@ export default function ShopPage() {
                     {filteredProducts.map(product => (
                         <Link href={`/shop/${slug}/${product.id}`} key={product.id} className={styles.productCard}>
                             <div className={styles.productImageWrap}>
-                                <img src={product.image} alt={product.name} className={styles.productImage} />
+                                <Image src={product.image} alt={product.name} width={400} height={300} placeholder="empty" className={styles.productImage} />
                             </div>
                             <div className={styles.productInfo}>
                                 <h3 className={styles.productTitle}>{product.name}</h3>

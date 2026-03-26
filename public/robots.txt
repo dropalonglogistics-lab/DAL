@@ -1,0 +1,17 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /superadmin
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /rider
+Disallow: /errand
+Disallow: /driver
+Disallow: /business
+
+# Host
+Host: https://dal.com
+
+# Sitemaps
+Sitemap: https://dal.com/sitemap.xml

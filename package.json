@@ -9,16 +9,21 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "postbuild": "next-sitemap"
     },
     "dependencies": {
         "@react-email/components": "^1.0.10",
+        "@sentry/nextjs": "^10.46.0",
         "@supabase/ssr": "^0.8.0",
         "@supabase/supabase-js": "^2.93.3",
+        "@upstash/redis": "^1.37.0",
         "leaflet": "^1.9.4",
         "lucide-react": "latest",
         "next": "16.1.6",
+        "next-sitemap": "^4.2.3",
         "papaparse": "^5.5.3",
+        "posthog-js": "^1.363.5",
         "react": "19.0.0",
         "react-dom": "19.0.0",
         "react-hot-toast": "^2.6.0",
