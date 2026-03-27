@@ -1,200 +1,225 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import RouteSearch from '@/components/RouteSearch/RouteSearch';
-import RouteResultCard from '@/components/RouteResults/RouteResultCard';
-import RouteMap from '@/components/Map/RouteMap';
-import styles from './search.module.css';
-import { Navigation, Search as SearchIcon, ChevronLeft } from 'lucide-react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { createClient } from '@/utils/supabase/client';
+import { ArrowRight, ArrowDownUp, Loader2 } from 'lucide-react';
+import styles from './search.module.css';
 
-export default function SearchPageClient({ initialRoutes, initialTitle }: { initialRoutes: any[], initialTitle: string }) {
-    const [selectedRoute, setSelectedRoute] = useState<any | null>(initialRoutes?.[0] || null);
-    const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
-    const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-    const [showRouteMap, setShowRouteMap] = useState<boolean>(true);
-    const [expandedRouteId, setExpandedRouteId] = useState<string | null>(null);
-    const [allAlerts, setAllAlerts] = useState<any[]>([]);
+interface RouteData {
+    id: string;
+    start_location: string;
+    destination: string;
+    road_condition: string;
+    estimated_travel_time_min: number;
+    estimated_travel_time_max: number;
+    fare_price_range_min: number;
+    fare_price_range_max: number;
+    is_featured: boolean;
+}
 
-    useEffect(() => {
-        fetch('/api/alerts').then(r => r.json()).then(data => setAllAlerts(data.alerts || [])).catch(() => {});
-        fetch('/api/config?key=show_route_map')
-            .then(r => r.json())
-            .then(data => {
-                if (data.show_route_map !== undefined) setShowRouteMap(data.show_route_map === 'true' || data.show_route_map === true);
-            })
-            .catch(() => {});
-    }, []);
+export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: RouteData[] }) {
+    const [fromInput, setFromInput] = useState('');
+    const [toInput, setToInput] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
+    const [results, setResults] = useState<RouteData[]>([]);
+    const supabase = createClient();
 
-    const getAlertsForRoute = useCallback((route: any) => {
-        if (!route) return [];
-        const areas = new Set([route.start_location?.toLowerCase(), route.destination?.toLowerCase()].filter(Boolean));
+    const handleSwap = () => {
+        setFromInput(toInput);
+        setToInput(fromInput);
+    };
+
+    const handleSearch = async () => {
+        if (!fromInput.trim() && !toInput.trim()) return;
         
-        let stops = [];
-        if (typeof route.stops_along_the_way === 'string') {
-            try {
-                stops = JSON.parse(route.stops_along_the_way);
-            } catch (e) {
-                // Fallback for legacy comma-separated strings
-                stops = route.stops_along_the_way.split(/[,;\n]+/).map((s: string) => ({ location: s.trim() }));
-            }
-        } else if (Array.isArray(route.stops_along_the_way)) {
-            stops = route.stops_along_the_way;
+        setIsSearching(true);
+        setHasSearched(true);
+        
+        const cleanFrom = fromInput.trim();
+        const cleanTo = toInput.trim();
+        
+        let query = supabase.from('routes').select('id, start_location, destination, road_condition, estimated_travel_time_min, estimated_travel_time_max, fare_price_range_min, fare_price_range_max');
+        
+        if (cleanFrom && cleanTo) {
+            query = query.or(`start_location.ilike.%${cleanFrom}%,destination.ilike.%${cleanFrom}%`).or(`start_location.ilike.%${cleanTo}%,destination.ilike.%${cleanTo}%`);
+        } else if (cleanFrom) {
+            query = query.or(`start_location.ilike.%${cleanFrom}%,destination.ilike.%${cleanFrom}%`);
+        } else if (cleanTo) {
+            query = query.or(`start_location.ilike.%${cleanTo}%,destination.ilike.%${cleanTo}%`);
         }
-            
-        stops.forEach((step: any) => {
-            if (step.location) areas.add(step.location.toLowerCase());
-        });
         
-        return allAlerts.filter(a => a.area && areas.has(a.area.toLowerCase()));
-    }, [allAlerts]);
+        const { data, error } = await query;
+        if (!error && data) {
+            setResults(data);
+        } else {
+            setResults([]);
+        }
+        setIsSearching(false);
+    };
 
-    const getTrafficForRoute = useCallback((routeAlerts: any[]) => {
-        if (routeAlerts.some(a => a.severity === 'critical')) return 'heavy';
-        if (routeAlerts.some(a => a.severity === 'warning')) return 'moderate';
-        return 'clear';
-    }, []);
+    const handleCardClick = (route: RouteData) => {
+        setFromInput(route.start_location);
+        setToInput(route.destination);
+        // Force state update then search
+        setTimeout(() => {
+            handleSearchClick(route.start_location, route.destination);
+        }, 0);
+    };
 
-    const handleRouteSelect = (route: any) => {
-        setSelectedRoute(route);
-        setActiveStepIndex(null); // Reset step when switching routes
+    const handleSearchClick = async (start: string, dest: string) => {
+        setIsSearching(true);
+        setHasSearched(true);
+        let query = supabase.from('routes').select('id, start_location, destination, road_condition, estimated_travel_time_min, estimated_travel_time_max, fare_price_range_min, fare_price_range_max');
+        
+        query = query.or(`start_location.ilike.%${start}%,destination.ilike.%${start}%`).or(`start_location.ilike.%${dest}%,destination.ilike.%${dest}%`);
+        
+        const { data } = await query;
+        setResults(data || []);
+        setIsSearching(false);
+    };
+
+    const getConditionTag = (condition: string) => {
+        const c = (condition || '').toLowerCase();
+        if (c === 'clear') return { label: 'Fast', css: styles.tagGreen, dot: styles.dotGreen };
+        if (c === 'slow') return { label: 'Busy now', css: styles.tagOrange, dot: styles.dotOrange };
+        if (c === 'blocked') return { label: 'Blocked', css: styles.tagRed, dot: styles.dotRed };
+        return { label: 'Popular', css: styles.tagGold, dot: styles.dotGray }; // Default for unknown/featured
     };
 
     return (
-        <div className={styles.searchContainer}>
-            <header className={styles.searchHeader}>
-                <div className={styles.headerContent}>
-                    <div className={styles.logoRow}>
-                        <Link href="/" className={styles.logo}>DAL</Link>
-                        {initialRoutes?.length > 0 && (
-                            <span className={styles.resultsBadge}>{initialRoutes.length} found</span>
-                        )}
+        <div className={styles.pageContainer}>
+            <div className={styles.contentWrapper}>
+                
+                {/* SECTION 1 - HEADER */}
+                <header className={styles.headerSection}>
+                    <span className={styles.subLabel}>ROUTE INTELLIGENCE</span>
+                    <h1 className={styles.pageTitle}>Find your <span className={styles.goldText}>route</span></h1>
+                </header>
+
+                {/* SECTION 2 - SEARCH INPUT BOX */}
+                <div className={styles.searchContainer}>
+                    <div className={styles.connectorLine}></div>
+                    
+                    <div className={styles.inputRow}>
+                        <div className={styles.iconWrapper}>
+                            <div className={styles.dotGold}></div>
+                        </div>
+                        <input 
+                            type="text" 
+                            className={styles.inputField} 
+                            placeholder="Where from?" 
+                            value={fromInput}
+                            onChange={(e) => setFromInput(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                        />
+                        <button className={styles.swapBtn} onClick={handleSwap} aria-label="Swap locations" type="button">
+                            <ArrowDownUp size={16} />
+                        </button>
                     </div>
-                    <div className={styles.searchBarWrapper}>
-                        <RouteSearch showTitle={false} />
+
+                    <div className={styles.inputRow}>
+                        <div className={styles.iconWrapper}>
+                            <div className={styles.dotWhite}></div>
+                        </div>
+                        <input 
+                            type="text" 
+                            className={styles.inputField} 
+                            placeholder="Where to?" 
+                            value={toInput}
+                            onChange={(e) => setToInput(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                        />
                     </div>
                 </div>
-            </header>
 
-            <main className={styles.mainContent}>
-                <div className={`${styles.resultsSidebar} ${viewMode === 'map' ? styles.hideOnMobile : ''}`}>
-                    <div className={styles.resultsHeader}>
-                        <Link href="/" className={styles.backLink}>
-                            <ChevronLeft size={16} /> Back to Home
-                        </Link>
-                        <h1 className={styles.titleText}>{initialTitle}</h1>
-                    </div>
+                <button className={styles.submitBtn} onClick={handleSearch} disabled={isSearching} type="button">
+                    {isSearching ? <Loader2 size={20} className="animate-spin" /> : 'Find Route'}
+                </button>
 
-                    <div className={styles.resultsList}>
-                        {initialRoutes && initialRoutes.length > 0 ? (
-                            initialRoutes.map((route) => (
-                                <div
-                                    key={route.id}
-                                    className={`${styles.cardWrapper} ${selectedRoute?.id === route.id ? styles.selectedCard : ''}`}
-                                >
-                                    <RouteResultCard
-                                        route_title={route.route_title}
-                                        start_location={route.start_location}
-                                        destination={route.destination}
-                                        estimated_travel_time_min={route.estimated_travel_time_min}
-                                        estimated_travel_time_max={route.estimated_travel_time_max}
-                                        fare_price_range_min={route.fare_price_range_min}
-                                        fare_price_range_max={route.fare_price_range_max}
-                                        vehicle_type_used={route.vehicle_type_used}
-                                        difficulty_level={route.difficulty_level}
-                                        detailed_directions={route.detailed_directions}
-                                        tips_and_warnings={route.tips_and_warnings}
-                                        traffic={getTrafficForRoute(getAlertsForRoute(route))}
-                                        routeAlerts={getAlertsForRoute(route)}
-                                        isRecommended={true}
-                                        stops_along_the_way={route.stops_along_the_way}
-                                        isGlobalMode={true}
-                                        isExpanded={expandedRouteId === route.id}
-                                        activeStepIndex={selectedRoute?.id === route.id ? activeStepIndex : null}
-                                        onStepSelect={(idx) => {
-                                            handleRouteSelect(route);
-                                            setActiveStepIndex(idx);
-                                        }}
-                                        onExpand={() => handleRouteSelect(route)}
-                                        onToggleExpand={(expanded) => {
-                                            setExpandedRouteId(expanded ? route.id : null);
-                                            if (expanded) handleRouteSelect(route);
-                                        }}
-                                    />
-                                </div>
-                            ))
+                {/* SECTION 3 - DEFAULT STATE (POPULAR ROUTES) */}
+                {!hasSearched && (
+                    <section>
+                        {featuredRoutes.length === 0 ? (
+                            <div className={styles.emptyState}>
+                                <p className={styles.emptyTitle}>Routes loading — check back shortly.</p>
+                            </div>
                         ) : (
-                            <div className={styles.noResults}>
-                                <SearchIcon size={48} />
-                                <p>No routes found for this search.</p>
+                            <>
+                                <h2 className={styles.popularHeader}>POPULAR ROUTES</h2>
+                                <div className={styles.popularGrid}>
+                                    {featuredRoutes.map((route) => {
+                                        const tag = getConditionTag(route.road_condition);
+                                        return (
+                                            <div key={route.id} className={styles.routeCard} onClick={() => handleCardClick(route)}>
+                                                <span className={`${styles.cardTag} ${tag.css}`}>{tag.label}</span>
+                                                <h3 className={styles.cardTitle}>
+                                                    {route.start_location} <ArrowRight size={14} className={styles.cardArrow} /> {route.destination}
+                                                </h3>
+                                                <div className={styles.cardMeta}>
+                                                    <div className={`${styles.conditionDot} ${tag.dot}`}></div>
+                                                    <span>{route.road_condition === 'clear' ? 'Clear' : route.road_condition === 'slow' ? 'Slow traffic' : route.road_condition === 'blocked' ? 'Blocked' : 'Unknown'}</span>
+                                                    <div className={styles.metaDivider}></div>
+                                                    <span>{route.estimated_travel_time_min}{route.estimated_travel_time_max && route.estimated_travel_time_max !== route.estimated_travel_time_min ? `-${route.estimated_travel_time_max}` : ''} min</span>
+                                                    <div className={styles.metaDivider}></div>
+                                                    <span>₦{route.fare_price_range_min || 0}{route.fare_price_range_max && route.fare_price_range_max !== route.fare_price_range_min ? `-${route.fare_price_range_max}` : ''}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </>
+                        )}
+                    </section>
+                )}
+
+                {/* SECTION 4 - LIVE SEARCH RESULTS */}
+                {hasSearched && (
+                    <section>
+                        <h2 className={styles.resultsHeader}>
+                            {results.length === 1 ? '1 route found' : `${results.length} routes found`}
+                        </h2>
+                        
+                        {results.length > 0 ? (
+                            <div className={styles.resultsList}>
+                                {results.map((route) => {
+                                    const tag = getConditionTag(route.road_condition);
+                                    return (
+                                        <div key={route.id} className={styles.resultRow}>
+                                            <div className={styles.resultLeft}>
+                                                <div className={styles.resultName}>
+                                                    {route.start_location} <ArrowRight size={12} className={styles.cardArrow} /> {route.destination}
+                                                </div>
+                                                <div className={styles.resultCondition}>
+                                                    <div className={`${styles.conditionDot} ${tag.dot}`}></div>
+                                                    <span>{route.road_condition === 'clear' ? 'Clear' : route.road_condition === 'slow' ? 'Slow traffic' : route.road_condition === 'blocked' ? 'Blocked' : 'Unknown traffic'}</span>
+                                                </div>
+                                            </div>
+                                            <div className={styles.resultRight}>
+                                                <div className={styles.resultFare}>
+                                                    ₦{route.fare_price_range_min?.toLocaleString() || 0}{route.fare_price_range_max && route.fare_price_range_max !== route.fare_price_range_min ? `-₦${route.fare_price_range_max.toLocaleString()}` : ''}
+                                                </div>
+                                                <div className={styles.resultDuration}>
+                                                    {route.estimated_travel_time_min}{route.estimated_travel_time_max && route.estimated_travel_time_max !== route.estimated_travel_time_min ? `-${route.estimated_travel_time_max}` : ''} min
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className={styles.emptyState}>
+                                <p className={styles.emptyTitle}>No routes found from {fromInput || '[Any]'} to {toInput || '[Any]'}.</p>
+                                <Link href="/suggest-route" className={styles.suggestLink}>
+                                    Suggest this route <ArrowRight size={14} />
+                                </Link>
                             </div>
                         )}
-                    </div>
-                </div>
-
-                {showRouteMap && (
-                <div className={`${styles.mapStickyContainer} ${viewMode === 'list' ? styles.hideOnMobile : ''}`}>
-                    {selectedRoute ? (
-                        <div className={styles.globalMapWrapper}>
-                            <RouteMap
-                                activeStepIndex={activeStepIndex}
-                                locations={(() => {
-                                    let stops = [];
-                                    if (typeof selectedRoute.stops_along_the_way === 'string') {
-                                        try {
-                                            stops = JSON.parse(selectedRoute.stops_along_the_way);
-                                        } catch (e) {
-                                            stops = selectedRoute.stops_along_the_way.split(/[,;\n]+/).map((s: string) => ({ location: s.trim() }));
-                                        }
-                                    } else if (Array.isArray(selectedRoute.stops_along_the_way)) {
-                                        stops = selectedRoute.stops_along_the_way;
-                                    }
-                                    return stops.map((step: any, idx: number) => ({
-                                        title: step.location,
-                                        desc: step.instruction || `Step ${idx + 1}`,
-                                        city: 'Port Harcourt',
-                                        type: step.type || 'stop'
-                                    }));
-                                })()}
-                                traffic={getTrafficForRoute(getAlertsForRoute(selectedRoute))}
-                            />
-                            <div className={styles.mapOverlayInfo}>
-                                <div className={styles.overlayHeader}>
-                                    <Navigation size={16} />
-                                    <span>LIVE ROUTE</span>
-                                </div>
-                                <h3>{selectedRoute.route_title || `${selectedRoute.start_location} → ${selectedRoute.destination}`}</h3>
-                                <p>{selectedRoute.estimated_travel_time_min}{selectedRoute.estimated_travel_time_max ? `-${selectedRoute.estimated_travel_time_max}` : ''} min</p>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className={styles.placeholderMap}>
-                            <Navigation size={64} className={styles.mapIcon} />
-                            <h3>Select a route to view on map</h3>
-                        </div>
-                    )}
-                </div>
+                    </section>
                 )}
-            </main>
 
-            {showRouteMap && (
-            <button
-                className={styles.mobileToggleButton}
-                onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
-            >
-                {viewMode === 'list' ? (
-                    <>
-                        <Navigation size={18} />
-                        <span>Show Map</span>
-                    </>
-                ) : (
-                    <>
-                        <SearchIcon size={18} />
-                        <span>Show List</span>
-                    </>
-                )}
-            </button>
-            )}
+            </div>
         </div>
     );
 }
