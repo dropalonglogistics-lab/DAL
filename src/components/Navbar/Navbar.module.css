@@ -17,6 +17,17 @@
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
 }
 
+:global(.light-mode) .navbar {
+    background-color: #FFFFFF;
+    color: var(--brand-black);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:global(.light-mode) .navbar.scrolled {
+    background-color: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+}
+
 .navContainer {
     display: flex;
     justify-content: space-between;
@@ -82,6 +93,15 @@
 .navLink:hover {
     color: #fff;
     background: rgba(255, 255, 255, 0.07);
+}
+
+:global(.light-mode) .navLink {
+    color: rgba(0, 0, 0, 0.65);
+}
+
+:global(.light-mode) .navLink:hover {
+    color: var(--brand-black);
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .navLinkActive {
@@ -161,6 +181,15 @@
     color: #fff;
 }
 
+:global(.light-mode) .iconBtn {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+:global(.light-mode) .iconBtn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--brand-black);
+}
+
 .iconWrapper {
     width: 19px;
     height: 19px;
@@ -214,6 +243,17 @@
     background: rgba(255, 255, 255, 0.06);
 }
 
+:global(.light-mode) .signInBtn {
+    border-color: rgba(0, 0, 0, 0.15);
+    color: rgba(0, 0, 0, 0.7);
+}
+
+:global(.light-mode) .signInBtn:hover {
+    border-color: rgba(0, 0, 0, 0.3);
+    color: var(--brand-black);
+    background: rgba(0, 0, 0, 0.04);
+}
+
 /* Avatar */
 .avatarWrap {
     position: relative;
@@ -260,6 +300,10 @@
 .chevron {
     color: rgba(255, 255, 255, 0.5);
     transition: transform var(--transition-fast);
+}
+
+:global(.light-mode) .chevron {
+    color: rgba(0, 0, 0, 0.4);
 }
 
 .chevronOpen {
@@ -561,8 +605,7 @@
         display: none !important; /* Hide the compact premium badge on mobile top bar */
     }
 
-    /* Hide theme toggle and cart from mobile top bar — they live in the dropdown */
-    .themeToggleBtn,
+    /* Hide cart from mobile top bar — they live in the dropdown */
     .cartIconBtn {
         display: none !important;
     }
@@ -596,8 +639,8 @@
 }
 
 .soonBadgeNav {
-    background: var(--color-gold);
-    color: var(--card-bg);
+    background: #C9A227;
+    color: #0D0D0D;
     font-size: 0.6rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -608,6 +651,11 @@
     display: inline-flex;
     align-items: center;
     box-shadow: 0 2px 8px rgba(201, 162, 39, 0.4);
+}
+
+:global(.light-mode) .soonBadgeNav {
+    background: #B45309;
+    color: #FFFFFF;
 }
 
 /* Mobile utility row (theme toggle + cart) shown at bottom of mobile dropdown */

@@ -170,7 +170,7 @@ export default function Navbar() {
                     {/* Logo */}
                     <Link href="/" className={styles.logo}>
                         <Image
-                            src="/dal-logo-light.png"
+                            src={isDarkMode ? "/dal-logo-light.png" : "/dal-logo-dark.png"}
                             alt="Drop Along Logistics"
                             height={36}
                             width={120}

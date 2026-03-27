@@ -160,16 +160,14 @@
     color: #6366F1;
 }
 
-.statText {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
 .statLabel {
     font-size: 1rem;
     font-weight: 700;
     color: var(--text-primary);
+}
+
+:global(.light-mode) .statLabel {
+    color: var(--brand-black);
 }
 
 .statValue {
@@ -186,6 +184,12 @@
     border-top: 1px solid rgba(201,162,39,0.15);
     border-bottom: 1px solid rgba(201,162,39,0.15);
     padding: 14px 24px;
+}
+
+:global(.light-mode) .statsBar {
+    background: var(--card-bg);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
 }
 
 .statsBarInner {
@@ -207,11 +211,23 @@
     padding: 8px 16px;
 }
 
+:global(.light-mode) .statsBarItem {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
 @media (max-width: 768px) {
+    .statsBarInner {
+        flex-direction: column;
+        align-items: flex-start;
+        width: fit-content;
+        margin: 0 auto;
+        gap: 4px;
+    }
     .statsBarItem {
         width: 100%;
-        justify-content: center;
-        padding: 12px 16px;
+        justify-content: flex-start;
+        padding: 8px 16px;
     }
     .statsBarDivider {
         display: none;
@@ -327,6 +343,10 @@
     color: var(--color-gold);
 }
 
+:global(.light-mode) .trendingFare {
+    color: #92400E;
+}
+
 /* ─────────────────────────────────────────────────
    LIVE ROAD INTELLIGENCE
 ────────────────────────────────────────────────── */
@@ -412,6 +432,10 @@
     font-weight: 600;
     color: var(--color-gold);
     margin-top: 4px;
+}
+
+:global(.light-mode) .intelTime {
+    color: #92400E;
 }
 
 /* ─────────────────────────────────────────────────
