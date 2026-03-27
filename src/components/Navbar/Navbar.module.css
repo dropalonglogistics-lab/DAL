@@ -627,6 +627,10 @@
         flex-shrink: 0;
     }
 
+    :global(.light-mode) .unifiedMenuBtn {
+        color: var(--brand-black);
+    }
+
     .unifiedMenuBtn:hover {
         opacity: 0.85;
     }
