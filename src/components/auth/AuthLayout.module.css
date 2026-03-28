@@ -1,0 +1,138 @@
+.container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #0D0D0D;
+    color: #FFFFFF;
+    overflow: hidden;
+}
+
+/* BRAND PANEL - LEFT */
+.brandPanel {
+    flex: 1;
+    min-width: 420px;
+    background-color: #0D0D0D;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 48px;
+}
+
+.svgOverlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.brandContent {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.mainLogo {
+    width: 140px;
+    height: auto;
+    display: block;
+}
+
+.headline {
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: #FFFFFF;
+    max-width: 340px;
+    margin: 0;
+}
+
+.goldText {
+    color: #C9A227;
+}
+
+.tagline {
+    margin-top: 16px;
+    font-size: 13px;
+    color: #666666;
+    line-height: 1.7;
+}
+
+.tagline p {
+    margin: 0;
+}
+
+.brandBottom {
+    font-size: 11px;
+    color: #333333;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* FORM PANEL - RIGHT */
+.formPanel {
+    width: 380px;
+    min-width: 380px;
+    background-color: #111111;
+    border-left: 0.5px solid #1E1E1E;
+    display: flex;
+    flex-direction: column;
+}
+
+.scrollContent {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 36px;
+}
+
+.formContainer {
+    width: 100%;
+}
+
+.subLogo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 32px;
+    display: block;
+}
+
+.mobileLogoContainer {
+    display: block;
+}
+
+/* RESPONSIVE */
+@media (max-width: 767px) {
+    .container {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .brandPanel {
+        display: none;
+    }
+
+    .formPanel {
+        width: 100%;
+        min-width: 100%;
+        border-left: none;
+        background-color: #0D0D0D; /* Inverted for mobile as per instructions */
+    }
+
+    .scrollContent {
+        padding: 32px 24px;
+        align-items: flex-start;
+    }
+
+    .subLogo {
+        width: 100px;
+        margin: 0 auto 28px auto;
+    }
+
+    .mobileLogoContainer {
+        text-align: center;
+    }
+}

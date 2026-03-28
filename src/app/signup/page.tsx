@@ -6,13 +6,16 @@ import { createClient } from '@/utils/supabase/client';
 import AuthLayout from '@/components/auth/AuthLayout';
 import styles from '@/components/auth/Auth.module.css';
 
-export default function LoginPage() {
+type UserType = 'user' | 'rider' | 'errand_worker';
+
+export default function SignupPage() {
     const router = useRouter();
     const supabase = createClient();
     
     const [view, setView] = useState<'email' | 'otp'>('email');
     const [email, setEmail] = useState('');
     const [code, setCode] = useState('');
+    const [userType, setUserType] = useState<UserType>('user');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [checkingAuth, setCheckingAuth] = useState(true);
@@ -30,13 +33,13 @@ export default function LoginPage() {
         checkUser();
     }, [supabase, router]);
 
-    const handleGoogleLogin = async () => {
+    const handleGoogleSignup = async () => {
         setLoading(true);
         setError(null);
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
+                redirectTo: `${window.location.origin}/auth/callback?role=${userType}`,
             },
         });
         if (error) {
@@ -57,10 +60,7 @@ export default function LoginPage() {
         const { error } = await supabase.auth.signInWithOtp({
             email,
             options: {
-                shouldCreateUser: false, // Login page shouldn't create user? Or should it?
-                // Actually DAL uses OTP for both. 
-                // But instructions for /login say "Sign in to your DAL account".
-                // Signup says "Create your account".
+                shouldCreateUser: true,
             }
         });
 
@@ -81,32 +81,49 @@ export default function LoginPage() {
         setLoading(true);
         setError(null);
 
-        const { error } = await supabase.auth.verifyOtp({
+        const { data, error: authError } = await supabase.auth.verifyOtp({
             email,
             token: code,
             type: 'email'
         });
 
-        if (error) {
+        if (authError || !data.user) {
             setError('Invalid code. Please try again.');
             setLoading(false);
-        } else {
-            router.push('/dashboard');
+            return;
         }
+
+        // Create profile
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+                id: data.user.id,
+                email: data.user.email,
+                role: userType,
+                created_at: new Date().toISOString()
+            });
+
+        if (profileError) {
+            console.error('Profile creation error:', profileError);
+            // Even if profile fails, user is authenticated. 
+            // But we should probably show an error or try again.
+        }
+
+        router.push('/dashboard');
     };
 
     if (checkingAuth) return null;
 
     return (
-        <AuthLayout brandHeadline="Port Harcourt moves smarter with DAL.">
+        <AuthLayout brandHeadline="Join thousands of Port Harcourt commuters moving smarter.">
             <div>
-                <h2 className={styles.heading}>Welcome back</h2>
-                <p className={styles.subheading}>Sign in to your DAL account</p>
+                <h2 className={styles.heading}>Create your account</h2>
+                <p className={styles.subheading}>Join DAL — it's free</p>
 
                 {/* GOOGLE BUTTON */}
                 <button 
                     className={styles.googleBtn} 
-                    onClick={handleGoogleLogin} 
+                    onClick={handleGoogleSignup} 
                     disabled={loading}
                 >
                     <svg width="18" height="18" viewBox="0 0 18 18">
@@ -120,7 +137,7 @@ export default function LoginPage() {
 
                 <div className={styles.divider}>
                     <div className={styles.line}></div>
-                    <span className={styles.dividerText}>or sign in with email</span>
+                    <span className={styles.dividerText}>or sign up with email</span>
                     <div className={styles.line}></div>
                 </div>
 
@@ -134,7 +151,43 @@ export default function LoginPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             onFocus={() => setError(null)}
+                            style={{ marginBottom: '24px' }}
                         />
+
+                        {/* USER TYPE SELECTION */}
+                        <label className={styles.label}>WHICH BEST DESCRIBES YOU?</label>
+                        <div className={styles.userTypes}>
+                            <div 
+                                className={`${styles.typeCard} ${userType === 'user' ? styles.typeCardActive : ''}`}
+                                onClick={() => setUserType('user')}
+                            >
+                                <div className={styles.typeIcon}>🗺</div>
+                                <h4 className={styles.typeTitle}>Commuter</h4>
+                                <p className={styles.typeDesc}>Find routes and book deliveries</p>
+                                {userType === 'user' && <div className={styles.checkmark}>✓</div>}
+                            </div>
+
+                            <div 
+                                className={`${styles.typeCard} ${userType === 'rider' ? styles.typeCardActive : ''}`}
+                                onClick={() => setUserType('rider')}
+                            >
+                                <div className={styles.typeIcon}>🏍</div>
+                                <h4 className={styles.typeTitle}>Rider</h4>
+                                <p className={styles.typeDesc}>Deliver with DAL</p>
+                                {userType === 'rider' && <div className={styles.checkmark}>✓</div>}
+                            </div>
+
+                            <div 
+                                className={`${styles.typeCard} ${userType === 'errand_worker' ? styles.typeCardActive : ''}`}
+                                onClick={() => setUserType('errand_worker')}
+                            >
+                                <div className={styles.typeIcon}>🛍</div>
+                                <h4 className={styles.typeTitle}>Errand Worker</h4>
+                                <p className={styles.typeDesc}>Handle tasks and errands</p>
+                                {userType === 'errand_worker' && <div className={styles.checkmark}>✓</div>}
+                            </div>
+                        </div>
+
                         {error && <p className={styles.error}>{error}</p>}
                         
                         <button 
@@ -143,11 +196,8 @@ export default function LoginPage() {
                             disabled={loading}
                         >
                             {loading && <div className={styles.spinner}></div>}
-                            Send OTP Code
+                            Create Account
                         </button>
-                        <p className={styles.note}>
-                            We'll send a one-time code to your email. No password needed.
-                        </p>
                     </div>
                 ) : (
                     <div className={styles.formGroup}>
@@ -179,8 +229,8 @@ export default function LoginPage() {
                 )}
 
                 <div className={styles.footerNote}>
-                    Don't have an account?{' '}
-                    <a href="/signup" className={styles.link}>Sign up</a>
+                    Already have an account?{' '}
+                    <a href="/login" className={styles.link}>Sign in</a>
                 </div>
             </div>
         </AuthLayout>

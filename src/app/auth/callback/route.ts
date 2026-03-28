@@ -10,6 +10,7 @@ import { getBaseUrl } from '@/utils/url'
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')
+    const requestedRole = searchParams.get('role') || 'user'
     const origin = request.nextUrl.origin
 
     if (code) {
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
                         id: user.id,
                         full_name: user.user_metadata?.full_name || '',
                         email: user.email,
-                        role: 'user',
+                        role: requestedRole,
                         avatar_url: user.user_metadata?.avatar_url || ''
                     })
                     
