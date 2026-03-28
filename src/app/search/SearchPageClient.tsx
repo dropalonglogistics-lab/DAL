@@ -150,35 +150,13 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
                     {isSearching ? <Loader2 size={20} className="animate-spin" /> : 'Find Route'}
                 </button>
 
-                {/* SECTION 3 - DEFAULT STATE (POPULAR ROUTES) */}
-                {!hasSearched && (
-                    <section>
-                        <h2 className={styles.popularHeader}>POPULAR ROUTES</h2>
-                        <div className={styles.resultsList}>
-                            {featuredRoutes.map((route) => (
-                                <RouteResultCard 
-                                    key={route.id} 
-                                    {...route} 
-                                    isExpanded={expandedRouteId === route.id}
-                                    onToggleExpand={(expanded) => handleToggleExpand(route.id, expanded)}
-                                />
-                            ))}
-                            {featuredRoutes.length === 0 && (
-                                <div className={styles.emptyState}>
-                                    <p className={styles.emptyTitle}>Routes loading — check back shortly.</p>
-                                </div>
-                            )}
-                        </div>
-                    </section>
-                )}
-
-                {/* SECTION 4 - LIVE SEARCH RESULTS */}
-                {hasSearched && (
+                {/* SECTION 3 - RESULTS */}
+                {hasSearched ? (
                     <section>
                         {results.length > 0 ? (
                             <>
                                 <h2 className={styles.resultsHeader}>
-                                    {results.length === 1 ? '1 route found' : `${results.length} routes found`}
+                                    {results.length} results found
                                 </h2>
                                 <div className={styles.resultsList}>
                                     {results.map((route) => (
@@ -190,32 +168,31 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
                                         />
                                     ))}
                                 </div>
-                            </>
-                        ) : didYouMean.length > 0 ? (
-                            <>
-                                <h2 className={styles.resultsHeader}>Did you mean these routes?</h2>
-                                <div className={styles.resultsList}>
-                                    {didYouMean.map((route) => (
-                                        <RouteResultCard 
-                                            key={route.id} 
-                                            {...route} 
-                                            isExpanded={expandedRouteId === route.id}
-                                            onToggleExpand={(expanded) => handleToggleExpand(route.id, expanded)}
-                                        />
-                                    ))}
-                                </div>
+                                {results.length >= 20 && (
+                                    <div style={{ textAlign: 'center', marginTop: '32px' }}>
+                                        <button className={styles.submitBtn} style={{ background: 'transparent', border: '1px solid var(--border)', width: 'auto', padding: '12px 32px' }}>
+                                            Load more results…
+                                        </button>
+                                    </div>
+                                )}
                             </>
                         ) : (
-                            <div className={styles.emptyState}>
-                                <div className={styles.emptyTitle}>0 routes found</div>
-                                <p className={styles.emptySub}>No results for "{fromInput || '[Any]'}" to "{toInput || '[Any]'}".</p>
-                                <Link href="/suggest-route" className={styles.suggestLink}>
-                                    Suggest this route <ArrowRight size={14} />
-                                </Link>
-                            </div>
+                                <div className={styles.emptyState}>
+                                    <div className={styles.emptyTitle}>0 routes found</div>
+                                    <p className={styles.emptySub}>No results for "{fromInput || '[Any]'}" to "{toInput || '[Any]'}".</p>
+                                    <Link href="/suggest-route" className={styles.suggestLink}>
+                                        Suggest this route <ArrowRight size={14} />
+                                    </Link>
+                                </div>
                         )}
                     </section>
+                ) : (
+                    <div className={styles.emptyState} style={{ padding: '80px 20px', opacity: 0.7 }}>
+                        <div className={styles.emptyTitle}>Enter locations to begin</div>
+                        <p className={styles.emptySub}>Search over 40+ verified routes across Port Harcourt.</p>
+                    </div>
                 )}
+}
 
             </div>
         </div>

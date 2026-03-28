@@ -30,6 +30,11 @@ export default async function CommunityPage() {
         .limit(1)
         .maybeSingle();
 
+    const { count: verifiedCount } = await supabase
+        .from('community_routes')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'approved');
+
     const competition = activeComp || lastEnded || null;
     const state = activeComp ? 'active' : lastEnded ? 'ended' : 'none';
 
@@ -76,6 +81,7 @@ export default async function CommunityPage() {
             competitionState={state}
             leaderboard={leaderboard}
             totalParticipants={totalCount ?? 0}
+            verifiedCount={verifiedCount ?? 0}
             myRank={myRank}
             myPoints={myPoints}
             top25Threshold={top25Threshold}

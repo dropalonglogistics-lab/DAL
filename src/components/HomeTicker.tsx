@@ -22,7 +22,7 @@ export default function HomeTicker() {
     }, []);
 
     const text = count === null
-        ? 'Loading live road intelligence…'
+        ? 'Connecting to road intelligence…'
         : count === 0
             ? 'LIVE: Roads look clear in Port Harcourt right now'
             : `LIVE: ${count} active road alert${count !== 1 ? 's' : ''} in Port Harcourt right now`;

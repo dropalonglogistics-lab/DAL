@@ -39,7 +39,7 @@ export default async function Home() {
     // Trending routes — 3 most recently updated community routes
     const { data: trending } = await supabase
         .from('community_routes')
-        .select('id, start_location, destination, vehicle_type_used, fare_price_range_min, fare_price_range_min')
+        .select('id, start_location, destination, vehicle_type_used, fare_price_range_min, fare_price_range_max')
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(3);
@@ -66,27 +66,33 @@ export default async function Home() {
                         <RouteSearch />
                     </div>
                 </div>
-            </section>
-
-            {/* ── Community Stats Bar ── */}
-            <section className={styles.statsBar}>
-                <div className={styles.statsBarInner}>
-                    <div className={styles.statsBarItem}>
-                        <ShieldCheck size={18} />
-                        <span><strong>{verifiedCount ?? 0}</strong> routes verified</span>
+                  {/* ── Community Stats Bar ── */}
+            {(verifiedCount > 0 || alertCount > 0 || memberCount > 0) && (
+                <section className={styles.statsBar}>
+                    <div className={styles.statsBarInner}>
+                        {verifiedCount > 0 && (
+                            <div className={styles.statsBarItem}>
+                                <ShieldCheck size={18} />
+                                <span><strong>{verifiedCount}</strong> routes verified</span>
+                            </div>
+                        )}
+                        {verifiedCount > 0 && (alertCount > 0 || memberCount > 0) && <div className={styles.statsBarDivider} />}
+                        {alertCount > 0 && (
+                            <div className={styles.statsBarItem}>
+                                <Bell size={18} />
+                                <span><strong>{alertCount}</strong> alerts today</span>
+                            </div>
+                        )}
+                        {alertCount > 0 && memberCount > 0 && <div className={styles.statsBarDivider} />}
+                        {memberCount > 0 && (
+                            <div className={styles.statsBarItem}>
+                                <Users size={18} />
+                                <span><strong>{memberCount.toLocaleString()}</strong> members</span>
+                            </div>
+                        )}
                     </div>
-                    <div className={styles.statsBarDivider} />
-                    <div className={styles.statsBarItem}>
-                        <Bell size={18} />
-                        <span><strong>{alertCount ?? 0}</strong> alerts today</span>
-                    </div>
-                    <div className={styles.statsBarDivider} />
-                    <div className={styles.statsBarItem}>
-                        <Users size={18} />
-                        <span><strong>{(memberCount ?? 0).toLocaleString()}</strong> members</span>
-                    </div>
-                </div>
-            </section>
+                </section>
+            )}
 
             {/* ── Stat Cards ── */}
             <section className={styles.statsSection}>
@@ -97,7 +103,7 @@ export default async function Home() {
                         </div>
                         <div className={styles.statText}>
                             <span className={styles.statLabel}>Route Coverage</span>
-                            <span className={styles.statValue}>45+ active paths verified</span>
+                            <span className={styles.statValue}>{verifiedCount || 45}+ active paths verified</span>
                         </div>
                     </div>
                     <Link href="/suggest-route" className={styles.statCard}>
@@ -117,10 +123,7 @@ export default async function Home() {
                             <span className={styles.statLabel}>Community Hub</span>
                             <span className={styles.statValue}>{communityCount || 0} active locales</span>
                         </div>
-                    </Link>
-
-                    <HomepageExpressTile isLive={Boolean(isF2Live)} />
-                    <HomepageShopperTile isLive={Boolean(isF3Live)} />
+                    </div>
                 </div>
             </section>
 
@@ -129,7 +132,7 @@ export default async function Home() {
                 <section className={styles.trendingSection}>
                     <div className={styles.trendingHeader}>
                         <h2 className={styles.sectionTitle}>
-                            <TrendingUp size={22} /> Trending Routes This Week
+                            <TrendingUp size={22} /> Trending Routes
                         </h2>
                         <Link href="/search" className={styles.seeAll}>See all →</Link>
                     </div>
@@ -148,11 +151,6 @@ export default async function Home() {
                                 </div>
                                 <div className={styles.trendingMeta}>
                                     <span className={styles.trendingVehicle}>{route.vehicle_type_used}</span>
-                                    {(route.fare_price_range_min || route.fare_price_range_min) && (
-                                        <span className={styles.trendingFare}>
-                                            ₦{(route.fare_price_range_min || route.fare_price_range_min)?.toLocaleString()}
-                                        </span>
-                                    )}
                                 </div>
                             </Link>
                         ))}
@@ -174,23 +172,10 @@ export default async function Home() {
                             <div className={styles.intelContent}>
                                 <span className={styles.intelTitle}>{alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} Report</span>
                                 <p className={styles.intelText}>{alert.description}</p>
-                                <span className={styles.intelTime}>Just now</span>
                             </div>
                         </div>
                     ))}
-                    {communityCount !== null && communityCount > 0 && (
-                        <div className={styles.intelCard}>
-                            <div className={styles.intelIcon}>
-                                <Users size={20} />
-                            </div>
-                            <div className={styles.intelContent}>
-                                <span className={styles.intelTitle}>Community Hub</span>
-                                <p className={styles.intelText}>{communityCount} crowd-sourced routes ready for exploration.</p>
-                                <span className={styles.intelTime}>Always Learning</span>
-                            </div>
-                        </div>
-                    )}
-                    {(!alerts || alerts.length === 0) && (!communityCount || communityCount === 0) && (
+                    {(!alerts || alerts.length === 0) && (
                         <div className={styles.intelCard}>
                             <div className={styles.intelIcon}>
                                 <Info size={20} />
@@ -209,12 +194,11 @@ export default async function Home() {
                 <div className={styles.premiumContent}>
                     <div className={styles.premiumBadge}>
                         <Sparkles size={14} />
-                        <span>Coming Soon</span>
+                        <span>Premium Features</span>
                     </div>
                     <h2 className={styles.premiumTitle}>Advanced Logistics Intelligence</h2>
                     <p className={styles.premiumDesc}>
-                        Upgrade to <strong>DAL Premium</strong> for our most advanced data layer.
-                        Get real-time traffic heatmaps, predictive fare analytics, and priority route intelligence.
+                        The DAL platform is currently in early access. Upgrade to <strong>DAL Premium</strong> to support the mission and unlock our most advanced data layers as they roll out.
                     </p>
                     <div className={styles.premiumGrid}>
                         <div className={styles.premiumFeature}>
@@ -239,9 +223,13 @@ export default async function Home() {
                             </div>
                         </div>
                     </div>
-                    <button className={styles.waitlistBtn} disabled>
-                        Join the Premium Waitlist <ChevronRight size={18} />
-                    </button>
+                    
+                    <div className={styles.waitlistForm}>
+                        <input type="email" placeholder="Enter email for early access" className={styles.waitlistInput} />
+                        <button className={styles.waitlistBtn}>
+                            Join Premium Waitlist
+                        </button>
+                    </div>
                 </div>
                 <div className={styles.premiumVisual}>
                     <div className={styles.visualOrb}></div>
@@ -257,6 +245,5 @@ export default async function Home() {
                     </div>
                 </div>
             </section>
-        </div>
     );
 }

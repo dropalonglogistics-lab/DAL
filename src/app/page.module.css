@@ -481,6 +481,51 @@
     gap: 24px;
 }
 
+.waitlistForm {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.waitlistInput {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    color: white;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.waitlistInput:focus {
+    border-color: var(--brand-gold);
+}
+
+.waitlistBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
+    color: var(--brand-black);
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.waitlistBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(201, 162, 39, 0.4);
+}
+
 .premiumBadge {
     display: inline-flex;
     align-items: center;

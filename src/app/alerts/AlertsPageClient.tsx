@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, type ReactElement } from 'react';
-import { Bell, Filter, ThumbsUp, ThumbsDown, MapPin, AlertTriangle, Shield, TrafficCone, Loader, ChevronRight } from 'lucide-react';
+import { Bell, Filter, ThumbsUp, ThumbsDown, MapPin, AlertTriangle, Shield, TrafficCone, Loader, ChevronRight, Plus, X } from 'lucide-react';
 import Link from 'next/link';
 
 const PH_AREAS_TOP = [
@@ -48,6 +48,13 @@ export default function AlertsPageClient() {
     const [area, setArea] = useState('All Areas');
     const [severity, setSeverity] = useState('all');
     const [voted, setVoted] = useState<Record<string, 1 | -1 | 0>>({});
+    
+    // Reporting form state
+    const [showReportForm, setShowReportForm] = useState(false);
+    const [newAlertType, setNewAlertType] = useState('traffic');
+    const [newAlertArea, setNewAlertArea] = useState('Mile 1');
+    const [newAlertDesc, setNewAlertDesc] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchAlerts = useCallback(async () => {
         setLoading(true);
@@ -88,6 +95,35 @@ export default function AlertsPageClient() {
         } catch { /* silent */ }
     };
 
+    const handleSubmitAlert = async () => {
+        if (!newAlertDesc) return;
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/alerts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: newAlertType,
+                    description: newAlertDesc,
+                    area: newAlertArea,
+                    severity: newAlertType === 'accident' || newAlertType === 'police' ? 'critical' : 'warning'
+                }),
+            });
+
+            if (res.ok) {
+                setNewAlertDesc('');
+                setShowReportForm(false);
+                fetchAlerts();
+            } else if (res.status === 401) {
+                alert('Please sign in to report alerts.');
+            }
+        } catch (err) {
+            console.error('Submit Alert Error:', err);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const severityColor = (s?: string) => {
         if (s === 'critical') return '#ef4444';
         if (s === 'warning') return '#f59e0b';
@@ -97,15 +133,84 @@ export default function AlertsPageClient() {
     return (
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 20px' }}>
             {/* Header */}
-            <div style={{ marginBottom: '32px' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <Bell size={28} style={{ color: 'var(--color-gold)' }} />
-                    Community Alerts
-                </h1>
-                <p style={{ color: 'var(--text-secondary)', marginTop: '6px' }}>
-                    Real-time road reports from Port Harcourt commuters
-                </p>
+            <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+                <div>
+                    <h1 style={{ fontSize: '2rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
+                        <Bell size={28} style={{ color: 'var(--color-gold)' }} />
+                        Community Alerts
+                    </h1>
+                    <p style={{ color: 'var(--text-secondary)', marginTop: '6px', margin: 0 }}>
+                        Real-time road reports from Port Harcourt commuters
+                    </p>
+                </div>
+                <button 
+                    onClick={() => setShowReportForm(!showReportForm)}
+                    style={{
+                        background: 'transparent', border: '1px solid var(--color-gold)', color: 'var(--color-gold)',
+                        padding: '10px 20px', borderRadius: '12px', fontWeight: 700, fontSize: '0.9rem',
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s'
+                    }}
+                >
+                    {showReportForm ? <X size={18} /> : <Plus size={18} />}
+                    {showReportForm ? 'Cancel' : 'Report Alert'}
+                </button>
             </div>
+
+            {/* Inline Report Form */}
+            {showReportForm && (
+                <div style={{ background: 'var(--card-bg)', border: '1.5px solid var(--color-gold)', borderRadius: '18px', padding: '24px', marginBottom: '32px', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
+                    <h3 style={{ margin: '0 0 16px', fontWeight: 800 }}>Submit New Road Alert</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Type</label>
+                            <select 
+                                value={newAlertType} 
+                                onChange={e => setNewAlertType(e.target.value)}
+                                style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#111', border: '1px solid var(--border)', color: '#fff' }}
+                            >
+                                <option value="traffic">🚦 Traffic</option>
+                                <option value="police">👮 Checkpoint</option>
+                                <option value="accident">⚠️ Accident</option>
+                                <option value="flooding">🌧️ Flooding</option>
+                                <option value="other">ℹ️ Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Area</label>
+                            <select 
+                                value={newAlertArea} 
+                                onChange={e => setNewAlertArea(e.target.value)}
+                                style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#111', border: '1px solid var(--border)', color: '#fff' }}
+                            >
+                                {PH_AREAS_TOP.map(a => <option key={a} value={a}>{a}</option>)}
+                            </select>
+                        </div>
+                    </div>
+                    <div style={{ marginBottom: '16px' }}>
+                        <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</label>
+                        <textarea 
+                            value={newAlertDesc}
+                            onChange={e => setNewAlertDesc(e.target.value)}
+                            placeholder="e.g. Heavy traffic build up at Rumuokoro flyover due to broken down truck..."
+                            rows={3}
+                            style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#111', border: '1px solid var(--border)', color: '#fff' }}
+                        />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                        <button 
+                            disabled={isSubmitting || !newAlertDesc}
+                            onClick={handleSubmitAlert}
+                            style={{
+                                background: 'var(--color-gold)', color: '#000', fontWeight: 800,
+                                padding: '10px 24px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                                opacity: (!newAlertDesc || isSubmitting) ? 0.6 : 1
+                            }}
+                        >
+                            {isSubmitting ? 'Posting...' : 'Post Alert'}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Severity Tabs */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>

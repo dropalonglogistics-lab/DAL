@@ -111,8 +111,10 @@ export default function SuggestRouteClient() {
         formData.append('type', 'route');
         formData.append('start_location', start_location);
         formData.append('destination', destination);
+        formData.append('fareMin', fareMin);
         formData.append('fareMax', fareMax);
-        formData.append('durationMinutes', timeMax);
+        formData.append('timeMin', timeMin);
+        formData.append('timeMax', timeMax);
 
         const stops_along_the_way = legs.map((leg, i) => ({
             id: String(i + 1),

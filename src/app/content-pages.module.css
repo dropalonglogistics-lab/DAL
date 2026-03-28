@@ -1,0 +1,54 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 120px 24px 80px;
+    min-height: 80vh;
+}
+
+.title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 900;
+    font-family: 'Syne', sans-serif;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #fff 30%, #C9A227 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.lastUpdated {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 48px;
+    display: block;
+}
+
+.content {
+    color: var(--text-primary);
+    line-height: 1.8;
+    font-size: 1.05rem;
+}
+
+.content h2 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin: 40px 0 16px;
+    font-weight: 800;
+}
+
+.content p {
+    margin-bottom: 20px;
+}
+
+.content ul {
+    margin-bottom: 24px;
+    padding-left: 20px;
+}
+
+.content li {
+    margin-bottom: 12px;
+}
+
+.content strong {
+    color: var(--color-gold);
+}

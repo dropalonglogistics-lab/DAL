@@ -90,14 +90,16 @@ export async function suggestRoute(formData: FormData) {
         start_location: formData.get('start_location') as string,
         destination: formData.get('destination') as string,
         vehicle_type_used: Array.from(vehicleTypes).join(', ') || 'Various',
-        fare_price_range_min: parseFloat(formData.get('fareMax') as string) || null,
-        estimated_travel_time_min: parseInt(formData.get('durationMinutes') as string) || null,
+        fare_price_range_min: parseFloat(formData.get('fareMin') as string) || null,
+        fare_price_range_max: parseFloat(formData.get('fareMax') as string) || null,
+        estimated_travel_time_min: parseInt(formData.get('timeMin') as string) || null,
+        estimated_travel_time_max: parseInt(formData.get('timeMax') as string) || null,
         stops_along_the_way: stops_along_the_way,
-        status: 'pending' // For admin approval workflow
+        status: 'pending' 
     }
 
     if (!routeData.start_location || !routeData.destination) {
-        return { error: 'Origin and destination are required.' }
+        return { error: 'Start location and destination are required.' }
     }
 
     const { error } = await supabase
@@ -108,21 +110,7 @@ export async function suggestRoute(formData: FormData) {
         return { error: error.message }
     }
 
-    // Award Point (Route)
-    if (user && user.id) {
-        try {
-            const { data: profile } = await supabase.from('profiles').select('points, full_name').eq('id', user.id).single()
-            const { error: upsertError } = await supabase.from('profiles').upsert({
-                id: user.id,
-                email: user.email || '',
-                points: (profile?.points || 0) + 1,
-                full_name: profile?.full_name || (user.user_metadata?.full_name as string) || 'Community Member'
-            })
-            if (upsertError) console.error('Point Award Error (Route):', upsertError)
-        } catch (err) {
-            console.error('Point error (Route):', err)
-        }
-    }
+    // Points are awarded by admin on approval (+50 pts)
 
     // Conceptual AI Learning
     await learnNewRoutePattern(routeData.start_location, routeData.destination, routeData.vehicle_type_used, routeData.stops_along_the_way || [])

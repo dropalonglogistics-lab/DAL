@@ -28,6 +28,7 @@ interface Props {
     competitionState: 'active' | 'ended' | 'none';
     leaderboard: LeaderboardRow[];
     totalParticipants: number;
+    verifiedCount: number;
     myRank: number;
     myPoints: number;
     top25Threshold: number;
@@ -126,6 +127,25 @@ export default function CommunityClient({
 
     return (
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 20px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
+
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <h1 style={{ fontSize: 'clamp(2.2rem, 6vw, 3.5rem)', fontWeight: 900, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.02em', margin: '0 0 12px' }}>
+                    Growth via Intelligence
+                </h1>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>
+                    Real humans. Real data. Real impact in Port Harcourt.
+                </p>
+                <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginTop: '24px' }}>
+                    <div>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>{verifiedCount.toLocaleString()}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Verified Routes</div>
+                    </div>
+                    <div>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>{totalParticipants.toLocaleString()}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Active Members</div>
+                    </div>
+                </div>
+            </div>
 
             {/* ── SECTION 1: Competition Banner ── */}
             {competitionState === 'active' && competition ? (
@@ -300,9 +320,17 @@ export default function CommunityClient({
                                 ))}
                             </tbody>
                         </table>
-                        <p style={{ marginTop: '12px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                            Example vehicles used on routes: Keke, Taxi, Bus, Shuttle, Bike, Walk
-                        </p>
+                        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                            <Link href="/suggest-route" style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                background: 'rgba(201,162,39,0.1)', color: '#C9A227',
+                                padding: '10px 20px', borderRadius: '12px', fontWeight: 700,
+                                textDecoration: 'none', border: '1px solid rgba(201,162,39,0.3)',
+                                fontSize: '0.9rem', transition: 'all 0.2s'
+                            }}>
+                                <MapPin size={16} /> Suggest a new route
+                            </Link>
+                        </div>
                     </div>
                 )}
             </section>

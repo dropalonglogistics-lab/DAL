@@ -61,10 +61,10 @@ export default function RouteResultCard({
             {/* COLLAPSED STATE (Always visible) */}
             <header className={styles.header}>
                 <h3 className={styles.title}>
-                    {route_title || `${start_location} → ${destination}`}
+                    {route_title || `${start_location || 'Unknown Origin'} → ${destination || 'Unknown Destination'}`}
                 </h3>
                 <div className={styles.subtitle}>
-                    {start_location} <span style={{ opacity: 0.5 }}>→</span> {destination}
+                    {start_location || 'Unknown Origin'} <span style={{ opacity: 0.5 }}>→</span> {destination || 'Unknown Destination'}
                 </div>
             </header>
 
