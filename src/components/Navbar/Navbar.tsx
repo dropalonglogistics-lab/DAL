@@ -404,7 +404,7 @@ export default function Navbar() {
                             <Link href="/login" className={styles.mobileActionSignIn} onClick={() => setIsMobileMenuOpen(false)}>
                                 Sign In
                             </Link>
-                            <Link href="/register" className={styles.mobileActionJoin} onClick={() => setIsMobileMenuOpen(false)}>
+                            <Link href="/signup" className={styles.mobileActionJoin} onClick={() => setIsMobileMenuOpen(false)}>
                                 Join Now
                             </Link>
                         </div>

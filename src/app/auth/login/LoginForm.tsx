@@ -22,7 +22,7 @@ function GoogleIcon() {
     );
 }
 
-export default function AuthLoginForm() {
+export default function LoginForm() {
     const router = useRouter();
     const supabase = createClient();
 
@@ -203,7 +203,7 @@ export default function AuthLoginForm() {
 
             <div className={styles.formFooter}>
                 New to DAL?
-                <Link href="/auth/register" className={styles.formLink}>Create account</Link>
+                <Link href="/signup" className={styles.formLink}>Create account</Link>
             </div>
         </div>
     );

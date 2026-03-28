@@ -1,5 +1,1 @@
-import LoginForm from './LoginForm';
-
-export default function AuthLoginPage() {
-    return <LoginForm />;
-}
+export { default } from '../../login/page';

@@ -91,7 +91,7 @@ export default function RegisterForm() {
             }
 
             // 3. Redirect to email OTP verification page
-            router.push(`/auth/verify-otp?email=${encodeURIComponent(fields.email)}`);
+            router.push(`/verify-otp?email=${encodeURIComponent(fields.email)}`);
         } catch (err: any) {
             setGlobalError(err.message || 'Registration failed. Please try again.');
             setLoading(false);
@@ -242,7 +242,7 @@ export default function RegisterForm() {
 
             <div className={styles.formFooter}>
                 Already have an account?
-                <Link href="/auth/login" className={styles.formLink}>Sign in</Link>
+                <Link href="/login" className={styles.formLink}>Sign in</Link>
             </div>
         </div>
     );

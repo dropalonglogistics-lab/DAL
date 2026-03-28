@@ -101,7 +101,7 @@ function LockScreen() {
                 </p>
             </div>
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <a href="/auth/login?next=/community" style={{
+                <a href="/login?next=/community" style={{
                     display: 'inline-flex', alignItems: 'center', gap: '8px',
                     background: 'linear-gradient(135deg, #C9A227, #D97706)', color: '#000',
                     padding: '14px 32px', borderRadius: '100px', fontWeight: 800, fontSize: '1rem',
@@ -110,7 +110,7 @@ function LockScreen() {
                 }}>
                     Sign In
                 </a>
-                <a href="/auth/register?next=/community" style={{
+                <a href="/signup?next=/community" style={{
                     display: 'inline-flex', alignItems: 'center', gap: '8px',
                     border: '1.5px solid rgba(201,162,39,0.5)', color: '#C9A227',
                     padding: '14px 32px', borderRadius: '100px', fontWeight: 700, fontSize: '1rem',

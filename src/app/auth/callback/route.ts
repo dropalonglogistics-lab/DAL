@@ -47,17 +47,7 @@ export async function GET(request: NextRequest) {
                     return NextResponse.redirect(`${origin}/dashboard`)
                 }
 
-                const roleRedirects: Record<string, string> = {
-                    user: '/dashboard',
-                    rider: '/become-a-rider',
-                    errand_worker: '/become-an-errand-worker',
-                    driver: '/become-a-driver',
-                    admin: '/admin',
-                    super_admin: '/super-admin'
-                }
-
-                const destination = roleRedirects[profile.role] || '/dashboard'
-                return NextResponse.redirect(`${origin}${destination}`)
+                return NextResponse.redirect(`${origin}/dashboard`)
             }
         }
     }

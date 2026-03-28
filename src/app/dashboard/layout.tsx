@@ -11,7 +11,7 @@ export default async function UserDashboardLayout({
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        redirect('/auth/login?next=/dashboard');
+        redirect('/login?next=/dashboard');
     }
 
     return <DashboardLayout>{children}</DashboardLayout>;

@@ -4,6 +4,13 @@ import { withSentryConfig } from '@sentry/nextjs';
 
 const nextConfig: NextConfig = {
     outputFileTracingRoot: path.join(__dirname, './'),
+    async redirects() {
+        return [
+            { source: '/register', destination: '/signup', permanent: true },
+            { source: '/auth/login', destination: '/login', permanent: true },
+            { source: '/auth/register', destination: '/signup', permanent: true }
+        ]
+    }
 };
 
 export default withSentryConfig(nextConfig, {
@@ -15,6 +22,4 @@ export default withSentryConfig(nextConfig, {
         enabled: true,
     },
     sourcemaps: { disable: false },
-    // disableLogger: true,
-    // automaticVercelMonitors: true,
 });

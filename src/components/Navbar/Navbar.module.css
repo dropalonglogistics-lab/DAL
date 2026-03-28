@@ -628,7 +628,7 @@
     }
 
     :global(.light-mode) .unifiedMenuBtn {
-        color: var(--brand-black);
+        color: var(--foreground);
     }
 
     .unifiedMenuBtn:hover {
