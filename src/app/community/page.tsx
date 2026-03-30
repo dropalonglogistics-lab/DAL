@@ -11,97 +11,115 @@ export default async function CommunityPage() {
         return <LockScreen />;
     }
 
-    // 1. Fetch Real-time Stats
-    // Active Members
-    const { count: memberCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
+    try {
+        // 1. Fetch Real-time Stats
+        // Active Members
+        const { count: memberCount } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true });
 
-    // Reports Today (Unique areas in last 24h)
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const { data: alertsData } = await supabase
-        .from('alerts')
-        .select('area')
-        .gt('created_at', yesterday);
-    const uniqueAreas = new Set(alertsData?.map(a => a.area) || []);
-    const reportsToday = uniqueAreas.size;
+        // Reports Today (Unique areas in last 24h)
+        const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const { data: alertsData } = await supabase
+            .from('alerts')
+            .select('area')
+            .gt('created_at', yesterday);
+        const uniqueAreas = new Set(alertsData?.map(a => a.area) || []);
+        const reportsToday = uniqueAreas.size;
 
-    // Routes Verified
-    const { count: verifiedCount } = await supabase
-        .from('routes')
-        .select('*', { count: 'exact', head: true });
-        // NOTE: If there's a 'verified' column, add .eq('verified', true)
+        // Routes Verified
+        const { count: verifiedCount } = await supabase
+            .from('routes')
+            .select('*', { count: 'exact', head: true });
 
-    // 2. Competition Data
-    const { data: activeComp } = await supabase
-        .from('competitions')
-        .select('*')
-        .eq('status', 'active')
-        .order('start_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        // 2. Competition Data
+        const { data: activeComp } = await supabase
+            .from('competitions')
+            .select('*')
+            .eq('status', 'active')
+            .order('start_date', { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-    const { data: lastEnded } = await supabase
-        .from('competitions')
-        .select('*')
-        .eq('status', 'ended')
-        .order('end_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        const { data: lastEnded } = await supabase
+            .from('competitions')
+            .select('*')
+            .eq('status', 'ended')
+            .order('end_date', { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-    const competition = activeComp || lastEnded || null;
-    const state = activeComp ? 'active' : lastEnded ? 'ended' : 'none';
+        const competition = activeComp || lastEnded || null;
+        const state = activeComp ? 'active' : lastEnded ? 'ended' : 'none';
 
-    // 3. Leaderboard (Top 25)
-    const { data: leaderboardRaw } = await supabase
-        .from('profiles')
-        .select('id, full_name, points, city')
-        .order('points', { ascending: false })
-        .limit(25);
+        // 3. Leaderboard (Top 25)
+        const { data: leaderboardRaw } = await supabase
+            .from('profiles')
+            .select('id, full_name, points, city')
+            .order('points', { ascending: false })
+            .limit(25);
 
-    const leaderboard = (leaderboardRaw ?? []).map((u, i) => {
-        const parts = (u.full_name || 'Anonymous').split(' ');
-        const firstName = parts[0];
-        const lastInitial = parts.length > 1 ? parts[1].charAt(0) + '.' : '';
-        return {
-            rank: i + 1,
-            id: u.id,
-            name: lastInitial ? `${firstName} ${lastInitial}` : firstName,
-            points: u.points ?? 0,
-            location: u.city || 'Port Harcourt',
-        };
-    });
+        const leaderboard = (leaderboardRaw ?? []).map((u, i) => {
+            const parts = (u.full_name || 'Anonymous').split(' ');
+            const firstName = parts[0];
+            const lastInitial = parts.length > 1 ? parts[1].charAt(0) + '.' : '';
+            return {
+                rank: i + 1,
+                id: u.id,
+                name: lastInitial ? `${firstName} ${lastInitial}` : firstName,
+                points: u.points ?? 0,
+                location: u.city || 'Port Harcourt',
+            };
+        });
 
-    // 4. User Standing
-    const { data: myProfile } = await supabase.from('profiles').select('points').eq('id', user.id).single();
-    const myPoints = myProfile?.points ?? 0;
-    const { count: aboveMe } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).gt('points', myPoints);
-    const myRank = (aboveMe ?? 0) + 1;
+        // 4. User Standing
+        const { data: myProfile } = await supabase.from('profiles').select('points').eq('id', user.id).maybeSingle();
+        const myPoints = myProfile?.points ?? 0;
+        const { count: aboveMe } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).gt('points', myPoints);
+        const myRank = (aboveMe ?? 0) + 1;
 
-    const top25Threshold = leaderboard.length >= 25 ? leaderboard[24].points : 0;
+        const top25Threshold = leaderboard.length >= 25 ? leaderboard[24].points : 0;
 
-    // 5. Past Competitions
-    const { data: pastComps } = await supabase
-        .from('competitions')
-        .select('*')
-        .eq('status', 'ended')
-        .order('end_date', { ascending: false })
-        .limit(5);
+        // 5. Past Competitions
+        const { data: pastComps } = await supabase
+            .from('competitions')
+            .select('*')
+            .eq('status', 'ended')
+            .order('end_date', { ascending: false })
+            .limit(5);
 
-    return (
-        <CommunityClient
-            competition={competition}
-            competitionState={state}
-            leaderboard={leaderboard}
-            totalParticipants={memberCount ?? 0}
-            reportsToday={reportsToday}
-            verifiedCount={verifiedCount ?? 0}
-            myRank={myRank}
-            myPoints={myPoints}
-            top25Threshold={top25Threshold}
-            pastCompetitions={pastComps ?? []}
-        />
-    );
+        return (
+            <CommunityClient
+                competition={competition}
+                competitionState={state}
+                leaderboard={leaderboard}
+                totalParticipants={memberCount ?? 0}
+                reportsToday={reportsToday}
+                verifiedCount={verifiedCount ?? 0}
+                myRank={myRank}
+                myPoints={myPoints}
+                top25Threshold={top25Threshold}
+                pastCompetitions={pastComps ?? []}
+            />
+        );
+    } catch (error) {
+        console.error('Community data fetch error:', error);
+        // Provide a bare-bones fallback UI if db fails
+        return (
+            <CommunityClient
+                competition={null}
+                competitionState="none"
+                leaderboard={[]}
+                totalParticipants={0}
+                reportsToday={0}
+                verifiedCount={0}
+                myRank={0}
+                myPoints={0}
+                top25Threshold={0}
+                pastCompetitions={[]}
+            />
+        );
+    }
 }
 
 function LockScreen() {

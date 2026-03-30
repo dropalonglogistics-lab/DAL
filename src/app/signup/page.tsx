@@ -112,7 +112,19 @@ export default function SignupPage() {
         router.push('/dashboard');
     };
 
-    if (checkingAuth) return null;
+    if (checkingAuth) {
+        return (
+            <AuthLayout brandHeadline="Join thousands of Port Harcourt commuters moving smarter.">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '20px 0' }}>
+                    <div className={styles.skeleton} style={{ height: '40px', width: '60%', borderRadius: '8px' }} />
+                    <div className={styles.skeleton} style={{ height: '24px', width: '40%', borderRadius: '8px' }} />
+                    <div className={styles.skeleton} style={{ height: '50px', borderRadius: '12px', marginTop: '20px' }} />
+                    <div className={styles.skeleton} style={{ height: '50px', borderRadius: '12px' }} />
+                    <div className={styles.skeleton} style={{ height: '50px', borderRadius: '12px' }} />
+                </div>
+            </AuthLayout>
+        );
+    }
 
     return (
         <AuthLayout brandHeadline="Join thousands of Port Harcourt commuters moving smarter.">
