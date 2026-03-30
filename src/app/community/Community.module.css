@@ -1,0 +1,185 @@
+/* DAL Community Hub Styling */
+.container {
+    background-color: #0D0D0D;
+    color: #FFFFFF;
+    min-height: 100vh;
+    padding: 60px 20px;
+    font-family: var(--font-inter), sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.hero {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.headline {
+    font-family: var(--font-syne), sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.subheadline {
+    font-size: 14px;
+    color: #666666;
+    margin-bottom: 40px;
+}
+
+.statsRow {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 24px;
+}
+
+.statItem {
+    text-align: center;
+}
+
+.statValue {
+    font-size: 24px;
+    font-weight: 800;
+    color: #C9A227;
+}
+
+.statLabel {
+    font-size: 10px;
+    color: #555555;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+/* CARDS */
+.section {
+    margin-bottom: 40px;
+}
+
+.sectionTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.competitionCard {
+    background-color: #111111;
+    border: 0.5px solid rgba(201, 162, 39, 0.4);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 60px;
+}
+
+.cardTitle {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.prize {
+    font-size: 14px;
+    font-weight: 700;
+    color: #C9A227;
+    margin-bottom: 12px;
+}
+
+.rules {
+    font-size: 13px;
+    color: #666666;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.ghostBtn {
+    background: transparent;
+    border: 0.5px solid #333333;
+    color: #888888;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+
+.earnList {
+    font-size: 12px;
+    color: #666666;
+    background-color: #0A0A0A;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* LEADERBOARD */
+.leaderboardCard {
+    background-color: #111111;
+    border: 0.5px solid #1E1E1E;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    font-size: 10px;
+    color: #555555;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 14px 20px;
+    background-color: #161616;
+}
+
+.table td {
+    padding: 14px 20px;
+    font-size: 13px;
+    border-bottom: 0.5px solid #1E1E1E;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.myRow {
+    background-color: rgba(201, 162, 39, 0.05);
+}
+
+/* STANDING CARD */
+.standingCard {
+    background-color: #111111;
+    border: 0.5px solid #1E1E1E;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.standingTitle {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.standingValue {
+    font-size: 13px;
+    color: #C9A227;
+    font-weight: 600;
+}
+
+.progressBar {
+    height: 6px;
+    background-color: #1A1A1A;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progressFill {
+    height: 100%;
+    background-color: #C9A227;
+    border-radius: 10px;
+    transition: width 0.5s ease-out;
+}

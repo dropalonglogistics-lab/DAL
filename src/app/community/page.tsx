@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import CommunityClient from './CommunityClient';
 
@@ -9,11 +8,31 @@ export default async function CommunityPage() {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        // Show lock screen — no content for unauthenticated users
         return <LockScreen />;
     }
 
-    // Pre-fetch competition and user rank for SSR
+    // 1. Fetch Real-time Stats
+    // Active Members
+    const { count: memberCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+    // Reports Today (Unique areas in last 24h)
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: alertsData } = await supabase
+        .from('alerts')
+        .select('area')
+        .gt('created_at', yesterday);
+    const uniqueAreas = new Set(alertsData?.map(a => a.area) || []);
+    const reportsToday = uniqueAreas.size;
+
+    // Routes Verified
+    const { count: verifiedCount } = await supabase
+        .from('routes')
+        .select('*', { count: 'exact', head: true });
+        // NOTE: If there's a 'verified' column, add .eq('verified', true)
+
+    // 2. Competition Data
     const { data: activeComp } = await supabase
         .from('competitions')
         .select('*')
@@ -30,18 +49,13 @@ export default async function CommunityPage() {
         .limit(1)
         .maybeSingle();
 
-    const { count: verifiedCount } = await supabase
-        .from('community_routes')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'approved');
-
     const competition = activeComp || lastEnded || null;
     const state = activeComp ? 'active' : lastEnded ? 'ended' : 'none';
 
-    // Leaderboard top 25
-    const { data: leaderboardRaw, count: totalCount } = await supabase
+    // 3. Leaderboard (Top 25)
+    const { data: leaderboardRaw } = await supabase
         .from('profiles')
-        .select('id, full_name, points, city', { count: 'exact' })
+        .select('id, full_name, points, city')
         .order('points', { ascending: false })
         .limit(25);
 
@@ -58,16 +72,15 @@ export default async function CommunityPage() {
         };
     });
 
-    // User rank
+    // 4. User Standing
     const { data: myProfile } = await supabase.from('profiles').select('points').eq('id', user.id).single();
     const myPoints = myProfile?.points ?? 0;
     const { count: aboveMe } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).gt('points', myPoints);
     const myRank = (aboveMe ?? 0) + 1;
 
-    // Top 25 threshold
     const top25Threshold = leaderboard.length >= 25 ? leaderboard[24].points : 0;
 
-    // Past competitions
+    // 5. Past Competitions
     const { data: pastComps } = await supabase
         .from('competitions')
         .select('*')
@@ -80,7 +93,8 @@ export default async function CommunityPage() {
             competition={competition}
             competitionState={state}
             leaderboard={leaderboard}
-            totalParticipants={totalCount ?? 0}
+            totalParticipants={memberCount ?? 0}
+            reportsToday={reportsToday}
             verifiedCount={verifiedCount ?? 0}
             myRank={myRank}
             myPoints={myPoints}
@@ -94,35 +108,26 @@ function LockScreen() {
     return (
         <div style={{
             minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'radial-gradient(ellipse at 50% 40%, #181818 0%, #000 100%)',
+            background: '#0D0D0D',
             flexDirection: 'column', gap: '24px', padding: '40px 20px', textAlign: 'center',
         }}>
             <div style={{ fontSize: '64px', lineHeight: 1 }}>🔒</div>
             <div>
-                <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3.2rem)', fontWeight: 900, background: 'linear-gradient(135deg, #fff 20%, #C9A227 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: '12px', fontFamily: "'Syne', sans-serif" }}>
-                    Join the Competition
+                <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3.2rem)', fontWeight: 900, color: '#FFFFFF', marginBottom: '12px', fontFamily: "'Syne', sans-serif" }}>
+                    Join the Community
                 </h1>
-                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1.05rem', maxWidth: '420px', lineHeight: 1.6 }}>
-                    Sign in to see where you rank on DAL&apos;s leaderboard and compete for monthly prizes.
+                <p style={{ color: '#555555', fontSize: '1.05rem', maxWidth: '420px', lineHeight: 1.6, margin: '0 auto' }}>
+                    Sign in to see where you rank on DAL&apos;s leaderboard and contribute to Port Harcourt&apos;s intelligence layer.
                 </p>
             </div>
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <a href="/login?next=/community" style={{
                     display: 'inline-flex', alignItems: 'center', gap: '8px',
-                    background: 'linear-gradient(135deg, #C9A227, #D97706)', color: '#000',
-                    padding: '14px 32px', borderRadius: '100px', fontWeight: 800, fontSize: '1rem',
-                    textDecoration: 'none', boxShadow: '0 10px 30px rgba(201,162,39,0.35)',
-                    transition: 'transform 0.2s',
+                    backgroundColor: '#C9A227', color: '#0D0D0D',
+                    padding: '14px 32px', borderRadius: '8px', fontWeight: 800, fontSize: '1rem',
+                    textDecoration: 'none', transition: 'opacity 0.2s',
                 }}>
                     Sign In
-                </a>
-                <a href="/signup?next=/community" style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '8px',
-                    border: '1.5px solid rgba(201,162,39,0.5)', color: '#C9A227',
-                    padding: '14px 32px', borderRadius: '100px', fontWeight: 700, fontSize: '1rem',
-                    textDecoration: 'none', transition: 'all 0.2s', background: 'transparent',
-                }}>
-                    Create Account
                 </a>
             </div>
         </div>
