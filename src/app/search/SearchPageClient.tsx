@@ -192,6 +192,8 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
                         <p className={styles.emptySub}>Search over 40+ verified routes across Port Harcourt.</p>
                     </div>
                 )}
+}
+
             </div>
         </div>
     );
