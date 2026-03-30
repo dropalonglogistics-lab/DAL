@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { Twitter, Instagram, MessageCircle } from 'lucide-react';
 import styles from './Footer.module.css';
 
 const PLATFORM_LINKS = [
@@ -30,55 +31,70 @@ export default function Footer() {
             <div className={styles.footerInner}>
                 <div className={styles.top}>
                     <div className={styles.brand}>
-                        <Link href="/">
+                        <Link href="/" className={styles.logoLink}>
                             <Image
                                 src="/dal-logo-light.png"
                                 alt="Drop Along Logistics (DAL)"
                                 height={32}
                                 width={120}
-                                style={{ objectFit: 'contain', objectPosition: 'left', marginBottom: '20px' }}
+                                className={styles.logo}
                             />
                         </Link>
                         <p className={styles.tagline}>
                             Nigeria&apos;s informal economy moves on DAL. Building the intelligence layer for urban mobility in Port Harcourt and beyond.
                         </p>
                         <div className={styles.socials}>
-                            {/* Standardized social links */}
-                            <a href="https://twitter.com/dropalong" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>Twitter</a>
-                            <a href="https://instagram.com/dropalong" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>Instagram</a>
-                            <a href="https://wa.me/2348000000000" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>WhatsApp</a>
+                            <a href="https://twitter.com/dropalong" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} aria-label="Twitter">
+                                <Twitter size={18} />
+                            </a>
+                            <a href="https://instagram.com/dropalong" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} aria-label="Instagram">
+                                <Instagram size={18} />
+                            </a>
+                            <a href="https://wa.me/2348000000000" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} aria-label="WhatsApp">
+                                <MessageCircle size={18} />
+                            </a>
                         </div>
                     </div>
 
                     <div className={styles.linksGrid}>
                         <div className={styles.linkCol}>
                             <h4 className={styles.colTitle}>Platform</h4>
-                            {PLATFORM_LINKS.map(({ href, label }) => (
-                                <Link key={href} href={href} className={styles.footerLink}>{label}</Link>
-                            ))}
+                            <div className={styles.links}>
+                                {PLATFORM_LINKS.map(({ href, label }) => (
+                                    <Link key={href} href={href} className={styles.footerLink}>{label}</Link>
+                                ))}
+                            </div>
                         </div>
                         <div className={styles.linkCol}>
                             <h4 className={styles.colTitle}>Company</h4>
-                            {COMPANY_LINKS.map(({ href, label }) => (
-                                <Link key={href} href={href} className={styles.footerLink}>{label}</Link>
-                            ))}
+                            <div className={styles.links}>
+                                {COMPANY_LINKS.map(({ href, label }) => (
+                                    <Link key={href} href={href} className={styles.footerLink}>{label}</Link>
+                                ))}
+                            </div>
                         </div>
                         <div className={styles.linkCol}>
                             <h4 className={styles.colTitle}>Resources</h4>
-                            {SUPPORT_LINKS.map(({ href, label }) => (
-                                <Link key={href} href={href} className={styles.footerLink}>{label}</Link>
-                            ))}
+                            <div className={styles.links}>
+                                {SUPPORT_LINKS.map(({ href, label }) => (
+                                    <Link key={href} href={href} className={styles.footerLink}>{label}</Link>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div className={styles.bottom}>
-                    <span className={styles.copyright}>
-                        © {new Date().getFullYear()} Drop Along Logistics. Nigeria&apos;s Intelligence Layer.
-                    </span>
-                    <span className={styles.madeIn}>
-                        Designed in Port Harcourt 🇳🇬
-                    </span>
+            <div className={styles.bottomBar}>
+                <div className={styles.footerInner}>
+                    <div className={styles.bottomContent}>
+                        <span className={styles.copyright}>
+                            © {new Date().getFullYear()} Drop Along Logistics. <span className={styles.hideMobile}>Nigeria&apos;s Intelligence Layer.</span>
+                        </span>
+                        <div className={styles.madeIn}>
+                            Designed in Port Harcourt 🇳🇬
+                        </div>
+                    </div>
                 </div>
             </div>
         </footer>
