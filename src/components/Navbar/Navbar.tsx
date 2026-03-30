@@ -52,7 +52,7 @@ export default function Navbar() {
         };
         loadInitialData();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
             const currentUser = session?.user ?? null;
             setUser(currentUser);
             if (currentUser) {

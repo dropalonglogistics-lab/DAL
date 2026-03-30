@@ -75,7 +75,7 @@ const ROW_STYLES: Record<number, React.CSSProperties> = {
 const RANK_BADGES: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
 export default function CommunityClient({
-    competition, competitionState, leaderboard, totalParticipants,
+    competition, competitionState, leaderboard, totalParticipants, verifiedCount,
     myRank, myPoints, top25Threshold, pastCompetitions,
 }: Props) {
     const [page, setPage] = useState(1);
