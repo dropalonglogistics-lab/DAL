@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
+import CityGrid from '@/components/Visuals/CityGrid';
 import styles from './page.module.css';
 
 export default function HomePage() {
@@ -15,11 +16,27 @@ export default function HomePage() {
     const router = useRouter();
     const supabase = createClient();
 
+    // Intersection Observer for reveal animations
+    useEffect(() => {
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add(styles.revealActive);
+                }
+            });
+        }, observerOptions);
+
+        const elements = document.querySelectorAll(`.${styles.reveal}`);
+        elements.forEach(el => observer.observe(el));
+
+        return () => observer.disconnect();
+    }, [loading, alerts]);
+
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Fetch active alerts within last 24 hours
                 const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
                 const { data: alertsData } = await supabase
                     .from('alerts')
@@ -29,7 +46,6 @@ export default function HomePage() {
                     .order('created_at', { ascending: false });
                 setAlerts(alertsData || []);
 
-                // Fetch route count
                 const { count } = await supabase
                     .from('routes')
                     .select('*', { count: 'exact', head: true });
@@ -65,8 +81,11 @@ export default function HomePage() {
 
     return (
         <div className={styles.container}>
+            <CityGrid />
+
             {/* SECTION 1 — HERO */}
-            <section className={styles.hero}>
+            <section className={`${styles.hero} ${styles.reveal}`}>
+                <div className={styles.heroSpotlight} />
                 <span className={styles.heroTag}>PORT HARCOURT&apos;S INTELLIGENCE LAYER</span>
                 <h1 className={styles.headline}>
                     Nigeria&apos;s informal economy<br />
@@ -76,7 +95,7 @@ export default function HomePage() {
                     Route intelligence, on-demand delivery, and personal shopping — powered by the community that built it. Starting in Port Harcourt.
                 </p>
 
-                <div className={styles.searchContainer}>
+                <div className={styles.searchContainer} style={{ animationDelay: '0.4s' }}>
                     <div className={styles.searchRow}>
                         <div className={`${styles.dotIcon} ${styles.dotGold}`} />
                         <input
@@ -110,27 +129,27 @@ export default function HomePage() {
             </section>
 
             {/* SECTION 2 — FEATURES */}
-            <section className={styles.section}>
+            <section className={`${styles.section} ${styles.reveal}`}>
                 <span className={styles.label}>WHAT DAL DOES</span>
                 <div className={styles.featureGrid}>
-                    {/* Card 1 */}
-                    <div className={`${styles.card} ${styles.cardGold}`}>
+                    <div className={`${styles.card} ${styles.cardGold}`} style={{ transitionDelay: '0.1s' }}>
                         <div className={styles.iconBox} style={{ background: '#1E1A0A', color: '#C9A227' }}>F1</div>
                         <h3 className={styles.featureTitle}>Route Intelligence</h3>
                         <p className={styles.featureDesc}>Community-powered routing and live road alerts for keke, bus, bike, and walking.</p>
-                        <span className={styles.statusPill} style={{ color: '#4CAF50', backgroundColor: '#0A1A0A', borderColor: 'rgba(76, 175, 80, 0.18)' }}>Live now</span>
+                        <span className={styles.statusPill} style={{ color: '#4CAF50', backgroundColor: '#0A1A0A', borderColor: 'rgba(76, 175, 80, 0.18)' }}>
+                            <div className={styles.pulse} />
+                            Live now
+                        </span>
                     </div>
 
-                    {/* Card 2 */}
-                    <div className={styles.card}>
+                    <div className={styles.card} style={{ transitionDelay: '0.2s' }}>
                         <div className={styles.iconBox} style={{ background: '#0A160A', color: '#4CAF50' }}>F2</div>
                         <h3 className={styles.featureTitle}>Express Delivery</h3>
                         <p className={styles.featureDesc}>Same-hour delivery across Port Harcourt. DAL-employed riders. From ₦2,000.</p>
                         <span className={styles.statusPill} style={{ color: '#888', backgroundColor: '#1A1A0A', borderColor: 'rgba(51, 51, 48, 0.37)' }}>Launching soon</span>
                     </div>
 
-                    {/* Card 3 */}
-                    <div className={styles.card}>
+                    <div className={styles.card} style={{ transitionDelay: '0.3s' }}>
                         <div className={styles.iconBox} style={{ background: '#0A0A1A', color: '#888' }}>F3</div>
                         <h3 className={styles.featureTitle}>Personal Shopper</h3>
                         <p className={styles.featureDesc}>Market runs, pharmacy, bill payments, queuing. DAL handles your errands.</p>
@@ -140,16 +159,22 @@ export default function HomePage() {
             </section>
 
             {/* SECTION 3 — LIVE ROAD ALERTS */}
-            <section className={styles.section}>
+            <section className={`${styles.section} ${styles.reveal}`}>
                 <div className={styles.alertsHeader}>
                     <span className={styles.label}>LIVE ROAD INTELLIGENCE</span>
                     <Link href="/alerts" className={styles.allAlertsLink}>See all alerts →</Link>
                 </div>
 
-                {alerts.length > 0 ? (
+                {loading ? (
                     <div className={styles.featureGrid}>
-                        {alerts.map((alert) => (
-                            <div key={alert.id} className={styles.card}>
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className={`${styles.card} ${styles.skeleton}`} style={{ height: '80px' }} />
+                        ))}
+                    </div>
+                ) : alerts.length > 0 ? (
+                    <div className={styles.featureGrid}>
+                        {alerts.map((alert, idx) => (
+                            <div key={alert.id} className={styles.card} style={{ transitionDelay: `${idx * 0.1}s` }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                                     <span style={{ fontSize: '12px', fontWeight: 'bold' }}>{alert.type_icon} {alert.area}</span>
                                     <span style={{ fontSize: '10px', color: '#555' }}>{timeAgo(alert.created_at)}</span>
@@ -169,11 +194,13 @@ export default function HomePage() {
             </section>
 
             {/* SECTION 4 — INTELLIGENCE DATA */}
-            <section className={styles.section}>
+            <section className={`${styles.section} ${styles.reveal}`}>
                 <span className={styles.label}>THE DATA BEHIND THE PLATFORM</span>
                 <div className={styles.dataGrid}>
                     <div className={styles.card}>
-                        {routeCount && routeCount > 0 ? (
+                        {loading ? (
+                            <div className={styles.skeleton} style={{ height: '100px', borderRadius: '8px' }} />
+                        ) : routeCount && routeCount > 0 ? (
                             <>
                                 <div className={styles.statNumber}>{routeCount.toLocaleString()}</div>
                                 <div className={styles.statLabel}>Routes in the database</div>
@@ -192,7 +219,7 @@ export default function HomePage() {
             </section>
 
             {/* SECTION 5 — PREMIUM */}
-            <section className={styles.section}>
+            <section className={`${styles.section} ${styles.reveal}`}>
                 <span className={styles.label}>DAL PREMIUM</span>
                 <div className={`${styles.card} ${styles.premiumCard}`}>
                     <div className={styles.premiumHeader}>
@@ -222,7 +249,7 @@ export default function HomePage() {
             </section>
 
             {/* SECTION 6 — WHATSAPP */}
-            <section className={styles.section} style={{ paddingBottom: '100px' }}>
+            <section className={`${styles.section} ${styles.reveal}`} style={{ paddingBottom: '100px' }}>
                 <div className={`${styles.card} ${styles.whatsappBand}`}>
                     <div>
                         <h3 className={styles.whatsappTitle}>DAL is also on WhatsApp</h3>
@@ -230,7 +257,6 @@ export default function HomePage() {
                     </div>
                     <a href="https://wa.me/2348000000000" target="_blank" rel="noopener noreferrer" className={styles.whatsappBtn}>
                         Chat on WhatsApp
-                        {/* TODO: Update with real DAL WhatsApp business number */}
                     </a>
                 </div>
             </section>
