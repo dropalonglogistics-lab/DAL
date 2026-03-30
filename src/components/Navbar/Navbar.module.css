@@ -48,9 +48,10 @@
 }
 
 .logo img {
-    height: 36px;
+    height: 42px;
     width: auto;
     object-fit: contain;
+    max-height: none;
 }
 
 /* Desktop Nav */

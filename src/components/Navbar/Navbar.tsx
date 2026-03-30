@@ -114,7 +114,7 @@ export default function Navbar() {
                     <img
                         src="/dal-logo-light.png"
                         alt="Drop Along Logistics"
-                        height={36}
+                        height={42}
                     />
                 </Link>
 
