@@ -5,18 +5,26 @@ import { createClient } from '@/utils/supabase/client';
 import { 
     MapPin, Bus, Navigation, Info, 
     CheckCircle2, Clock, Wallet, ChevronRight, 
-    ArrowLeft, User as UserIcon
+    ArrowLeft, User as UserIcon, Plus, Trash2,
+    Zap, Award, ShieldCheck
 } from 'lucide-react';
 import styles from './suggest-route.module.css';
 
-type Step = 'details' | 'community' | 'success';
+interface RouteLeg {
+    id: string;
+    from: string;
+    to: string;
+    vehicle: string;
+    fare: string;
+}
+
+type Step = 'builder' | 'success';
 
 export default function SuggestRouteClient() {
-    const [step, setStep] = useState<Step>('details');
-    const [from, setFrom] = useState('');
-    const [to, setTo] = useState('');
-    const [vehicleType, setVehicleType] = useState('Keke');
-    const [expectedFare, setExpectedFare] = useState('');
+    const [step, setStep] = useState<Step>('builder');
+    const [legs, setLegs] = useState<RouteLeg[]>([
+        { id: '1', from: '', to: '', vehicle: 'Keke', fare: '' }
+    ]);
     const [peakHours, setPeakHours] = useState('');
     const [description, setDescription] = useState('');
     const [attributionName, setAttributionName] = useState('');
@@ -39,55 +47,72 @@ export default function SuggestRouteClient() {
         getAuth();
     }, [supabase]);
 
-    const validateStep1 = () => {
+    const addLeg = () => {
+        const lastLeg = legs[legs.length - 1];
+        setLegs([...legs, { 
+            id: Math.random().toString(36).substr(2, 9), 
+            from: lastLeg.to || '', 
+            to: '', 
+            vehicle: 'Bus', 
+            fare: '' 
+        }]);
+    };
+
+    const removeLeg = (id: string) => {
+        if (legs.length > 1) {
+            setLegs(legs.filter(l => l.id !== id));
+        }
+    };
+
+    const updateLeg = (id: string, field: keyof RouteLeg, value: string) => {
+        setLegs(legs.map(l => l.id === id ? { ...l, [field]: value } : l));
+    };
+
+    const validate = () => {
         const newErrors: { [key: string]: string } = {};
-        if (!from.trim()) newErrors.from = 'Required';
-        if (!to.trim()) newErrors.to = 'Required';
+        if (!legs[0].from.trim()) newErrors.from_0 = 'Start point required';
+        if (!legs[legs.length - 1].to.trim()) newErrors[`to_${legs.length - 1}`] = 'End point required';
         
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const nextStep = () => {
-        if (validateStep1()) setStep('community');
-    };
-
-    const prevStep = () => setStep('details');
-
     const handleSubmit = async () => {
+        if (!validate()) return;
         setIsSubmitting(true);
         setErrorMsg('');
 
         try {
-            // 1. Insert to route_suggestions
+            // Serialize Intelligence Report
+            const intelligenceReport = legs.map((leg, i) => (
+                `Leg ${i+1}: ${leg.from} to ${leg.to} via ${leg.vehicle}${leg.fare ? ` (Fare: ₦${leg.fare})` : ''}`
+            )).join('\n');
+
+            const fullDescription = `${intelligenceReport}\n\nAdditional Intel: ${description}\nPeak Hours: ${peakHours}`;
+
             const { error: suggestError } = await supabase
                 .from('route_suggestions')
                 .insert({
-                    from_location: from,
-                    to_location: to,
-                    vehicle_type: vehicleType,
-                    expected_fare: expectedFare,
+                    from_location: legs[0].from,
+                    to_location: legs[legs.length - 1].to,
+                    vehicle_type: legs[0].vehicle, // Primary vehicle
+                    expected_fare: legs.reduce((acc, l) => acc + (parseInt(l.fare) || 0), 0).toString(),
                     peak_hours: peakHours,
-                    description: description,
+                    description: fullDescription,
                     submitted_by: user?.id || null,
                     status: 'pending'
                 });
 
             if (suggestError) throw suggestError;
 
-            // 2. If user is logged in, insert to community_points
             if (user) {
-                const { error: pointsError } = await supabase
-                    .from('community_points')
-                    .insert({
-                        user_id: user.id,
-                        points: 10,
-                        reason: 'route_suggestion'
-                    });
-                if (pointsError) console.error('Points error:', pointsError);
-                
-                // Update local profile points if needed (handled by DB trigger usually, but good for UI)
-                await supabase.rpc('increment_profile_points', { user_id: user.id, amount: 10 });
+                const totalPoints = 10 + (legs.length > 1 ? 5 : 0) + (description.length > 20 ? 5 : 0);
+                await supabase.from('community_points').insert({
+                    user_id: user.id,
+                    points: totalPoints,
+                    reason: 'route_intelligence_architect'
+                });
+                await supabase.rpc('increment_profile_points', { user_id: user.id, amount: totalPoints });
             }
 
             setStep('success');
@@ -100,14 +125,11 @@ export default function SuggestRouteClient() {
     };
 
     const resetForm = () => {
-        setFrom('');
-        setTo('');
-        setVehicleType('Keke');
-        setExpectedFare('');
+        setLegs([{ id: '1', from: '', to: '', vehicle: 'Keke', fare: '' }]);
         setPeakHours('');
         setDescription('');
         setErrors({});
-        setStep('details');
+        setStep('builder');
         setErrorMsg('');
     };
 
@@ -116,17 +138,17 @@ export default function SuggestRouteClient() {
             <div className={styles.container}>
                 <div className={styles.successWrapper}>
                     <div className={styles.coinAnimation}>
-                        <CheckCircle2 size={80} className={styles.successIcon} />
+                        <Award size={80} className={styles.successIcon} />
                         <div className={styles.coinGlow} />
                     </div>
-                    <h1 className={styles.successTitle}>Contribution Received!</h1>
+                    <h1 className={styles.successTitle}>Route Architecture Captured!</h1>
                     <p className={styles.successDesc}>
-                        Your route suggestion has been sent to the intelligence layer for verification. 
-                        <strong> +10 Community Points</strong> awarded.
+                        Your intelligence has been saved. The DAL community thanks you for mapping the network.
+                        <span className={styles.pointReward}> +{10 + (legs.length > 1 ? 5 : 0) + (description.length > 20 ? 5 : 0)} XP</span>
                     </p>
                     <div className={styles.successActions}>
-                        <button className={styles.primaryBtn} onClick={resetForm}>Suggest Another</button>
-                        <a href="/community" className={styles.secondaryBtn}>View Leaderboard</a>
+                        <button className={styles.primaryBtn} onClick={resetForm}>Map Another Route</button>
+                        <a href="/community" className={styles.secondaryBtn}>View Performance</a>
                     </div>
                 </div>
             </div>
@@ -135,110 +157,141 @@ export default function SuggestRouteClient() {
 
     return (
         <div className={styles.container}>
-            <div className={styles.wizardCard}>
+            <div className={styles.architectCard}>
                 {/* Header */}
-                <header className={styles.wizardHeader}>
-                    <div className={styles.stepper}>
-                        <div className={`${styles.stepDot} ${step === 'details' ? styles.activeDot : ''}`} />
-                        <div className={styles.stepLine} />
-                        <div className={`${styles.stepDot} ${step === 'community' ? styles.activeDot : ''}`} />
+                <header className={styles.header}>
+                    <div className={styles.badgeRow}>
+                        <div className={styles.intelligenceBadge}>
+                            <Zap size={14} /> LIVE INTELLIGENCE
+                        </div>
+                        {user && (
+                            <div className={styles.pointsBadge}>
+                                <Award size={14} /> Current Level: {user.user_metadata?.points || 0}
+                            </div>
+                        )}
                     </div>
-                    <h1 className={styles.title}>Grow the network</h1>
-                    <p className={styles.subtitle}>
-                        {step === 'details' ? 'Phase 1: Route Intelligence' : 'Phase 2: Community Attribution'}
-                    </p>
+                    <h1 className={styles.title}>Intelligence Architect</h1>
+                    <p className={styles.subtitle}>Map a new route in the Port Harcourt network</p>
                 </header>
 
-                {/* Body */}
-                <div className={styles.wizardBody}>
-                    {step === 'details' ? (
-                        <div className={styles.detailsView}>
-                            <div className={styles.row}>
-                                <div className={styles.field}>
-                                    <label><MapPin size={14} /> Starting Point</label>
-                                    <input 
-                                        placeholder="e.g. Mile 1 Park" 
-                                        value={from} 
-                                        onChange={e => setFrom(e.target.value)}
-                                        className={errors.from ? styles.errorInput : ''}
-                                    />
+                <div className={styles.builderBody}>
+                    <div className={styles.timeline}>
+                        {legs.map((leg, index) => (
+                            <div key={leg.id} className={styles.legSegment}>
+                                <div className={styles.segmentIndicator}>
+                                    <div className={styles.dot} />
+                                    {index < legs.length - 1 && <div className={styles.connector} />}
                                 </div>
-                                <div className={styles.field}>
-                                    <label><Navigation size={14} /> Destination</label>
-                                    <input 
-                                        placeholder="e.g. Uniport Choba" 
-                                        value={to} 
-                                        onChange={e => setTo(e.target.value)}
-                                        className={errors.to ? styles.errorInput : ''}
-                                    />
+                                <div className={styles.legContent}>
+                                    <div className={styles.legHeader}>
+                                        <h3 className={styles.legTitle}>Leg {index + 1}</h3>
+                                        {legs.length > 1 && (
+                                            <button onClick={() => removeLeg(leg.id)} className={styles.removeBtn}>
+                                                <Trash2 size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    <div className={styles.row}>
+                                        <div className={styles.field}>
+                                            <label><MapPin size={12} /> From</label>
+                                            <input 
+                                                placeholder="Starting point" 
+                                                value={leg.from} 
+                                                onChange={e => updateLeg(leg.id, 'from', e.target.value)}
+                                                className={errors[`from_${index}`] ? styles.errorInput : ''}
+                                            />
+                                        </div>
+                                        <div className={styles.field}>
+                                            <label><Navigation size={12} /> To</label>
+                                            <input 
+                                                placeholder="Junction or End" 
+                                                value={leg.to} 
+                                                onChange={e => updateLeg(leg.id, 'to', e.target.value)}
+                                                className={errors[`to_${index}`] ? styles.errorInput : ''}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.row}>
+                                        <div className={styles.field}>
+                                            <label><Bus size={12} /> Vehicle</label>
+                                            <select 
+                                                value={leg.vehicle} 
+                                                onChange={e => updateLeg(leg.id, 'vehicle', e.target.value)}
+                                            >
+                                                <option>Keke</option>
+                                                <option>Bus</option>
+                                                <option>Motorcycle</option>
+                                                <option>Walking</option>
+                                            </select>
+                                        </div>
+                                        <div className={styles.field}>
+                                            <label>
+                                                <Wallet size={12} /> Fare (₦)
+                                                <span className={styles.pointIncentive}>+5 XP</span>
+                                            </label>
+                                            <input 
+                                                placeholder="Amount" 
+                                                value={leg.fare} 
+                                                onChange={e => updateLeg(leg.id, 'fare', e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        ))}
+                        
+                        <button className={styles.addLegBtn} onClick={addLeg}>
+                            <Plus size={16} /> Add a Stop / Connection
+                            <span className={styles.pointIncentive}>+10 XP</span>
+                        </button>
+                    </div>
 
-                            <div className={styles.field}>
-                                <label><Bus size={14} /> Vehicle Type</label>
-                                <div className={styles.vehicleGrid}>
-                                    {['Keke', 'Bus', 'Motorcycle', 'Walking'].map(type => (
-                                        <button 
-                                            key={type}
-                                            className={`${styles.typeBtn} ${vehicleType === type ? styles.activeType : ''}`}
-                                            onClick={() => setVehicleType(type)}
-                                        >
-                                            {type}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className={styles.row}>
-                                <div className={styles.field}>
-                                    <label><Wallet size={14} /> Est. Fare (₦)</label>
-                                    <input placeholder="200, 500, etc." value={expectedFare} onChange={e => setExpectedFare(e.target.value)} />
-                                </div>
-                                <div className={styles.field}>
-                                    <label><Clock size={14} /> Peak Hours</label>
-                                    <input placeholder="e.g. 7am - 9am" value={peakHours} onChange={e => setPeakHours(e.target.value)} />
-                                </div>
-                            </div>
-
-                            <button className={styles.stepBtn} onClick={nextStep}>
-                                Continue <ChevronRight size={18} />
-                            </button>
+                    <div className={styles.extraSection}>
+                        <div className={styles.field}>
+                            <label>
+                                <Clock size={12} /> Peak Hours (e.g., 7am-9am)
+                                <span className={styles.pointIncentive}>+5 XP</span>
+                            </label>
+                            <input value={peakHours} onChange={e => setPeakHours(e.target.value)} placeholder="When is it busiest?" />
                         </div>
-                    ) : (
-                        <div className={styles.communityView}>
-                            <div className={styles.field}>
-                                <label><Info size={14} /> Route Notes (Optional)</label>
-                                <textarea 
-                                    placeholder="Add landmarks, specific junctions, or fare nuances..." 
-                                    rows={4}
-                                    value={description}
-                                    onChange={e => setDescription(e.target.value)}
-                                />
-                            </div>
 
+                        <div className={styles.field}>
+                            <label>
+                                <Info size={12} /> Expert Notes & Landmarks
+                                <span className={styles.pointIncentive}>+10 XP</span>
+                            </label>
+                            <textarea 
+                                value={description} 
+                                onChange={e => setDescription(e.target.value)}
+                                placeholder="Tell us the 'Street Intel' — loading park location, landmarks to watch for..."
+                                rows={3}
+                            />
+                        </div>
+
+                        {!user && (
                             <div className={styles.field}>
-                                <label><UserIcon size={14} /> Contributor Name</label>
+                                <label><UserIcon size={12} /> Contributor Name</label>
                                 <input 
-                                    placeholder={user ? attributionName : "Anonymous"} 
-                                    value={attributionName}
-                                    onChange={e => setAttributionName(e.target.value)}
-                                    disabled={!!user}
+                                    placeholder="Anonymous" 
+                                    value={attributionName} 
+                                    onChange={e => setAttributionName(e.target.value)} 
                                 />
-                                <span className={styles.subtext}>Verified contributors earn higher trust scores.</span>
                             </div>
+                        )}
+                    </div>
 
-                            {errorMsg && <div className={styles.errorAlert}>{errorMsg}</div>}
+                    {errorMsg && <div className={styles.errorAlert}>{errorMsg}</div>}
 
-                            <div className={styles.btnRow}>
-                                <button className={styles.backBtn} onClick={prevStep} disabled={isSubmitting}>
-                                    <ArrowLeft size={18} /> Back
-                                </button>
-                                <button className={styles.primaryBtn} onClick={handleSubmit} disabled={isSubmitting}>
-                                    {isSubmitting ? 'Processing...' : 'Submit Suggestion'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                    <button 
+                        className={styles.submitBtn} 
+                        onClick={handleSubmit} 
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Archiving Intelligence...' : 'Upload Route Architecture'}
+                        <ShieldCheck size={18} />
+                    </button>
                 </div>
             </div>
         </div>

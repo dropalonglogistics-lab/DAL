@@ -18,9 +18,15 @@ const getCachedConfig = unstable_cache(
 
 export async function GET() {
     try {
-        const val = await getCachedConfig('f2_express_live');
-        return NextResponse.json({ f2_express_live: val === true || val === 'true' });
+        const [f2, f3] = await Promise.all([
+            getCachedConfig('f2_express_live'),
+            getCachedConfig('f3_shopper_live')
+        ]);
+        return NextResponse.json({ 
+            f2_express_live: f2 === true || f2 === 'true',
+            f3_shopper_live: f3 === true || f3 === 'true'
+        });
     } catch (e) {
-        return NextResponse.json({ f2_express_live: false }, { status: 500 });
+        return NextResponse.json({ f2_express_live: false, f3_shopper_live: false }, { status: 500 });
     }
 }
