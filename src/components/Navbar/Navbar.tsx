@@ -6,7 +6,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import {
     Menu, X,
-    LogOut, Shield, User, ChevronDown
+    LogOut, Shield, User, ChevronDown,
+    Sun, Moon
 } from 'lucide-react';
 import styles from './Navbar.module.css';
 
@@ -21,6 +22,7 @@ export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isAvatarDropdownOpen, setIsAvatarDropdownOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [theme, setTheme] = useState<'light' | 'dark'>('dark');
     const [user, setUser] = useState<any>(null);
     const [profile, setProfile] = useState<any>(null);
     const router = useRouter();
@@ -30,9 +32,9 @@ export default function Navbar() {
     const navbarRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
-        // Force dark mode globally to prevent flash
-        document.body.classList.add('dark-mode');
-        document.body.classList.remove('light-mode');
+        // Sync theme with document class
+        const currentTheme = document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light';
+        setTheme(currentTheme);
 
         const handleScroll = () => setIsScrolled(window.scrollY > 10);
         window.addEventListener('scroll', handleScroll, { passive: true });
@@ -99,6 +101,21 @@ export default function Navbar() {
         router.refresh();
     };
 
+    const toggleTheme = () => {
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+        
+        if (newTheme === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+            document.documentElement.classList.remove('light-mode');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.add('light-mode');
+            document.documentElement.classList.remove('dark-mode');
+            localStorage.setItem('theme', 'light');
+        }
+    };
+
     const isActive = (href: string) => pathname === href || pathname?.startsWith(href + '/');
 
     const getInitials = () => {
@@ -146,6 +163,15 @@ export default function Navbar() {
                     <Link href="/premium" className={`${styles.goPremiumBtn} ${styles.desktopOnly}`}>
                         Go Premium
                     </Link>
+
+                    {/* Theme Toggle */}
+                    <button 
+                        className={styles.themeToggleBtn} 
+                        onClick={toggleTheme}
+                        aria-label="Toggle Theme"
+                    >
+                        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
 
                     {user ? (
                         <div className={`${styles.avatarWrap} ${styles.desktopOnly}`} ref={dropdownRef}>
@@ -229,6 +255,15 @@ export default function Navbar() {
                             Sign In
                         </Link>
                     )}
+                    
+                    <div className={styles.dividerLine} />
+                    
+                    <button className={styles.mobileNavLink} onClick={() => { toggleTheme(); setIsMobileMenuOpen(false); }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                            <span>Switch to {theme === 'dark' ? 'Light' : 'Dark'} Mode</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </nav>

@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
+import { 
+    MapPin, AlertTriangle, Users, 
+    ArrowRight, Box, ShoppingCart, 
+    Check, Zap, MessageCircle, Star 
+} from 'lucide-react';
 import CityGrid from '@/components/Visuals/CityGrid';
 import styles from './page.module.css';
 
@@ -104,9 +109,9 @@ export default function HomePage() {
                         <Link href="/about" className={styles.ctaGhost}>See How It Works</Link>
                     </div>
                     <div className={styles.statsRow}>
-                        <div className={styles.statItem}>🗺️ <strong>{stats.verifiedCount.toLocaleString()}</strong> verified routes</div>
-                        <div className={styles.statItem}>⚠️ <strong>{stats.alertCount.toLocaleString()}</strong> alerts today</div>
-                        <div className={styles.statItem}>👥 <strong>{stats.memberCount.toLocaleString()}</strong> members</div>
+                        <div className={styles.statItem}><MapPin size={18} color="var(--color-gold)" /> <strong>{stats.verifiedCount.toLocaleString()}</strong> verified routes</div>
+                        <div className={styles.statItem}><AlertTriangle size={18} color="#F87171" /> <strong>{stats.alertCount.toLocaleString()}</strong> alerts today</div>
+                        <div className={styles.statItem}><Users size={18} color="#60A5FA" /> <strong>{stats.memberCount.toLocaleString()}</strong> members</div>
                     </div>
                 </div>
             </section>
@@ -122,7 +127,9 @@ export default function HomePage() {
                         <div className={styles.alertsList}>
                             {alerts.length > 0 ? alerts.map((alert) => (
                                 <div key={alert.id} className={styles.alertCard}>
-                                    <div className={styles.alertIcon}>{alert.type_icon || '⚠️'}</div>
+                                    <div className={styles.alertIcon}>
+                                        <AlertTriangle size={24} />
+                                    </div>
                                     <div className={styles.alertBody}>
                                         <div className={styles.alertMeta}>
                                             <span className={styles.alertArea}>{alert.area}</span>
@@ -130,14 +137,16 @@ export default function HomePage() {
                                         </div>
                                         <p className={styles.alertDesc}>{alert.description}</p>
                                         <div className={styles.alertFooter}>
-                                            {alert.upvotes || 0} Upvotes
+                                            <Zap size={14} fill="currentColor" /> {alert.upvotes || 0} Upvotes
                                         </div>
                                     </div>
                                 </div>
                             )) : (
                                 <p className={styles.textMuted}>No active alerts. Roads are clear.</p>
                             )}
-                            <Link href="/alerts" className={styles.seeAllLink}>See All Alerts →</Link>
+                            <Link href="/alerts" className={styles.seeAllLink}>
+                                See All Alerts <ArrowRight size={18} />
+                            </Link>
                         </div>
                     </div>
 
@@ -173,53 +182,53 @@ export default function HomePage() {
             <section className={styles.featureSection}>
                 <div className={styles.featureGrid}>
                     <Link href="/search" className={`${styles.featureCard} ${styles.blackCard}`}>
-                        <div className={styles.featureIcon}>📍</div>
+                        <div className={styles.featureIcon}><MapPin size={32} color="var(--color-gold)" /></div>
                         <div>
                             <h3 className={styles.featureTitle}>F1 ROUTING</h3>
-                            <p style={{ fontSize: '14px', marginTop: '8px', opacity: 0.8 }}>Intelligent routing for PH commuters. Fare estimates and transit mapping.</p>
+                            <p style={{ fontSize: '15px', marginTop: '12px', opacity: 0.8, lineHeight: '1.5' }}>Intelligent routing for PH commuters. Fare estimates and transit mapping.</p>
                         </div>
-                        <div className={styles.featureCTA}>Explore Routes →</div>
+                        <div className={styles.featureCTA}>Explore Routes <ArrowRight size={16} /></div>
                     </Link>
 
                     {config.f2_express_live ? (
                         <Link href="/express" className={`${styles.featureCard} ${styles.goldCard}`}>
-                            <div className={styles.featureIcon}>📦</div>
+                            <div className={styles.featureIcon}><Box size={32} /></div>
                             <div>
                                 <h3 className={styles.featureTitle}>F2 EXPRESS</h3>
-                                <p style={{ fontSize: '14px', marginTop: '8px' }}>Same-hour delivery within Port Harcourt. Reliable and tracked.</p>
+                                <p style={{ fontSize: '15px', marginTop: '12px', fontWeight: '500' }}>Same-hour delivery within Port Harcourt. Reliable and tracked.</p>
                             </div>
-                            <div className={styles.featureCTA}>Order a Delivery →</div>
+                            <div className={styles.featureCTA}>Order a Delivery <ArrowRight size={16} /></div>
                         </Link>
                     ) : (
                         <div className={`${styles.featureCard} ${styles.goldCard}`} style={{ opacity: 0.9 }}>
-                            <div className={styles.featureIcon}>📦</div>
+                            <div className={styles.featureIcon}><Box size={32} /></div>
                             <div>
                                 <h3 className={styles.featureTitle}>F2 EXPRESS</h3>
-                                <p style={{ fontSize: '14px', marginTop: '8px' }}>Same-hour delivery. Launching across the city soon.</p>
-                                <span style={{ background: '#FFF', color: '#000', fontSize: '10px', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>COMING SOON</span>
+                                <p style={{ fontSize: '15px', marginTop: '12px' }}>Same-hour delivery. Launching across the city soon.</p>
+                                <span style={{ background: 'var(--foreground)', color: 'var(--background)', fontSize: '10px', padding: '4px 10px', borderRadius: '6px', fontWeight: 'bold', display: 'inline-block', marginTop: '12px' }}>COMING SOON</span>
                             </div>
-                            <div className={styles.featureCTA}>Notify Me →</div>
+                            <div className={styles.featureCTA}>Notify Me <ArrowRight size={16} /></div>
                         </div>
                     )}
 
                     {config.f3_shopper_live ? (
                         <Link href="/shopper" className={`${styles.featureCard} ${styles.blackCard}`}>
-                            <div className={styles.featureIcon}>🛒</div>
+                            <div className={styles.featureIcon}><ShoppingCart size={32} color="var(--color-gold)" /></div>
                             <div>
                                 <h3 className={styles.featureTitle}>F3 SHOPPER</h3>
-                                <p style={{ fontSize: '14px', marginTop: '8px', opacity: 0.8 }}>Personal shopping and market errands. Handled by professionals.</p>
+                                <p style={{ fontSize: '15px', marginTop: '12px', opacity: 0.8 }}>Personal shopping and market errands. Handled by professionals.</p>
                             </div>
-                            <div className={styles.featureCTA}>Book a Shopper →</div>
+                            <div className={styles.featureCTA}>Book a Shopper <ArrowRight size={16} /></div>
                         </Link>
                     ) : (
                         <div className={`${styles.featureCard} ${styles.blackCard}`} style={{ opacity: 0.6 }}>
-                            <div className={styles.featureIcon}>🛒</div>
+                            <div className={styles.featureIcon}><ShoppingCart size={32} color="var(--color-gold)" /></div>
                             <div>
                                 <h3 className={styles.featureTitle}>F3 SHOPPER</h3>
-                                <p style={{ fontSize: '14px', marginTop: '8px' }}>Personal shopping. Launching soon.</p>
-                                <span style={{ background: '#C9A227', color: '#000', fontSize: '10px', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>COMING SOON</span>
+                                <p style={{ fontSize: '15px', marginTop: '12px' }}>Personal shopping. Launching soon.</p>
+                                <span style={{ background: 'var(--color-gold)', color: '#000', fontSize: '10px', padding: '4px 10px', borderRadius: '6px', fontWeight: 'bold', display: 'inline-block', marginTop: '12px' }}>COMING SOON</span>
                             </div>
-                            <div className={styles.featureCTA}>Notify Me →</div>
+                            <div className={styles.featureCTA}>Notify Me <ArrowRight size={16} /></div>
                         </div>
                     )}
                 </div>
@@ -230,21 +239,23 @@ export default function HomePage() {
                 <div className={styles.splitGrid}>
                     <div>
                         <h2 className={styles.sectionTitle}>Your Digital Storefront.<br />PH-Wide Reach.</h2>
-                        <p className={styles.subText}>List your business on DAL and access our fleet for deliveries, logistics, and visibility.</p>
-                        <Link href="/list-your-business" className={styles.ctaGold} style={{ display: 'inline-block' }}>List Your Business Free →</Link>
+                        <p className={styles.subText} style={{ marginBottom: '32px' }}>List your business on DAL and access our fleet for deliveries, logistics, and visibility.</p>
+                        <Link href="/list-your-business" className={styles.ctaGold} style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+                            List Your Business Free <ArrowRight size={18} />
+                        </Link>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
                         <div className={styles.statItem} style={{ flexDirection: 'column', textAlign: 'center' }}>
-                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--gold)' }}>500+</span>
-                            <span style={{ fontSize: '11px', color: '#555' }}>Vendors</span>
+                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-gold)' }}>500+</span>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Vendors</span>
                         </div>
                         <div className={styles.statItem} style={{ flexDirection: 'column', textAlign: 'center' }}>
-                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--gold)' }}>12k+</span>
-                            <span style={{ fontSize: '11px', color: '#555' }}>Orders</span>
+                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-gold)' }}>12k+</span>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Orders</span>
                         </div>
                         <div className={styles.statItem} style={{ flexDirection: 'column', textAlign: 'center' }}>
-                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--gold)' }}>100%</span>
-                            <span style={{ fontSize: '11px', color: '#555' }}>Coverage</span>
+                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-gold)' }}>100%</span>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Coverage</span>
                         </div>
                     </div>
                 </div>
@@ -255,39 +266,35 @@ export default function HomePage() {
                 <span className={styles.premiumPill}>Everything Better with DAL Premium</span>
                 <h2 className={styles.h1} style={{ fontSize: '48px' }}>₦700/month</h2>
                 
-                <div style={{ maxWidth: '800px', margin: '60px auto', background: '#111', padding: '40px', borderRadius: '20px' }}>
+                <div style={{ maxWidth: '900px', margin: '60px auto', background: 'var(--card-bg)', padding: '40px', borderRadius: '24px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-lg)' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
-                            <tr style={{ borderBottom: '1px solid #222' }}>
-                                <th style={{ padding: '20px', color: '#888' }}>Feature</th>
-                                <th style={{ padding: '20px', color: '#888' }}>Free</th>
-                                <th style={{ padding: '20px', color: 'var(--gold)' }}>Premium</th>
+                            <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                                <th style={{ padding: '24px', color: 'var(--text-secondary)', fontWeight: '800', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.1em' }}>Feature</th>
+                                <th style={{ padding: '24px', color: 'var(--text-secondary)', fontWeight: '800', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.1em' }}>Free</th>
+                                <th style={{ padding: '24px', color: 'var(--color-gold)', fontWeight: '800', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.1em' }}>Premium</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr style={{ borderBottom: '1px solid #222' }}>
-                                <td style={{ padding: '20px' }}>Route Search</td>
-                                <td style={{ padding: '20px' }}>✓</td>
-                                <td style={{ padding: '20px', color: 'var(--gold)' }}>Priority</td>
-                            </tr>
-                            <tr style={{ borderBottom: '1px solid #222' }}>
-                                <td style={{ padding: '20px' }}>Road Intelligence</td>
-                                <td style={{ padding: '20px' }}>3/day</td>
-                                <td style={{ padding: '20px', color: 'var(--gold)' }}>Unlimited</td>
-                            </tr>
-                            <tr style={{ borderBottom: '1px solid #222' }}>
-                                <td style={{ padding: '20px' }}>WhatsApp Bot</td>
-                                <td style={{ padding: '20px' }}>-</td>
-                                <td style={{ padding: '20px', color: 'var(--gold)' }}>Full Access</td>
-                            </tr>
-                            <tr style={{ borderBottom: '1px solid #222' }}>
-                                <td style={{ padding: '20px' }}>Earning Multiplier</td>
-                                <td style={{ padding: '20px' }}>1x</td>
-                                <td style={{ padding: '20px', color: 'var(--gold)' }}>1.5x</td>
-                            </tr>
+                            {[
+                                { name: 'Route Search', free: '✓', premium: 'Priority' },
+                                { name: 'Road Intelligence', free: '3/day', premium: 'Unlimited' },
+                                { name: 'WhatsApp Bot', free: '-', premium: 'Full Access' },
+                                { name: 'Earning Multiplier', free: '1x', premium: '1.5x' },
+                            ].map((row, i) => (
+                                <tr key={i} style={{ borderBottom: i === 3 ? 'none' : '1px solid var(--border)' }}>
+                                    <td style={{ padding: '24px', fontWeight: '600' }}>{row.name}</td>
+                                    <td style={{ padding: '24px', color: 'var(--text-secondary)' }}>{row.free}</td>
+                                    <td style={{ padding: '24px', color: 'var(--color-gold)', fontWeight: '700' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Check size={16} /> {row.premium}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
-                    <Link href="/premium" className={styles.ctaGold} style={{ display: 'block', marginTop: '40px', textAlign: 'center' }}>Upgrade Now</Link>
+                    <Link href="/premium" className={styles.ctaGold} style={{ display: 'block', marginTop: '40px', textAlign: 'center', fontSize: '18px' }}>Get Premium Access Now</Link>
                 </div>
             </section>
 
@@ -298,51 +305,68 @@ export default function HomePage() {
                 </div>
                 <div className={styles.testimonialGrid}>
                     <div className={styles.testimonialCard}>
-                        <p style={{ fontStyle: 'italic', color: '#555', marginBottom: '16px' }}>&quot;DAL has completely changed how I navigate traffic. The alerts are always spot on.&quot;</p>
-                        <strong>Adaobi O.</strong>
-                        <div style={{ fontSize: '12px', color: '#888' }}>Routine Commuter</div>
+                        <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', color: 'var(--color-gold)' }}>
+                            {[1,2,3,4,5].map(s => <Star key={s} size={14} fill="currentColor" />)}
+                        </div>
+                        <p style={{ fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.7' }}>&quot;DAL has completely changed how I navigate traffic. The alerts are always spot on.&quot;</p>
+                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                            <strong style={{ display: 'block', color: 'var(--text-primary)' }}>Adaobi O.</strong>
+                            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Routine Commuter</span>
+                        </div>
                     </div>
                     <div className={styles.testimonialCard}>
-                        <p style={{ fontStyle: 'italic', color: '#555', marginBottom: '16px' }}>&quot;Best delivery platform in Rivers State. We use it for our restaurant daily.&quot;</p>
-                        <strong>Chidi K.</strong>
-                        <div style={{ fontSize: '12px', color: '#888' }}>Business Owner</div>
+                        <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', color: 'var(--color-gold)' }}>
+                            {[1,2,3,4,5].map(s => <Star key={s} size={14} fill="currentColor" />)}
+                        </div>
+                        <p style={{ fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.7' }}>&quot;Best delivery platform in Rivers State. We use it for our restaurant daily.&quot;</p>
+                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                            <strong style={{ display: 'block', color: 'var(--text-primary)' }}>Chidi K.</strong>
+                            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Business Owner</span>
+                        </div>
                     </div>
                     <div className={styles.testimonialCard}>
-                        <p style={{ fontStyle: 'italic', color: '#555', marginBottom: '16px' }}>&quot;I earn extra points just by reporting road blocks. Love the community feel.&quot;</p>
-                        <strong>Emeka J.</strong>
-                        <div style={{ fontSize: '12px', color: '#888' }}>DAL Contributor</div>
+                        <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', color: 'var(--color-gold)' }}>
+                            {[1,2,3,4,5].map(s => <Star key={s} size={14} fill="currentColor" />)}
+                        </div>
+                        <p style={{ fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.7' }}>&quot;I earn extra points just by reporting road blocks. Love the community feel.&quot;</p>
+                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                            <strong style={{ display: 'block', color: 'var(--text-primary)' }}>Emeka J.</strong>
+                            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>DAL Contributor</span>
+                        </div>
                     </div>
                 </div>
 
-                <div style={{ background: '#000', color: '#FFF', padding: '60px', borderRadius: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ background: 'var(--foreground)', color: 'var(--background)', padding: '60px', borderRadius: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: 'var(--shadow-lg)' }}>
                     <div>
-                        <h3 className={styles.sectionTitle} style={{ fontSize: '24px' }}>Community Leaderboard</h3>
-                        <div style={{ display: 'flex', gap: '32px', marginTop: '24px' }}>
+                        <h3 className={styles.sectionTitle} style={{ fontSize: '28px', color: 'inherit' }}>Community Leaderboard</h3>
+                        <div style={{ display: 'flex', gap: '40px', marginTop: '32px' }}>
                             {leaderboard.map((user, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifySelf: 'center', fontWeight: 'bold', color: '#000', justifyContent: 'center' }}>
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--color-gold)', display: 'flex', alignItems: 'center', justifySelf: 'center', fontWeight: '900', color: '#000', justifyContent: 'center', fontSize: '20px' }}>
                                         {user.display_name?.[0] || 'U'}
                                     </div>
                                     <div>
-                                        <div style={{ fontWeight: '700' }}>#{i+1} {user.display_name}</div>
-                                        <div style={{ fontSize: '12px', color: 'var(--gold)' }}>{user.points} pts</div>
+                                        <div style={{ fontWeight: '800', fontSize: '16px' }}>#{i+1} {user.display_name}</div>
+                                        <div style={{ fontSize: '14px', color: 'var(--color-gold)', fontWeight: '700' }}>{user.points} pts</div>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
-                    <Link href="/community" className={styles.ctaGhost}>See Full Leaderboard →</Link>
+                    <Link href="/community" className={styles.ctaGhost} style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
+                        See Full Leaderboard <ArrowRight size={18} />
+                    </Link>
                 </div>
             </section>
 
             {/* SECTION 7 — WHATSAPP STRIP */}
             <section className={styles.whatsappStrip}>
                 <div>
-                    <h3 className={styles.sectionTitle} style={{ fontSize: '18px', marginBottom: '8px' }}>DAL is also on WhatsApp</h3>
-                    <p style={{ fontSize: '14px', color: '#888' }}>Access everything in one chat. <span style={{ color: 'var(--gold)' }}>Full access — Premium feature.</span></p>
+                    <h3 className={styles.sectionTitle} style={{ fontSize: '24px', marginBottom: '8px' }}>DAL is also on WhatsApp</h3>
+                    <p style={{ fontSize: '16px', color: 'var(--text-secondary)' }}>Access everything in one chat. <span style={{ color: 'var(--color-gold)', fontWeight: '700' }}>Full access — Premium feature.</span></p>
                 </div>
                 <a href="https://wa.me/2348000000000" target="_blank" rel="noopener noreferrer" className={styles.whatsappBtn}>
-                    Chat Now
+                    <MessageCircle size={24} fill="currentColor" /> Chat Now
                 </a>
             </section>
         </div>

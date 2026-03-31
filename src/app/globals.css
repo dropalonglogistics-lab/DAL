@@ -57,36 +57,32 @@
 
   /* ─── Transitions ────────────────────────────────────────── */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 
   --color-shadow: rgba(0, 0, 0, 0.05);
+
+  /* ─── Default (Light) ─────────────────────────────────────── */
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --card-bg: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --color-gold: #B45309;
+  --color-primary: #B45309;
+  --color-primary-hover: #92400E;
+  --border: #E2E8F0;
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --color-shadow: rgba(15, 23, 42, 0.08);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0B1120;
-    --foreground: #F1F5F9;
-    --card-bg: #161E2F;
-    --text-primary: #F8FAFC;
-    --text-secondary: #94A3B8;
-    --border: #334155;
-    --glass-bg: rgba(11, 17, 32, 0.82);
-    --color-shadow: rgba(0, 0, 0, 0.3);
-  }
-}
-
-/* Class-based Dark Mode Override */
-body.dark-mode {
+/* Dark Mode Overrides */
+.dark-mode {
   --background: #050505;
   --foreground: #FFFFFF;
-  /* Brighter foreground */
   --card-bg: #111111;
   --text-primary: #FFFFFF;
-  /* Pure white for maximum pop */
   --text-secondary: #CBD5E1;
-  /* Lighter grey for better legibility */
   --color-gold: #F3D271;
-  /* Brighter, more vibrant Gold */
   --color-primary: #F3D271;
   --color-primary-hover: #EAB308;
   --border: #262626;
@@ -94,18 +90,13 @@ body.dark-mode {
   --color-shadow: rgba(0, 0, 0, 0.6);
 }
 
-body.light-mode {
+.light-mode {
   --background: #F8FAFC;
-  /* Soft slate-off-white for better depth */
   --foreground: #0F172A;
-  /* Deep Obsidian */
   --card-bg: #FFFFFF;
   --text-primary: #0F172A;
-  /* Deep Obsidian for maximum readability */
   --text-secondary: #475569;
-  /* Crisp Slate for clear secondary info */
   --color-gold: #B45309;
-  /* Rich Amber-Gold for better visibility on light backgrounds */
   --color-primary: #B45309;
   --color-primary-hover: #92400E;
   --border: #E2E8F0;

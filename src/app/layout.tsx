@@ -38,6 +38,8 @@ export default function RootLayout({
                                 var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                                 if (theme === 'dark' || (!theme && prefersDark)) {
                                     document.documentElement.classList.add('dark-mode');
+                                } else {
+                                    document.documentElement.classList.add('light-mode');
                                 }
                             } catch (e) {}
                         })();
