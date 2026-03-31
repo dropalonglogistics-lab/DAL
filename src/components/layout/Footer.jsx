@@ -32,13 +32,12 @@ export default function Footer() {
                 <div className={styles.top}>
                     <div className={styles.brand}>
                         <Link href="/" className={styles.logoLink}>
-                            <Image
-                                src="/dal-logo-light.png"
-                                alt="Drop Along Logistics (DAL)"
-                                height={32}
-                                width={120}
-                                className={styles.logo}
-                            />
+                            <span className="hidden dark:block">
+                                <Image src="/dal-logo-light.png" alt="Drop Along Logistics" width={140} height={40} className="object-contain" />
+                            </span>
+                            <span className="block dark:hidden">
+                                <Image src="/dal-logo-dark.png" alt="Drop Along Logistics" width={140} height={40} className="object-contain" />
+                            </span>
                         </Link>
                         <p className={styles.tagline}>
                             Nigeria&apos;s informal economy moves on DAL. Building the intelligence layer for urban mobility in Port Harcourt and beyond.
@@ -89,7 +88,7 @@ export default function Footer() {
                 <div className={styles.footerInner}>
                     <div className={styles.bottomContent}>
                         <span className={styles.copyright}>
-                            © {new Date().getFullYear()} Drop Along Logistics. <span className={styles.hideMobile}>Nigeria&apos;s Intelligence Layer.</span>
+                            © 2026 Drop Along Logistics. <span className={styles.hideMobile}>Nigeria&apos;s Intelligence Layer.</span>
                         </span>
                         <div className={styles.madeIn}>
                             Designed in Port Harcourt 🇳🇬

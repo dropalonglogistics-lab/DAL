@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+    darkMode: 'class',
     content: [
         "./src/**/*.{js,jsx,ts,tsx}",
     ],
@@ -14,8 +15,8 @@ module.exports = {
                 "brand-off-white": "#FAFAF7",
             },
             fontFamily: {
-                heading: ["var(--font-heading)", "sans-serif"],
-                body: ["var(--font-body)", "sans-serif"],
+                heading: ['var(--font-heading)', 'sans-serif'],
+                body: ['var(--font-body)', 'sans-serif'],
             },
             borderRadius: {
                 sm: "6px",
@@ -23,6 +24,15 @@ module.exports = {
                 lg: "16px",
                 xl: "24px",
             },
+            keyframes: {
+                'bounce-short': {
+                    '0%, 100%': { transform: 'translateY(-4px)' },
+                    '50%': { transform: 'translateY(0)' },
+                }
+            },
+            animation: {
+                'bounce-short': 'bounce-short 1s ease-in-out infinite',
+            }
         },
     },
     plugins: [],
