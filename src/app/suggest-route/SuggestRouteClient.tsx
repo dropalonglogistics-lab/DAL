@@ -435,9 +435,11 @@ export default function SuggestRouteClient() {
                                     stops_along_the_way={[startLocation, ...stops.map(s => s.location), destination].filter(Boolean).join(' → ')}
                                     isExpanded={true}
                                 />
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     );
 }
