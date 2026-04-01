@@ -7,19 +7,19 @@ export async function GET() {
     try {
         const supabase = await createClient();
 
-        // 1. Verified Route Count
+        // 1. Verified Route Count (Primary Search Table)
         const { count: verifiedCount } = await supabase
-            .from('community_routes')
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'approved');
+            .from('routes')
+            .select('*', { count: 'exact', head: true });
 
         // 2. Alert Count (Last 24 Hours)
         const { count: alertCount } = await supabase
             .from('alerts')
             .select('*', { count: 'exact', head: true })
+            .eq('status', 'active')
             .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
-        // 3. Member Count (Profiles)
+        // 3. Member Count (Active Profiles)
         const { count: memberCount } = await supabase
             .from('profiles')
             .select('*', { count: 'exact', head: true });

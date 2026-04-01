@@ -64,7 +64,7 @@ export default function HomePage() {
                 // Leaderboard (Top 3)
                 const lbRes = await fetch('/api/community/leaderboard');
                 const lbData = await lbRes.json();
-                setLeaderboard(lbData.data?.slice(0, 3) || []);
+                setLeaderboard(lbData.leaderboard?.slice(0, 3) || []);
 
             } catch (e) {
                 console.error('Initial data fetch failed', e);
@@ -105,9 +105,18 @@ export default function HomePage() {
                         Fare estimates, live alerts, and real-time navigation — all free.
                     </p>
                     <div className={styles.statsRow}>
-                        <div className={styles.statItem}><MapPin size={16} color="var(--color-gold)" /> <strong>{stats.verifiedCount.toLocaleString()}</strong> routes</div>
-                        <div className={styles.statItem}><AlertTriangle size={16} color="#F87171" /> <strong>{stats.alertCount.toLocaleString()}</strong> alerts today</div>
-                        <div className={styles.statItem}><Users size={16} color="#60A5FA" /> <strong>{stats.memberCount.toLocaleString()}</strong> members</div>
+                        <div className={styles.statItem}>
+                            <MapPin size={16} color="var(--color-gold)" /> 
+                            <strong>{loading ? '...' : stats.verifiedCount.toLocaleString()}</strong> routes
+                        </div>
+                        <div className={styles.statItem}>
+                            <AlertTriangle size={16} color="#F87171" /> 
+                            <strong>{loading ? '...' : stats.alertCount.toLocaleString()}</strong> alerts today
+                        </div>
+                        <div className={styles.statItem}>
+                            <Users size={16} color="#60A5FA" /> 
+                            <strong>{loading ? '...' : stats.memberCount.toLocaleString()}</strong> members
+                        </div>
                     </div>
                 </div>
 
@@ -302,13 +311,13 @@ export default function HomePage() {
                         <h3 className={styles.sectionTitle} style={{ fontSize: '28px', color: 'inherit' }}>Community Leaderboard</h3>
                         <div style={{ display: 'flex', gap: '40px', marginTop: '32px' }}>
                             {leaderboard.map((user, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                <div key={user.id || i} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                     <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--color-gold)', display: 'flex', alignItems: 'center', justifySelf: 'center', fontWeight: '900', color: '#000', justifyContent: 'center', fontSize: '20px' }}>
-                                        {user.display_name?.[0] || 'U'}
+                                        {user.name?.[0] || 'U'}
                                     </div>
                                     <div>
-                                        <div style={{ fontWeight: '800', fontSize: '16px' }}>#{i+1} {user.display_name}</div>
-                                        <div style={{ fontSize: '14px', color: 'var(--color-gold)', fontWeight: '700' }}>{user.points} pts</div>
+                                        <div style={{ fontWeight: '800', fontSize: '16px' }}>#{user.rank || i+1} {user.name}</div>
+                                        <div style={{ fontSize: '14px', color: 'var(--color-gold)', fontWeight: '700' }}>{user.points.toLocaleString()} pts</div>
                                     </div>
                                 </div>
                             ))}
