@@ -16,11 +16,145 @@
     box-shadow: var(--shadow-md);
 }
 
+.themeToggleBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.themeToggleBtn:hover {
+    background: var(--border);
+    color: var(--text-primary);
+}
+
+.navContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 16px;
+    height: 64px;
+    width: 100%;
+    min-width: 0;
+}
+
+@media (min-width: 1024px) {
+    .navContainer {
+        padding: 0 24px;
+    }
+}
+
+/* Logo */
+.logo {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    min-width: 0;
+    height: 100%;
+}
+
+.logo img {
+    height: 42px;
+    width: auto;
+    object-fit: contain;
+    max-height: none;
+}
+
+/* Desktop Nav */
+.desktopNav {
+    display: none;
+    gap: 2px;
+    align-items: center;
+}
+
+@media (min-width: 1024px) {
+    .desktopNav {
+        display: flex;
+    }
+}
+
+.navLink {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast), background var(--transition-fast);
+    white-space: nowrap;
+}
+
+.navLink:hover {
+    color: var(--text-primary);
+    background: var(--border);
+}
+
+:global(.light-mode) .navLink {
+    color: rgba(0, 0, 0, 0.65);
+}
+
+:global(.light-mode) .navLink:hover {
+    color: var(--brand-black);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.navLinkActive {
+    color: var(--color-gold) !important;
+}
+
+.navLinkActive::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 14px;
+    right: 14px;
+    height: 2px;
+    background: var(--color-gold);
+    border-radius: 2px;
+}
+
+.adminLink {
+    color: rgba(255, 255, 255, 0.55) !important;
+}
+
+/* Go Premium gold outline button */
+.goPremiumBtn {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    background: transparent;
+    color: var(--brand-gold);
+    border: 1px solid var(--brand-gold);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.goPremiumBtn:hover {
+    background: rgba(201, 162, 39, 0.1);
+}
+
 /* Actions */
 .actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
     flex-shrink: 0;
     min-width: 0;
 }

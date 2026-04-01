@@ -2,403 +2,373 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { 
     MapPin, AlertTriangle, Users, 
     ArrowRight, Box, ShoppingCart, 
-    Check, Zap, MessageCircle, Star,
-    Search, Loader2
+    Check, Zap, MessageCircle, Star 
 } from 'lucide-react';
+import CityGrid from '@/components/Visuals/CityGrid';
+import styles from './page.module.css';
 
 export default function HomePage() {
-    const [counts, setCounts] = useState({ routeCount: 0, alertCount: 0, memberCount: 0 });
-    const [origin, setOrigin] = useState('');
-    const [destination, setDestination] = useState('');
-    const [searchError, setSearchError] = useState('');
-    const [waitlistEmail, setWaitlistEmail] = useState('');
-    const [waitlistStatus, setWaitlistStatus] = useState<{ type: 'success' | 'error' | 'duplicate' | null, message: string }>({ type: null, message: '' });
-    const [isSubmittingWaitlist, setIsSubmittingWaitlist] = useState(false);
+    const [from, setFrom] = useState('');
+    const [to, setTo] = useState('');
+    const [stats, setStats] = useState({ verifiedCount: 0, alertCount: 0, memberCount: 0 });
+    const [alerts, setAlerts] = useState<any[]>([]);
+    const [config, setConfig] = useState({ f2_express_live: false, f3_shopper_live: false });
+    const [leaderboard, setLeaderboard] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
     const supabase = createClient();
 
+    // 1. Fetch Stats on 60s interval
     useEffect(() => {
-        const fetchCounts = async () => {
+        const fetchStats = async () => {
             try {
-                const { count: routeCount } = await supabase
-                    .from('routes')
-                    .select('*', { count: 'exact', head: true });
-
-                const { count: alertCount } = await supabase
-                    .from('alerts')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('status', 'active');
-
-                const { count: memberCount } = await supabase
-                    .from('profiles')
-                    .select('*', { count: 'exact', head: true });
-
-                setCounts({ 
-                    routeCount: routeCount || 0, 
-                    alertCount: alertCount || 0, 
-                    memberCount: memberCount || 0 
-                });
-            } catch (error) {
-                console.error('Error fetching Supabase counts:', error);
+                const res = await fetch('/api/community/stats');
+                const data = await res.json();
+                setStats(data);
+            } catch (e) {
+                console.error('Stats fetch failed', e);
             }
         };
 
-        fetchCounts();
+        fetchStats();
+        const interval = setInterval(fetchStats, 60000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // 2. Fetch Config & Alerts & Leaderboard
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                // Config
+                const configRes = await fetch('/api/config');
+                const configData = await configRes.json();
+                setConfig(configData);
+
+                // Alerts (Top 3 active)
+                const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+                const { data: alertsData } = await supabase
+                    .from('alerts')
+                    .select('*')
+                    .eq('status', 'active')
+                    .gt('created_at', yesterday)
+                    .order('created_at', { ascending: false })
+                    .limit(3);
+                setAlerts(alertsData || []);
+
+                // Leaderboard (Top 3)
+                const lbRes = await fetch('/api/community/leaderboard');
+                const lbData = await lbRes.json();
+                setLeaderboard(lbData.data?.slice(0, 3) || []);
+
+            } catch (e) {
+                console.error('Initial data fetch failed', e);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
     }, [supabase]);
 
-    const handleRouteSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!origin || !destination) {
-            setSearchError('Please enter both a starting point and destination.');
-            return;
-        }
-        setSearchError('');
-        router.push(`/search?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`);
+    const handleSearch = () => {
+        if (!from && !to) return;
+        router.push(`/search?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
     };
 
-    const handleWaitlistSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!waitlistEmail) return;
-        
-        setIsSubmittingWaitlist(true);
-        setWaitlistStatus({ type: null, message: '' });
-
-        try {
-            const { error } = await supabase
-                .from('waitlist')
-                .insert([{ email: waitlistEmail }]);
-
-            if (error) {
-                if (error.code === '23505') {
-                    setWaitlistStatus({ type: 'duplicate', message: "You're already on the list!" });
-                } else {
-                    setWaitlistStatus({ type: 'error', message: 'Something went wrong. Try again.' });
-                }
-            } else {
-                setWaitlistStatus({ type: 'success', message: "You're on the list. We'll reach out first." });
-                setWaitlistEmail('');
-            }
-        } catch (err) {
-            setWaitlistStatus({ type: 'error', message: 'Something went wrong. Try again.' });
-        } finally {
-            setIsSubmittingWaitlist(false);
-        }
+    const timeAgo = (dateStr: string) => {
+        const diff = Date.now() - new Date(dateStr).getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 60) return `${mins}m ago`;
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return `${hrs}h ago`;
+        return new Date(dateStr).toLocaleDateString();
     };
 
     return (
-        <main className="min-h-screen bg-bg-primary text-text-primary transition-colors duration-300">
-            {/* SECTION A: HERO */}
-            <section className="relative min-h-[80vh] lg:min-h-screen flex flex-col items-center justify-center py-20 px-6 overflow-hidden">
-                {/* Radial Gradient Background */}
-                <div className="absolute inset-0 z-0 pointer-events-none
-                    dark:bg-[radial-gradient(circle_at_center,#111118_0%,#0A0A0F_100%)]
-                    bg-[radial-gradient(circle_at_center,#FFFFFF_0%,#F4F4F5_100%)]" />
-
-                <div className="relative z-10 max-w-[760px] w-full flex flex-col items-center text-center">
-                    {/* OVERLINE BADGE */}
-                    <span className="mb-6 px-4 py-1.5 rounded-full border font-body text-xs font-semibold tracking-widest uppercase transition-colors
-                        dark:bg-accent-subtle dark:border-[#D4A84340] dark:text-accent
-                        bg-accent-subtle border-[#D4A84340] text-accent">
-                        PORT HARCOURT · RIVERS STATE · NIGERIA
-                    </span>
-
-                    {/* HEADLINE (H1) */}
-                    <h1 className="mb-6 font-heading font-bold text-4xl sm:text-5xl lg:text-6xl leading-tight max-w-[680px]">
-                        The <span className="text-accent">Intelligence</span> Layer That Moves Port Harcourt.
-                    </h1>
-
-                    {/* SUBHEADLINE (P) */}
-                    <p className="mb-10 font-body text-lg sm:text-xl text-text-secondary max-w-[560px]">
-                        Real-time routes, same-hour delivery, and community-powered road intelligence — built from the ground up in Port Harcourt.
+        <div className={styles.container}>
+            {/* SECTION 1 — HERO */}
+            <section className={styles.heroSection}>
+                <div className={styles.heroVisual}>
+                    <CityGrid />
+                </div>
+                <div className={styles.heroContent}>
+                    <span className={styles.eyebrow}>PORT HARCOURT&apos;S INTELLIGENCE LAYER</span>
+                    <h1 className={styles.h1}>Move Smarter.<br />Deliver Faster.<br />Stress Less.</h1>
+                    <p className={styles.subText}>
+                        Community-powered routing, same-hour delivery, and personal shopping —
+                        all in one platform built for Port Harcourt.
                     </p>
-
-                    {/* CTA BUTTONS */}
-                    <div className="flex flex-wrap items-center justify-center gap-4">
-                        <Link href="/search" className="px-6 py-3 rounded-lg font-body font-semibold text-sm transition-all duration-200 shadow-lg hover:brightness-110 active:scale-95
-                            bg-accent text-[#09090B]">
-                            Search Routes Now
-                        </Link>
-                        <a href="#how-it-works" className="px-6 py-3 rounded-lg border font-body font-medium text-sm transition-all duration-200
-                            dark:border-border dark:text-text-secondary dark:hover:border-accent dark:hover:text-accent
-                            border-border text-text-secondary hover:border-accent hover:text-accent">
-                            How It Works
-                        </a>
+                    <div className={styles.ctaRow}>
+                        <Link href="/signup" className={styles.ctaGold}>Get Started Free</Link>
+                        <Link href="/about" className={styles.ctaGhost}>See How It Works</Link>
+                    </div>
+                    <div className={styles.statsRow}>
+                        <div className={styles.statItem}><MapPin size={18} color="var(--color-gold)" /> <strong>{stats.verifiedCount.toLocaleString()}</strong> verified routes</div>
+                        <div className={styles.statItem}><AlertTriangle size={18} color="#F87171" /> <strong>{stats.alertCount.toLocaleString()}</strong> alerts today</div>
+                        <div className={styles.statItem}><Users size={18} color="#60A5FA" /> <strong>{stats.memberCount.toLocaleString()}</strong> members</div>
                     </div>
                 </div>
             </section>
 
-            {/* SECTION B: LIVE DATA STRIP */}
-            <section className="full-width bg-bg-secondary border-y border-border py-5 px-6 transition-colors">
-                <div className="max-w-6xl mx-auto flex flex-row flex-wrap justify-center items-center gap-8 sm:gap-16">
-                    {/* Stat 1 */}
-                    <div className="flex flex-col items-center">
-                        <span className="font-heading font-bold text-2xl sm:text-3xl text-text-primary">
-                            {counts.routeCount.toLocaleString()}+
-                        </span>
-                        <span className="font-body text-[10px] sm:text-xs text-text-muted uppercase tracking-widest mt-1">
-                            Mapped Routes
-                        </span>
-                    </div>
-
-                    <div className="hidden sm:block w-px h-10 bg-border" />
-
-                    {/* Stat 2 */}
-                    <div className="flex flex-col items-center">
-                        <span className="font-heading font-bold text-2xl sm:text-3xl text-text-primary">
-                            Rivers State
-                        </span>
-                        <span className="font-body text-[10px] sm:text-xs text-text-muted uppercase tracking-widest mt-1">
-                            Coverage Area
-                        </span>
-                    </div>
-
-                    <div className="hidden sm:block w-px h-10 bg-border" />
-
-                    {/* Stat 3 */}
-                    <div className="flex flex-col items-center">
-                        <span className="font-heading font-bold text-2xl sm:text-3xl text-text-primary text-accent">
-                            {counts.alertCount}
-                        </span>
-                        <span className="font-body text-[10px] sm:text-xs text-text-muted uppercase tracking-widest mt-1">
-                            Active Alerts
-                        </span>
-                    </div>
-                </div>
-            </section>
-
-            {/* SECTION C: F1 ROUTING FEATURE BLOCK */}
-            <section className="py-20 px-6 max-w-6xl mx-auto">
-                <div className="mb-10">
-                    <span className="inline-block mb-4 px-4 py-1.5 rounded-full border font-body text-[10px] font-bold tracking-widest uppercase
-                        dark:bg-[#22C55E15] dark:border-[#22C55E40] dark:text-[#22C55E]
-                        bg-[#16A34A15] border-[#16A34A40] text-[#16A34A]">
-                        LIVE NOW
-                    </span>
-                    <h2 className="font-heading font-bold text-3xl sm:text-4xl text-text-primary mb-4 leading-tight">
-                        Find Your Route Across Port Harcourt
-                    </h2>
-                    <p className="font-body text-base text-text-secondary max-w-[520px]">
-                        Keke, Taxi, Shuttle, Bus, Bike — every route mapped, every fare estimated. Search once, move smarter every day.
-                    </p>
-                </div>
-
-                <div className="bg-bg-secondary border border-border rounded-2xl p-6 sm:p-8 shadow-sm transition-colors overflow-hidden">
-                    <form onSubmit={handleRouteSearch} className="flex flex-col md:flex-row gap-4 items-start md:items-end">
-                        <div className="w-full space-y-2">
-                            <label className="text-xs font-semibold text-text-muted uppercase tracking-wider pl-1">Starting point</label>
-                            <div className="relative group">
-                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-accent transition-colors" size={18} />
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Rumuola"
-                                    className="w-full pl-10 pr-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-accent-subtle transition-all
-                                        bg-bg-primary border-border text-text-primary placeholder:text-text-muted focus:border-accent"
-                                    value={origin}
-                                    onChange={(e) => setOrigin(e.target.value)}
-                                />
-                            </div>
+            {/* SECTION 2 — LIVE ROAD INTELLIGENCE */}
+            <section className={styles.darkSection}>
+                <div className={styles.intelligenceGrid}>
+                    <div>
+                        <div className={styles.sectionHeader}>
+                            <h2 className={styles.sectionTitle}>What&apos;s Happening Right Now</h2>
+                            <p className={styles.sectionSub}>Community-reported, in real time</p>
                         </div>
-
-                        <div className="w-full space-y-2">
-                            <label className="text-xs font-semibold text-text-muted uppercase tracking-wider pl-1">Destination</label>
-                            <div className="relative group">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-accent transition-colors" size={18} />
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Mile 1 Market"
-                                    className="w-full pl-10 pr-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-accent-subtle transition-all
-                                        bg-bg-primary border-border text-text-primary placeholder:text-text-muted focus:border-accent"
-                                    value={destination}
-                                    onChange={(e) => setDestination(e.target.value)}
-                                />
-                            </div>
+                        <div className={styles.alertsList}>
+                            {alerts.length > 0 ? alerts.map((alert) => (
+                                <div key={alert.id} className={styles.alertCard}>
+                                    <div className={styles.alertIcon}>
+                                        <AlertTriangle size={24} />
+                                    </div>
+                                    <div className={styles.alertBody}>
+                                        <div className={styles.alertMeta}>
+                                            <span className={styles.alertArea}>{alert.area}</span>
+                                            <span className={styles.alertTime}>{timeAgo(alert.created_at)}</span>
+                                        </div>
+                                        <p className={styles.alertDesc}>{alert.description}</p>
+                                        <div className={styles.alertFooter}>
+                                            <Zap size={14} fill="currentColor" /> {alert.upvotes || 0} Upvotes
+                                        </div>
+                                    </div>
+                                </div>
+                            )) : (
+                                <p className={styles.textMuted}>No active alerts. Roads are clear.</p>
+                            )}
+                            <Link href="/alerts" className={styles.seeAllLink}>
+                                See All Alerts <ArrowRight size={18} />
+                            </Link>
                         </div>
+                    </div>
 
-                        <button type="submit" className="w-full md:w-auto h-[46px] px-8 rounded-xl bg-accent hover:brightness-110 active:scale-95 transition-all
-                            text-[#09090B] font-bold text-sm shadow-md flex items-center justify-center gap-2">
-                            Find Route <ArrowRight size={16} />
-                        </button>
-                    </form>
-                    
-                    {searchError && (
-                        <p className="mt-4 text-xs font-semibold text-red-500 animate-pulse underline decoration-red-500/30 underline-offset-4">
-                            {searchError}
+                    <div className={styles.searchWidget}>
+                        <h3 className={styles.featureTitle} style={{ marginBottom: '24px', fontSize: '18px' }}>Find Your Route</h3>
+                        <div className={styles.inputGroup}>
+                            <label>Starting point</label>
+                            <input
+                                className={styles.darkInput}
+                                placeholder="e.g. Mile 1 Market"
+                                value={from}
+                                onChange={(e) => setFrom(e.target.value)}
+                            />
+                        </div>
+                        <div className={styles.inputGroup}>
+                            <label>Destination</label>
+                            <input
+                                className={styles.darkInput}
+                                placeholder="e.g. Garrison Junction"
+                                value={to}
+                                onChange={(e) => setTo(e.target.value)}
+                            />
+                        </div>
+                        <button className={styles.findBtn} onClick={handleSearch}>Find Route</button>
+                        <p style={{ fontSize: '10px', color: '#555', marginTop: '16px', textAlign: 'center' }}>
+                            Keke, Taxi, Shuttle, Bus, Bike — Port Harcourt Coverage.
                         </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* SECTION 3 — THREE FEATURES */}
+            <section className={styles.featureSection}>
+                <div className={styles.featureGrid}>
+                    <Link href="/search" className={`${styles.featureCard} ${styles.blackCard}`}>
+                        <div className={styles.featureIcon}><MapPin size={32} color="var(--color-gold)" /></div>
+                        <div>
+                            <h3 className={styles.featureTitle}>F1 ROUTING</h3>
+                            <p style={{ fontSize: '15px', marginTop: '12px', opacity: 0.8, lineHeight: '1.5' }}>Intelligent routing for PH commuters. Fare estimates and transit mapping.</p>
+                        </div>
+                        <div className={styles.featureCTA}>Explore Routes <ArrowRight size={16} /></div>
+                    </Link>
+
+                    {config.f2_express_live ? (
+                        <Link href="/express" className={`${styles.featureCard} ${styles.goldCard}`}>
+                            <div className={styles.featureIcon}><Box size={32} /></div>
+                            <div>
+                                <h3 className={styles.featureTitle}>F2 EXPRESS</h3>
+                                <p style={{ fontSize: '15px', marginTop: '12px', fontWeight: '500' }}>Same-hour delivery within Port Harcourt. Reliable and tracked.</p>
+                            </div>
+                            <div className={styles.featureCTA}>Order a Delivery <ArrowRight size={16} /></div>
+                        </Link>
+                    ) : (
+                        <div className={`${styles.featureCard} ${styles.goldCard}`} style={{ opacity: 0.9 }}>
+                            <div className={styles.featureIcon}><Box size={32} /></div>
+                            <div>
+                                <h3 className={styles.featureTitle}>F2 EXPRESS</h3>
+                                <p style={{ fontSize: '15px', marginTop: '12px' }}>Same-hour delivery. Launching across the city soon.</p>
+                                <span style={{ background: 'var(--foreground)', color: 'var(--background)', fontSize: '10px', padding: '4px 10px', borderRadius: '6px', fontWeight: 'bold', display: 'inline-block', marginTop: '12px' }}>COMING SOON</span>
+                            </div>
+                            <div className={styles.featureCTA}>Notify Me <ArrowRight size={16} /></div>
+                        </div>
                     )}
 
-                    <div className="mt-8 pt-8 border-t border-border/50">
-                        <div className="flex flex-wrap gap-2">
-                            {["🛺 Keke", "🚕 Taxi", "🚌 Shuttle", "🚐 Bus", "🏍 Bike"].map(tag => (
-                                <span key={tag} className="px-3 py-1.5 rounded-full border font-body text-xs font-medium transition-colors
-                                    dark:bg-bg-elevated dark:text-text-secondary dark:border-border
-                                    bg-bg-elevated text-text-secondary border-border">
-                                    {tag}
-                                </span>
-                            ))}
+                    {config.f3_shopper_live ? (
+                        <Link href="/shopper" className={`${styles.featureCard} ${styles.blackCard}`}>
+                            <div className={styles.featureIcon}><ShoppingCart size={32} color="var(--color-gold)" /></div>
+                            <div>
+                                <h3 className={styles.featureTitle}>F3 SHOPPER</h3>
+                                <p style={{ fontSize: '15px', marginTop: '12px', opacity: 0.8 }}>Personal shopping and market errands. Handled by professionals.</p>
+                            </div>
+                            <div className={styles.featureCTA}>Book a Shopper <ArrowRight size={16} /></div>
+                        </Link>
+                    ) : (
+                        <div className={`${styles.featureCard} ${styles.blackCard}`} style={{ opacity: 0.6 }}>
+                            <div className={styles.featureIcon}><ShoppingCart size={32} color="var(--color-gold)" /></div>
+                            <div>
+                                <h3 className={styles.featureTitle}>F3 SHOPPER</h3>
+                                <p style={{ fontSize: '15px', marginTop: '12px' }}>Personal shopping. Launching soon.</p>
+                                <span style={{ background: 'var(--color-gold)', color: '#000', fontSize: '10px', padding: '4px 10px', borderRadius: '6px', fontWeight: 'bold', display: 'inline-block', marginTop: '12px' }}>COMING SOON</span>
+                            </div>
+                            <div className={styles.featureCTA}>Notify Me <ArrowRight size={16} /></div>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* SECTION 4 — FOR BUSINESSES */}
+            <section className={styles.splitSection}>
+                <div className={styles.splitGrid}>
+                    <div>
+                        <h2 className={styles.sectionTitle}>Your Digital Storefront.<br />PH-Wide Reach.</h2>
+                        <p className={styles.subText} style={{ marginBottom: '32px' }}>List your business on DAL and access our fleet for deliveries, logistics, and visibility.</p>
+                        <Link href="/list-your-business" className={styles.ctaGold} style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+                            List Your Business Free <ArrowRight size={18} />
+                        </Link>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+                        <div className={styles.statItem} style={{ flexDirection: 'column', textAlign: 'center' }}>
+                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-gold)' }}>500+</span>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Vendors</span>
+                        </div>
+                        <div className={styles.statItem} style={{ flexDirection: 'column', textAlign: 'center' }}>
+                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-gold)' }}>12k+</span>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Orders</span>
+                        </div>
+                        <div className={styles.statItem} style={{ flexDirection: 'column', textAlign: 'center' }}>
+                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-gold)' }}>100%</span>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Coverage</span>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* SECTION D: HOW IT WORKS */}
-            <section id="how-it-works" className="py-24 px-6 transition-colors bg-bg-primary">
-                <div className="max-w-6xl mx-auto">
-                    <span className="mb-4 px-4 py-1.5 rounded-full border border-accent/30 bg-accent-subtle text-accent font-body text-[10px] font-bold tracking-widest uppercase">
-                        HOW IT WORKS
-                    </span>
-                    <h2 className="mt-3 mb-16 font-heading font-bold text-3xl sm:text-4xl text-text-primary">
-                        Three steps. That&apos;s all.
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {[
-                            { step: "01", title: "Search Your Route", desc: "Enter your starting point and destination. DAL matches you to the best transport options across Port Harcourt — with live fare estimates." },
-                            { step: "02", title: "Navigate With Intelligence", desc: "Get real-time road alerts reported by your community. Know before you go — which roads are clear, which are flooded, which to avoid." },
-                            { step: "03", title: "Report. Earn. Repeat.", desc: "Every alert you submit earns you DAL points. The more you contribute, the more the platform improves for everyone in your city." }
-                        ].map((item, i) => (
-                            <div key={i} className="bg-bg-secondary border border-border rounded-2xl p-8 shadow-sm group hover:border-accent/40 transition-all">
-                                <div className="w-10 h-10 rounded-full flex items-center justify-center font-heading font-bold text-sm mb-6
-                                    dark:bg-accent-subtle dark:text-accent
-                                    bg-accent-subtle text-accent">
-                                    {item.step}
-                                </div>
-                                <h3 className="font-heading font-semibold text-xl text-text-primary mb-3">
-                                    {item.title}
-                                </h3>
-                                <p className="font-body text-sm text-text-secondary leading-relaxed">
-                                    {item.desc}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* SECTION E: FOUNDER VOICE */}
-            <section className="py-24 px-6 bg-bg-secondary transition-colors">
-                <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
-                    <span className="mb-6 px-4 py-1.5 rounded-full border border-accent/30 bg-accent-subtle text-accent font-body text-[10px] font-bold tracking-widest uppercase">
-                        WHY WE BUILT THIS
-                    </span>
-                    <blockquote className="mt-6 mb-8 font-heading font-medium text-xl sm:text-2xl italic leading-relaxed text-text-primary max-w-[680px]">
-                        &quot;Port Harcourt&apos;s roads are impossible to navigate without local knowledge. Millions of people move through this city every day on routes that have never been properly mapped. DAL is changing that — one route at a time.&quot;
-                    </blockquote>
-                    <p className="font-body text-sm text-text-secondary">
-                        — Bel, Founder & CEO, Drop Along Logistics
-                    </p>
-                </div>
-            </section>
-
-            {/* SECTION F: PREMIUM UPGRADE */}
-            <section className="py-24 px-6 max-w-4xl mx-auto">
-                <div className="text-center mb-12">
-                    <span className="mb-4 px-4 py-1.5 rounded-full border border-accent/30 bg-accent-subtle text-accent font-body text-[10px] font-bold tracking-widest uppercase">
-                        DAL PREMIUM
-                    </span>
-                    <h2 className="mt-3 mb-4 font-heading font-bold text-3xl sm:text-4xl text-text-primary">
-                        Unlock the Full Intelligence Layer
-                    </h2>
-                    <p className="font-body text-lg text-text-secondary">
-                        Everything DAL offers, with no limits. ₦700/month.
-                    </p>
-                </div>
-
-                <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden shadow-sm transition-colors">
-                    <table className="w-full border-collapse">
+            {/* SECTION 5 — PREMIUM PITCH */}
+            <section className={styles.premiumSection}>
+                <span className={styles.premiumPill}>Everything Better with DAL Premium</span>
+                <h2 className={styles.h1} style={{ fontSize: '48px' }}>₦700/month</h2>
+                
+                <div style={{ maxWidth: '900px', margin: '60px auto', background: 'var(--card-bg)', padding: '40px', borderRadius: '24px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-lg)' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
-                            <tr className="bg-bg-elevated border-b border-border">
-                                <th className="px-6 py-4 text-left font-body font-semibold text-sm text-text-primary">Feature</th>
-                                <th className="px-6 py-4 text-center font-body font-semibold text-sm text-text-primary">Free</th>
-                                <th className="px-6 py-4 text-center font-body font-semibold text-sm text-accent">Premium</th>
+                            <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                                <th style={{ padding: '24px', color: 'var(--text-secondary)', fontWeight: '800', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.1em' }}>Feature</th>
+                                <th style={{ padding: '24px', color: 'var(--text-secondary)', fontWeight: '800', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.1em' }}>Free</th>
+                                <th style={{ padding: '24px', color: 'var(--color-gold)', fontWeight: '800', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.1em' }}>Premium</th>
                             </tr>
                         </thead>
-                        <tbody className="font-body text-sm divide-y divide-border/30">
+                        <tbody>
                             {[
-                                { name: "Route Search", free: "Basic", premium: "Priority Results", isCheck: true },
-                                { name: "Road Intelligence", free: "3 per day", premium: "Unlimited" },
-                                { name: "Road Alerts", free: "View Only", premium: "Post + View" },
-                                { name: "WhatsApp Bot", free: "—", premium: "Full Access" },
-                                { name: "Earning Multiplier", free: "1×", premium: "1.5×" },
+                                { name: 'Route Search', free: '✓', premium: 'Priority' },
+                                { name: 'Road Intelligence', free: '3/day', premium: 'Unlimited' },
+                                { name: 'WhatsApp Bot', free: '-', premium: 'Full Access' },
+                                { name: 'Earning Multiplier', free: '1x', premium: '1.5x' },
                             ].map((row, i) => (
-                                <tr key={i} className="hover:bg-bg-elevated/20 transition-colors">
-                                    <td className="px-6 py-4 text-text-secondary font-medium tracking-wide">{row.name}</td>
-                                    <td className="px-6 py-4 text-center text-text-muted">{row.isCheck && <span className="mr-1">✓</span>}{row.free}</td>
-                                    <td className="px-6 py-4 text-center text-[#22C55E] font-bold">{row.premium}</td>
+                                <tr key={i} style={{ borderBottom: i === 3 ? 'none' : '1px solid var(--border)' }}>
+                                    <td style={{ padding: '24px', fontWeight: '600' }}>{row.name}</td>
+                                    <td style={{ padding: '24px', color: 'var(--text-secondary)' }}>{row.free}</td>
+                                    <td style={{ padding: '24px', color: 'var(--color-gold)', fontWeight: '700' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Check size={16} /> {row.premium}
+                                        </div>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+                    <Link href="/premium" className={styles.ctaGold} style={{ display: 'block', marginTop: '40px', textAlign: 'center', fontSize: '18px' }}>Get Premium Access Now</Link>
+                </div>
+            </section>
+
+            {/* SECTION 6 — SOCIAL PROOF */}
+            <section className={styles.socialProofSection}>
+                <div className={styles.sectionHeader} style={{ textAlign: 'center' }}>
+                    <h2 className={styles.sectionTitle}>Built by Port Harcourt, for Port Harcourt</h2>
+                </div>
+                <div className={styles.testimonialGrid}>
+                    <div className={styles.testimonialCard}>
+                        <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', color: 'var(--color-gold)' }}>
+                            {[1,2,3,4,5].map(s => <Star key={s} size={14} fill="currentColor" />)}
+                        </div>
+                        <p style={{ fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.7' }}>&quot;DAL has completely changed how I navigate traffic. The alerts are always spot on.&quot;</p>
+                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                            <strong style={{ display: 'block', color: 'var(--text-primary)' }}>Adaobi O.</strong>
+                            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Routine Commuter</span>
+                        </div>
+                    </div>
+                    <div className={styles.testimonialCard}>
+                        <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', color: 'var(--color-gold)' }}>
+                            {[1,2,3,4,5].map(s => <Star key={s} size={14} fill="currentColor" />)}
+                        </div>
+                        <p style={{ fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.7' }}>&quot;Best delivery platform in Rivers State. We use it for our restaurant daily.&quot;</p>
+                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                            <strong style={{ display: 'block', color: 'var(--text-primary)' }}>Chidi K.</strong>
+                            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Business Owner</span>
+                        </div>
+                    </div>
+                    <div className={styles.testimonialCard}>
+                        <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', color: 'var(--color-gold)' }}>
+                            {[1,2,3,4,5].map(s => <Star key={s} size={14} fill="currentColor" />)}
+                        </div>
+                        <p style={{ fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.7' }}>&quot;I earn extra points just by reporting road blocks. Love the community feel.&quot;</p>
+                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                            <strong style={{ display: 'block', color: 'var(--text-primary)' }}>Emeka J.</strong>
+                            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>DAL Contributor</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="flex justify-center mt-8">
-                    <Link href="/premium" className="w-full max-w-xs text-center px-6 py-4 rounded-xl font-body font-bold text-sm transition-all duration-200 shadow-lg hover:brightness-110 active:scale-95
-                        bg-accent text-[#09090B]">
-                        Get Premium — ₦700/month
+                <div style={{ background: 'var(--foreground)', color: 'var(--background)', padding: '60px', borderRadius: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: 'var(--shadow-lg)' }}>
+                    <div>
+                        <h3 className={styles.sectionTitle} style={{ fontSize: '28px', color: 'inherit' }}>Community Leaderboard</h3>
+                        <div style={{ display: 'flex', gap: '40px', marginTop: '32px' }}>
+                            {leaderboard.map((user, i) => (
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--color-gold)', display: 'flex', alignItems: 'center', justifySelf: 'center', fontWeight: '900', color: '#000', justifyContent: 'center', fontSize: '20px' }}>
+                                        {user.display_name?.[0] || 'U'}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: '800', fontSize: '16px' }}>#{i+1} {user.display_name}</div>
+                                        <div style={{ fontSize: '14px', color: 'var(--color-gold)', fontWeight: '700' }}>{user.points} pts</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <Link href="/community" className={styles.ctaGhost} style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
+                        See Full Leaderboard <ArrowRight size={18} />
                     </Link>
                 </div>
             </section>
 
-            {/* SECTION G: COMING SOON STRIP */}
-            <section className="py-20 px-6 border-t border-border
-                dark:bg-gradient-to-b dark:from-bg-secondary dark:to-[#1A1A24]
-                bg-gradient-to-b from-[#F4F4F5] to-bg-primary transition-colors">
-                <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
-                    <h2 className="font-heading font-bold text-2xl sm:text-3xl text-text-primary max-w-[580px] mb-4">
-                        Express delivery and personal shopping are coming to Port Harcourt.
-                    </h2>
-                    <p className="font-body text-base text-text-secondary max-w-[480px] mb-8">
-                        F2 Express and F3 Shopper — same-hour delivery and personal shopping powered by DAL&apos;s growing city network. Be the first to know.
-                    </p>
-
-                    {waitlistStatus.type === 'success' ? (
-                        <div className="flex items-center gap-2 text-[#22C55E] bg-[#22C55E10] px-6 py-3 rounded-xl border border-[#22C55E20] animate-bounce-short">
-                            <Check size={20} />
-                            <span className="font-body font-semibold">{waitlistStatus.message}</span>
-                        </div>
-                    ) : (
-                        <form onSubmit={handleWaitlistSubmit} className="flex flex-col sm:flex-row gap-3 w-full justify-center max-w-md">
-                            <input
-                                type="email"
-                                placeholder="Your email address"
-                                required
-                                className="px-4 py-3 rounded-lg border font-body text-sm w-full focus:outline-none focus:ring-2 focus:ring-accent-subtle transition-all
-                                    dark:bg-[#0A0A0F] dark:border-border dark:text-text-primary dark:placeholder:text-text-muted dark:focus:border-accent
-                                    bg-white border-border text-text-primary placeholder:text-text-muted focus:border-accent"
-                                value={waitlistEmail}
-                                onChange={(e) => setWaitlistEmail(e.target.value)}
-                            />
-                            <button 
-                                type="submit" 
-                                disabled={isSubmittingWaitlist}
-                                className="px-6 py-3 rounded-lg bg-accent text-[#09090B] font-body font-bold text-sm whitespace-nowrap hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                            >
-                                {isSubmittingWaitlist ? <Loader2 className="animate-spin" size={18} /> : "Join Waitlist"}
-                            </button>
-                        </form>
-                    )}
-                    
-                    {waitlistStatus.type && waitlistStatus.type !== 'success' && (
-                        <p className={`mt-4 text-xs font-semibold ${waitlistStatus.type === 'duplicate' ? 'text-text-muted' : 'text-red-500'}`}>
-                            {waitlistStatus.message}
-                        </p>
-                    )}
+            {/* SECTION 7 — WHATSAPP STRIP */}
+            <section className={styles.whatsappStrip}>
+                <div>
+                    <h3 className={styles.sectionTitle} style={{ fontSize: '24px', marginBottom: '8px' }}>DAL is also on WhatsApp</h3>
+                    <p style={{ fontSize: '16px', color: 'var(--text-secondary)' }}>Access everything in one chat. <span style={{ color: 'var(--color-gold)', fontWeight: '700' }}>Full access — Premium feature.</span></p>
                 </div>
+                <a href="https://wa.me/2348000000000" target="_blank" rel="noopener noreferrer" className={styles.whatsappBtn}>
+                    <MessageCircle size={24} fill="currentColor" /> Chat Now
+                </a>
             </section>
-
-            {/* SECTION H: FOOTER LOGO STRIP / WHATSAPP NOTICE */}
-            <section className="py-8 px-6 text-center border-t border-border/30 opacity-70">
-                <p className="font-body text-xs text-text-muted">
-                    WhatsApp Bot — Premium Feature. Unlock at <Link href="/premium" className="text-accent underline decoration-accent/30 underline-offset-4">/premium</Link>
-                </p>
-            </section>
-        </main>
+        </div>
     );
 }
-
-// Add a simple animation to globals.css if needed, but let's stick to standard Tailwind for now.

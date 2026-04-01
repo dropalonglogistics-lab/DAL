@@ -2,14 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import {
     Menu, X,
-    LogOut, Shield, User, ChevronDown
+    LogOut, Shield, User, ChevronDown,
+    Sun, Moon
 } from 'lucide-react';
-import ThemeToggle from '@/components/ThemeToggle';
 import styles from './Navbar.module.css';
 
 const NAV_LINKS = [
@@ -23,6 +22,7 @@ export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isAvatarDropdownOpen, setIsAvatarDropdownOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [theme, setTheme] = useState<'light' | 'dark'>('dark');
     const [user, setUser] = useState<any>(null);
     const [profile, setProfile] = useState<any>(null);
     const router = useRouter();
@@ -32,6 +32,10 @@ export default function Navbar() {
     const navbarRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
+        // Sync theme with document class
+        const currentTheme = document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light';
+        setTheme(currentTheme);
+
         const handleScroll = () => setIsScrolled(window.scrollY > 10);
         window.addEventListener('scroll', handleScroll, { passive: true });
 
@@ -97,6 +101,21 @@ export default function Navbar() {
         router.refresh();
     };
 
+    const toggleTheme = () => {
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+        
+        if (newTheme === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+            document.documentElement.classList.remove('light-mode');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.add('light-mode');
+            document.documentElement.classList.remove('dark-mode');
+            localStorage.setItem('theme', 'light');
+        }
+    };
+
     const isActive = (href: string) => pathname === href || pathname?.startsWith(href + '/');
 
     const getInitials = () => {
@@ -109,12 +128,11 @@ export default function Navbar() {
             <div className={styles.navContainer}>
                 {/* Logo */}
                 <Link href="/" className={styles.logo}>
-                    <span className="hidden dark:block">
-                        <Image src="/dal-logo-light.png" alt="Drop Along Logistics" width={140} height={40} className="object-contain" />
-                    </span>
-                    <span className="block dark:hidden">
-                        <Image src="/dal-logo-dark.png" alt="Drop Along Logistics" width={140} height={40} className="object-contain" />
-                    </span>
+                    <img
+                        src="/dal-logo-light.png"
+                        alt="Drop Along Logistics"
+                        height={42}
+                    />
                 </Link>
 
                 {/* Desktop Nav */}
@@ -141,8 +159,19 @@ export default function Navbar() {
 
                 {/* Actions */}
                 <div className={styles.actions}>
+                    {/* Go Premium */}
+                    <Link href="/premium" className={`${styles.goPremiumBtn} ${styles.desktopOnly}`}>
+                        Go Premium
+                    </Link>
+
                     {/* Theme Toggle */}
-                    <ThemeToggle />
+                    <button 
+                        className={styles.themeToggleBtn} 
+                        onClick={toggleTheme}
+                        aria-label="Toggle Theme"
+                    >
+                        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
 
                     {user ? (
                         <div className={`${styles.avatarWrap} ${styles.desktopOnly}`} ref={dropdownRef}>
@@ -152,7 +181,7 @@ export default function Navbar() {
                                 aria-label="User menu"
                             >
                                 {user.user_metadata?.avatar_url ? (
-                                    <Image src={user.user_metadata.avatar_url} alt="Avatar" width={34} height={34} className={styles.avatarImg} />
+                                    <img src={user.user_metadata.avatar_url} alt="Avatar" className={styles.avatarImg} />
                                 ) : (
                                     <span className={styles.avatarInitials}>{getInitials()}</span>
                                 )}
@@ -226,6 +255,15 @@ export default function Navbar() {
                             Sign In
                         </Link>
                     )}
+                    
+                    <div className={styles.dividerLine} />
+                    
+                    <button className={styles.mobileNavLink} onClick={() => { toggleTheme(); setIsMobileMenuOpen(false); }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                            <span>Switch to {theme === 'dark' ? 'Light' : 'Dark'} Mode</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </nav>
