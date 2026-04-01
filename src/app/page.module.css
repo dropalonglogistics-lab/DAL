@@ -20,6 +20,8 @@
     min-height: 92vh;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 60px;
     padding: 0 6%;
     overflow: hidden;
     background: 
@@ -43,8 +45,8 @@
 .heroContent {
     position: relative;
     z-index: 10;
-    width: 55%;
-    padding-right: 40px;
+    flex: 1;
+    max-width: 580px;
     animation: heroFadeIn 0.9s ease-out;
 }
 
@@ -55,10 +57,45 @@
     width: 50%;
     height: 100%;
     z-index: 1;
-    opacity: 0.6;
-    mask-image: linear-gradient(to left, transparent 0%, black 30%);
-    -webkit-mask-image: linear-gradient(to left, transparent 0%, black 30%);
+    opacity: 0.4;
+    mask-image: linear-gradient(to left, transparent 0%, black 40%);
+    -webkit-mask-image: linear-gradient(to left, transparent 0%, black 40%);
 }
+
+/* Hero Search Card */
+.heroSearchCard {
+    position: relative;
+    z-index: 10;
+    width: 400px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    padding: 36px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.1),
+        0 24px 60px rgba(0, 0, 0, 0.3);
+    animation: heroFadeIn 1s ease-out 0.15s both;
+}
+
+.heroSearchTitle {
+    font-family: var(--font-syne), sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 24px;
+}
+
+.heroSearchVehicles {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.35);
+    margin: 16px 0 0;
+    text-align: center;
+    line-height: 1.8;
+}
+
 
 .eyebrow {
     color: var(--color-gold);
@@ -589,12 +626,11 @@
    RESPONSIVE
    ═══════════════════════════════════════════════ */
 @media (max-width: 1200px) {
-    .h1 { font-size: 52px; }
-    .intelligenceGrid { grid-template-columns: 1fr 340px; gap: 40px; }
+    .h1 { font-size: 48px; }
+    .heroSearchCard { width: 360px; }
 }
 
 @media (max-width: 1024px) {
-    .intelligenceGrid,
     .featureGrid,
     .testimonialGrid,
     .splitGrid {
@@ -602,24 +638,27 @@
     }
 
     .heroSection {
+        flex-direction: column;
         min-height: auto;
         padding: 80px 5% 100px;
+        gap: 40px;
+        text-align: center;
     }
     .heroContent {
-        width: 100%;
-        padding-right: 0;
-        text-align: center;
+        max-width: 100%;
     }
     .heroContent .eyebrow { margin: 0 auto 20px; }
     .heroContent .h1 { margin: 0 auto 20px; }
     .heroContent .subText { margin: 0 auto 40px; }
-    .ctaRow { justify-content: center; }
     .statsRow { justify-content: center; }
     .heroVisual { display: none; }
     .h1 { font-size: 44px; }
-    .searchWidget { position: static; margin-top: 40px; }
+    .heroSearchCard {
+        width: 100%;
+        max-width: 460px;
+    }
     .whatsappStrip { flex-direction: column; text-align: center; gap: 24px; }
-    .darkSection, .featureSection, .splitSection, .premiumSection, .socialProofSection {
+    .featureSection, .splitSection, .premiumSection, .socialProofSection {
         padding: 80px 5%;
     }
 }
@@ -637,9 +676,11 @@
 @media (max-width: 640px) {
     .h1 { font-size: 36px; }
     .statsRow { flex-direction: column; gap: 12px; }
-    .ctaRow { flex-direction: column; }
-    .ctaGold, .ctaGhost { width: 100%; text-align: center; justify-content: center; }
     .heroSection {
         padding: 60px 5% 80px;
+    }
+    .heroSearchCard {
+        max-width: 100%;
+        padding: 28px;
     }
 }

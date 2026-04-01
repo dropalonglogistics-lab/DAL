@@ -92,7 +92,7 @@ export default function HomePage() {
 
     return (
         <div className={styles.container}>
-            {/* SECTION 1 — HERO */}
+            {/* SECTION 1 — HERO + SEARCH */}
             <section className={styles.heroSection}>
                 <div className={styles.heroVisual}>
                     <CityGrid />
@@ -104,77 +104,38 @@ export default function HomePage() {
                         Intelligent road transit routing. Community-powered intelligence.
                         Fare estimates, live alerts, and real-time navigation — all free.
                     </p>
-                    <div className={styles.ctaRow}>
-                        <Link href="/search" className={styles.ctaGold}>Find a Route <ArrowRight size={16} /></Link>
-                        <Link href="/suggest-route" className={styles.ctaGhost}>Suggest a Route</Link>
-                    </div>
                     <div className={styles.statsRow}>
                         <div className={styles.statItem}><MapPin size={16} color="var(--color-gold)" /> <strong>{stats.verifiedCount.toLocaleString()}</strong> routes</div>
                         <div className={styles.statItem}><AlertTriangle size={16} color="#F87171" /> <strong>{stats.alertCount.toLocaleString()}</strong> alerts today</div>
                         <div className={styles.statItem}><Users size={16} color="#60A5FA" /> <strong>{stats.memberCount.toLocaleString()}</strong> members</div>
                     </div>
                 </div>
-            </section>
 
-            {/* SECTION 2 — LIVE ROAD INTELLIGENCE */}
-            <section className={styles.darkSection}>
-                <div className={styles.intelligenceGrid}>
-                    <div>
-                        <div className={styles.sectionHeader}>
-                            <h2 className={styles.sectionTitle}>What&apos;s Happening Right Now</h2>
-                            <p className={styles.sectionSub}>Community-reported, in real time</p>
-                        </div>
-                        <div className={styles.alertsList}>
-                            {alerts.length > 0 ? alerts.map((alert) => (
-                                <div key={alert.id} className={styles.alertCard}>
-                                    <div className={styles.alertIcon}>
-                                        <AlertTriangle size={24} />
-                                    </div>
-                                    <div className={styles.alertBody}>
-                                        <div className={styles.alertMeta}>
-                                            <span className={styles.alertArea}>{alert.area}</span>
-                                            <span className={styles.alertTime}>{timeAgo(alert.created_at)}</span>
-                                        </div>
-                                        <p className={styles.alertDesc}>{alert.description}</p>
-                                        <div className={styles.alertFooter}>
-                                            <Zap size={14} fill="currentColor" /> {alert.upvotes || 0} Upvotes
-                                        </div>
-                                    </div>
-                                </div>
-                            )) : (
-                                <p className={styles.textMuted}>No active alerts. Roads are clear.</p>
-                            )}
-                            <Link href="/alerts" className={styles.seeAllLink}>
-                                See All Alerts <ArrowRight size={18} />
-                            </Link>
-                        </div>
+                {/* Search Card — right side of hero */}
+                <div className={styles.heroSearchCard}>
+                    <h3 className={styles.heroSearchTitle}>Where to?</h3>
+                    <div className={styles.inputGroup}>
+                        <label>Starting point</label>
+                        <input
+                            className={styles.darkInput}
+                            placeholder="e.g. Mile 1 Market"
+                            value={from}
+                            onChange={(e) => setFrom(e.target.value)}
+                        />
                     </div>
-
-                    <div className={styles.searchWidget}>
-                        <h3 className={styles.featureTitle} style={{ marginBottom: '24px', fontSize: '18px' }}>Find Your Route</h3>
-                        <div className={styles.inputGroup}>
-                            <label>Starting point</label>
-                            <input
-                                className={styles.darkInput}
-                                placeholder="e.g. Mile 1 Market"
-                                value={from}
-                                onChange={(e) => setFrom(e.target.value)}
-                            />
-                        </div>
-                        <div className={styles.inputGroup}>
-                            <label>Destination</label>
-                            <input
-                                className={styles.darkInput}
-                                placeholder="e.g. Garrison Junction"
-                                value={to}
-                                onChange={(e) => setTo(e.target.value)}
-                            />
-                        </div>
-                        <button className={styles.findBtn} onClick={handleSearch}>Find Route</button>
-                        <p style={{ fontSize: '10px', color: '#555', marginTop: '16px', textAlign: 'center' }}>
-                            Keke, Taxi, Keke bus, Bus, Bike — Port Harcourt Coverage.
-                        </p>
+                    <div className={styles.inputGroup}>
+                        <label>Destination</label>
+                        <input
+                            className={styles.darkInput}
+                            placeholder="e.g. Garrison Junction"
+                            value={to}
+                            onChange={(e) => setTo(e.target.value)}
+                        />
                     </div>
+                    <button className={styles.findBtn} onClick={handleSearch}>Find Route</button>
+                    <p className={styles.heroSearchVehicles}>
+                        🛺 Keke &nbsp; 🚐 Keke Bus &nbsp; 🚌 Bus &nbsp; 🚕 Taxi &nbsp; 🏍️ Bike
+                    </p>
                 </div>
             </section>
 
