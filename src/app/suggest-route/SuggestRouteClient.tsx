@@ -32,10 +32,10 @@ export default function SuggestRouteClient() {
     const [fareMin, setFareMin] = useState('');
     const [fareMax, setFareMax] = useState('');
     const [difficulty, setDifficulty] = useState('Moderate');
+    const [roadCondition, setRoadCondition] = useState('Good');
     const [detailedDirections, setDetailedDirections] = useState('');
     const [tipsAndWarnings, setTipsAndWarnings] = useState('');
     
-    const [peakHours, setPeakHours] = useState('');
     const [description, setDescription] = useState('');
     const [attributionName, setAttributionName] = useState('');
     
@@ -43,6 +43,7 @@ export default function SuggestRouteClient() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const [user, setUser] = useState<any>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const supabase = createClient();
 
@@ -52,6 +53,11 @@ export default function SuggestRouteClient() {
             setUser(authUser);
             if (authUser?.user_metadata?.full_name) {
                 setAttributionName(authUser.user_metadata.full_name);
+            }
+
+            if (authUser) {
+                const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', authUser.id).single();
+                setIsAdmin(!!profile?.is_admin);
             }
         }
         getAuth();
@@ -94,47 +100,55 @@ export default function SuggestRouteClient() {
         setErrorMsg('');
 
         try {
+            const formData = new FormData();
+            formData.append('type', 'route');
+            formData.append('routeTitle', routeTitle);
+            formData.append('start_location', legs[0].from);
+            formData.append('destination', destination);
+            formData.append('timeMin', timeMin);
+            formData.append('timeMax', timeMax);
+            formData.append('fareMin', fareMin);
+            formData.append('fareMax', fareMax);
+            formData.append('difficulty', difficulty);
+            formData.append('roadCondition', roadCondition);
+            formData.append('detailedDirections', detailedDirections);
+            formData.append('tipsAndWarnings', tipsAndWarnings);
+            formData.append('description', description);
+
             // Serialize stops
             const stopsAlongTheWay = legs.map((leg, i) => ({
-                step: i + 1,
-                from: leg.from,
-                to: leg.to,
+                type: i === 0 ? 'start' : (i === legs.length - 1 ? 'end' : 'stop'),
+                location: leg.from,
+                instruction: `Board ${leg.vehicle} to ${leg.to || 'next stop'}.`,
                 vehicle: leg.vehicle,
-                fare: leg.fare
+                fare: parseFloat(leg.fare) || 0
             }));
 
-            const { error: suggestError } = await supabase
-                .from('route_suggestions')
-                .insert({
-                    route_title: routeTitle,
-                    start_location: legs[0].from,
-                    destination: destination,
-                    stops_along_the_way: stopsAlongTheWay,
-                    vehicle_type_used: Array.from(new Set(legs.map(l => l.vehicle))).join(', '),
-                    estimated_travel_time_min: parseInt(timeMin) || null,
-                    estimated_travel_time_max: parseInt(timeMax) || null,
-                    fare_price_range_min: parseInt(fareMin) || null,
-                    fare_price_range_max: parseInt(fareMax) || null,
-                    difficulty_level: difficulty,
-                    detailed_directions: detailedDirections,
-                    tips_and_warnings: tipsAndWarnings,
-                    peak_hours: peakHours,
-                    description: description,
-                    submitted_by: user?.id || null,
-                    status: 'pending',
-                    from_location: legs[0].from,
-                    to_location: destination,
-                    expected_fare: fareMax || fareMin || '0'
+            // Final stop logic
+            if (destination && destination !== legs[legs.length - 1].to) {
+                stopsAlongTheWay.push({
+                    type: 'end',
+                    location: destination,
+                    instruction: 'Final destination reached.',
+                    vehicle: 'None',
+                    fare: 0
                 });
+            }
 
-            if (suggestError) throw suggestError;
+            formData.append('stopsJSON', JSON.stringify(stopsAlongTheWay));
+
+            // Run the server action
+            const { suggestRoute } = await import('./actions');
+            const result = await suggestRoute(formData);
+
+            if (result.error) throw new Error(result.error);
 
             if (user) {
-                const totalPoints = 10 + (legs.length > 1 ? 5 : 0) + (description.length > 20 ? 5 : 0);
+                const totalPoints = 20 + (legs.length * 5) + (detailedDirections.length > 50 ? 10 : 0);
                 await supabase.from('community_points').insert({
                     user_id: user.id,
                     points: totalPoints,
-                    reason: 'route_intelligence_architect'
+                    reason: isAdmin ? 'admin_data_ingestion' : 'route_intelligence_architect'
                 });
                 await supabase.rpc('increment_profile_points', { user_id: user.id, amount: totalPoints });
             }
@@ -157,9 +171,9 @@ export default function SuggestRouteClient() {
         setFareMin('');
         setFareMax('');
         setDifficulty('Moderate');
+        setRoadCondition('Good');
         setDetailedDirections('');
         setTipsAndWarnings('');
-        setPeakHours('');
         setDescription('');
         setErrors({});
         setStep('builder');
@@ -341,56 +355,61 @@ export default function SuggestRouteClient() {
                     </section>
 
                     <section className={styles.formSection}>
-                        <h2 className={styles.sectionTitle}>Expert Survival Tips & Directions</h2>
-                        <div className={styles.field}>
-                            <label><Zap size={12} /> Difficulty Level</label>
-                            <select value={difficulty} onChange={e => setDifficulty(e.target.value)}>
-                                <option>Easy</option>
-                                <option>Moderate</option>
-                                <option>Challenging</option>
-                            </select>
-                        </div>
-
-                        <div className={styles.field}>
-                            <label><Navigation size={12} /> Detailed Directions</label>
-                            <textarea 
-                                value={detailedDirections} 
-                                onChange={e => setDetailedDirections(e.target.value)}
-                                placeholder="Step-by-step instructions for a first-timer..."
-                                rows={2}
-                            />
-                        </div>
-
-                        <div className={styles.field}>
-                            <label><ShieldCheck size={12} /> Tips & Warnings</label>
-                            <textarea 
-                                value={tipsAndWarnings} 
-                                onChange={e => setTipsAndWarnings(e.target.value)}
-                                placeholder="Watch out for pickpockets at this junction, best time to board, etc."
-                                rows={2}
-                            />
+                        <h2 className={styles.sectionTitle}>Logic & Logistics</h2>
+                        <div className={styles.row}>
+                            <div className={styles.field}>
+                                <label><Zap size={12} /> Road Condition</label>
+                                <select value={roadCondition} onChange={e => setRoadCondition(e.target.value)}>
+                                    <option>Good</option>
+                                    <option>Fair</option>
+                                    <option>Potholes</option>
+                                    <option>Flooded</option>
+                                    <option>Under Construction</option>
+                                </select>
+                            </div>
+                            <div className={styles.field}>
+                                <label><Info size={12} /> Primary Difficulty</label>
+                                <select value={difficulty} onChange={e => setDifficulty(e.target.value)}>
+                                    <option>Easy</option>
+                                    <option>Moderate</option>
+                                    <option>Challenging</option>
+                                </select>
+                            </div>
                         </div>
                     </section>
 
-                    <div className={styles.extraSection}>
+                    <section className={styles.formSection}>
+                        <h2 className={styles.sectionTitle}>Expert Intelligence Layer</h2>
                         <div className={styles.field}>
-                            <label>
-                                <Clock size={12} /> Peak Hours (e.g., 7am-9am)
-                                <span className={styles.pointIncentive}>+5 XP</span>
-                            </label>
-                            <input value={peakHours} onChange={e => setPeakHours(e.target.value)} placeholder="When is it busiest?" />
+                            <label><Navigation size={12} /> Detailed Navigational Instructions</label>
+                            <textarea 
+                                value={detailedDirections} 
+                                onChange={e => setDetailedDirections(e.target.value)}
+                                placeholder="Exact turns, landmarks to watch for, and how to spot the right vehicle..."
+                                rows={3}
+                            />
+                        </div>
+
+                        <div className={styles.field}>
+                            <label><ShieldCheck size={12} /> Survival Tips & Warnings</label>
+                            <textarea 
+                                value={tipsAndWarnings} 
+                                onChange={e => setTipsAndWarnings(e.target.value)}
+                                placeholder="Pickpocket zones, busy hours, alternative routes when flooded..."
+                                rows={3}
+                            />
                         </div>
 
                         <div className={styles.field}>
                             <label>
-                                <Info size={12} /> Expert Notes & Landmarks
+                                <Info size={12} /> General Expert Notes
                                 <span className={styles.pointIncentive}>+10 XP</span>
                             </label>
                             <textarea 
                                 value={description} 
                                 onChange={e => setDescription(e.target.value)}
-                                placeholder="Tell us the 'Street Intel' — loading park location, landmarks to watch for..."
-                                rows={3}
+                                placeholder="Any extra 'Street Intel' — loading park location, landmarks to watch for..."
+                                rows={2}
                             />
                         </div>
 
@@ -404,7 +423,7 @@ export default function SuggestRouteClient() {
                                 />
                             </div>
                         )}
-                    </div>
+                    </section>
 
                     {errorMsg && <div className={styles.errorAlert}>{errorMsg}</div>}
 

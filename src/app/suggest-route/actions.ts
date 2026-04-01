@@ -61,32 +61,30 @@ export async function suggestRoute(formData: FormData) {
 
     if (stopsJSON) {
         try {
-            const stops = JSON.parse(stopsJSON);
-            stops_along_the_way = stops.map((stop: any, index: number) => {
-                let type: 'start' | 'stop' | 'switch' | 'end' = 'stop';
-                if (index === 0) type = 'start';
-                if (index === stops.length - 1) type = 'end';
-
+            stops_along_the_way = JSON.parse(stopsJSON);
+            // Deduce unique vehicle types
+            stops_along_the_way.forEach((stop: any) => {
                 if (stop.vehicle) {
-                    // Split strictly by comma just in case they put multiple in one input
                     stop.vehicle.split(',').forEach((v: string) => vehicleTypes.add(v.trim()));
                 }
-
-                return {
-                    type,
-                    location: stop.location,
-                    instruction: stop.instructions,
-                    vehicle: stop.vehicle,
-                    fare: stop.fare
-                };
             });
         } catch (e) {
             console.error('Failed to parse stops JSON', e);
         }
     }
 
+    // Role check to determine target table
+    let isAdmin = false;
+    if (userId) {
+        const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', userId).single();
+        isAdmin = !!profile?.is_admin;
+    }
+
+    const targetTable = isAdmin ? 'routes' : 'route_suggestions';
+    const status = isAdmin ? 'approved' : 'pending';
+
     const routeData: any = {
-        user_id: userId,
+        route_title: formData.get('routeTitle') as string,
         start_location: formData.get('start_location') as string,
         destination: formData.get('destination') as string,
         vehicle_type_used: Array.from(vehicleTypes).join(', ') || 'Various',
@@ -95,7 +93,19 @@ export async function suggestRoute(formData: FormData) {
         estimated_travel_time_min: parseInt(formData.get('timeMin') as string) || null,
         estimated_travel_time_max: parseInt(formData.get('timeMax') as string) || null,
         stops_along_the_way: stops_along_the_way,
-        status: 'pending' 
+        difficulty_level: formData.get('difficulty') as string || 'Moderate',
+        road_condition: formData.get('roadCondition') as string || 'Good',
+        detailed_directions: formData.get('detailedDirections') as string || '',
+        tips_and_warnings: formData.get('tipsAndWarnings') as string || '',
+        description: formData.get('description') as string || '',
+        status: status
+    }
+
+    if (targetTable === 'route_suggestions') {
+        routeData.submitted_by = userId;
+        routeData.from_location = routeData.start_location;
+        routeData.to_location = routeData.destination;
+        routeData.expected_fare = routeData.fare_price_range_max?.toString() || '0';
     }
 
     if (!routeData.start_location || !routeData.destination) {
@@ -103,7 +113,7 @@ export async function suggestRoute(formData: FormData) {
     }
 
     const { error } = await supabase
-        .from('community_routes')
+        .from(targetTable)
         .insert([routeData])
 
     if (error) {
