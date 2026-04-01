@@ -64,7 +64,7 @@ export default function Avatar({
                         color: 'var(--brand-black)',
                         fontWeight: 700,
                         fontSize: px * 0.38,
-                        fontFamily: 'var(--font-heading), sans-serif',
+                        fontFamily: 'var(--font-display), sans-serif',
                         letterSpacing: '0.03em',
                     }}
                     aria-label={name || alt}

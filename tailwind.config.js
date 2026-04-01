@@ -14,7 +14,7 @@ module.exports = {
                 "brand-off-white": "#FAFAF7",
             },
             fontFamily: {
-                heading: ["var(--font-heading)", "sans-serif"],
+                heading: ["var(--font-display)", "sans-serif"],
                 body: ["var(--font-body)", "sans-serif"],
             },
             borderRadius: {

@@ -23,7 +23,7 @@ export default function Input({
                         fontSize: '14px',
                         fontWeight: 600,
                         color: 'var(--text-primary)',
-                        fontFamily: 'var(--font-heading), sans-serif',
+                        fontFamily: 'var(--font-display), sans-serif',
                     }}
                 >
                     {label}

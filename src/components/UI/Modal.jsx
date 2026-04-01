@@ -86,7 +86,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', s
                                 fontSize: '18px',
                                 fontWeight: 700,
                                 color: 'var(--text-primary)',
-                                fontFamily: 'var(--font-heading), sans-serif',
+                                fontFamily: 'var(--font-display), sans-serif',
                                 margin: 0,
                             }}
                         >

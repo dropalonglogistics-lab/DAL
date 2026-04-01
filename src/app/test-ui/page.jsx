@@ -17,7 +17,7 @@ export default function TestUIPage() {
         fontSize: '22px',
         fontWeight: 700,
         color: 'var(--text-primary)',
-        fontFamily: 'var(--font-heading), sans-serif',
+        fontFamily: 'var(--font-display), sans-serif',
         borderBottom: '2px solid var(--brand-gold)',
         paddingBottom: 'var(--space-2)',
         marginBottom: 'var(--space-4)',
@@ -40,7 +40,7 @@ export default function TestUIPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
                 <img src="/dal-logo-dark.png" alt="DAL" style={{ width: 48, height: 48, objectFit: 'contain' }} />
                 <div>
-                    <h1 style={{ fontSize: '28px', fontFamily: 'var(--font-heading), sans-serif', margin: 0 }}>
+                    <h1 style={{ fontSize: '28px', fontFamily: 'var(--font-display), sans-serif', margin: 0 }}>
                         DAL Design System
                     </h1>
                     <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0 }}>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Twitter, Instagram, MessageCircle } from 'lucide-react';
+import { Share2, MessageCircle } from 'lucide-react';
 import styles from './Footer.module.css';
 
 const PLATFORM_LINKS = [
@@ -44,11 +44,11 @@ export default function Footer() {
                             Nigeria&apos;s informal economy moves on DAL. Building the intelligence layer for urban mobility in Port Harcourt and beyond.
                         </p>
                         <div className={styles.socials}>
-                            <a href="https://twitter.com/dropalong" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} aria-label="Twitter">
-                                <Twitter size={18} />
+                            <a href="https://twitter.com/dropalong" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} aria-label="X (Twitter)">
+                                <Share2 size={18} />
                             </a>
                             <a href="https://instagram.com/dropalong" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} aria-label="Instagram">
-                                <Instagram size={18} />
+                                IG
                             </a>
                             <a href="https://wa.me/2348000000000" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} aria-label="WhatsApp">
                                 <MessageCircle size={18} />
