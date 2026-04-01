@@ -24,9 +24,7 @@ export default function SuggestRouteClient() {
     const [routeTitle, setRouteTitle] = useState('');
     const [startLocation, setStartLocation] = useState('');
     const [destination, setDestination] = useState('');
-    const [legs, setLegs] = useState<RouteLeg[]>([
-        { id: '1', from: '', to: '', vehicle: 'Keke', fare: '' }
-    ]);
+    const [vehicleTypeUsed, setVehicleTypeUsed] = useState('Keke bus');
     const [timeMin, setTimeMin] = useState('');
     const [timeMax, setTimeMax] = useState('');
     const [fareMin, setFareMin] = useState('');
@@ -63,31 +61,10 @@ export default function SuggestRouteClient() {
         getAuth();
     }, [supabase]);
 
-    const addLeg = () => {
-        const lastLeg = legs[legs.length - 1];
-        setLegs([...legs, { 
-            id: Math.random().toString(36).substr(2, 9), 
-            from: lastLeg.to || '', 
-            to: '', 
-            vehicle: 'Bus', 
-            fare: '' 
-        }]);
-    };
-
-    const removeLeg = (id: string) => {
-        if (legs.length > 1) {
-            setLegs(legs.filter(l => l.id !== id));
-        }
-    };
-
-    const updateLeg = (id: string, field: keyof RouteLeg, value: string) => {
-        setLegs(legs.map(l => l.id === id ? { ...l, [field]: value } : l));
-    };
-
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
         if (!routeTitle.trim()) newErrors.routeTitle = 'Route title required';
-        if (!legs[0].from.trim()) newErrors.from_0 = 'Start point required';
+        if (!startLocation.trim()) newErrors.startLocation = 'Start point required';
         if (!destination.trim()) newErrors.destination = 'Final destination required';
         
         setErrors(newErrors);
@@ -103,8 +80,9 @@ export default function SuggestRouteClient() {
             const formData = new FormData();
             formData.append('type', 'route');
             formData.append('routeTitle', routeTitle);
-            formData.append('start_location', legs[0].from);
+            formData.append('start_location', startLocation);
             formData.append('destination', destination);
+            formData.append('vehicle_type_used', vehicleTypeUsed);
             formData.append('timeMin', timeMin);
             formData.append('timeMax', timeMax);
             formData.append('fareMin', fareMin);
@@ -115,25 +93,11 @@ export default function SuggestRouteClient() {
             formData.append('tipsAndWarnings', tipsAndWarnings);
             formData.append('description', description);
 
-            // Serialize stops
-            const stopsAlongTheWay = legs.map((leg, i) => ({
-                type: i === 0 ? 'start' : (i === legs.length - 1 ? 'end' : 'stop'),
-                location: leg.from,
-                instruction: `Board ${leg.vehicle} to ${leg.to || 'next stop'}.`,
-                vehicle: leg.vehicle,
-                fare: parseFloat(leg.fare) || 0
-            }));
-
-            // Final stop logic
-            if (destination && destination !== legs[legs.length - 1].to) {
-                stopsAlongTheWay.push({
-                    type: 'end',
-                    location: destination,
-                    instruction: 'Final destination reached.',
-                    vehicle: 'None',
-                    fare: 0
-                });
-            }
+            // Send simplified stops
+            const stopsAlongTheWay = [
+                { type: 'start', location: startLocation, instruction: 'Starting point.', vehicle: vehicleTypeUsed, fare: 0 },
+                { type: 'end', location: destination, instruction: 'Final destination.', vehicle: 'None', fare: 0 }
+            ];
 
             formData.append('stopsJSON', JSON.stringify(stopsAlongTheWay));
 
@@ -144,7 +108,7 @@ export default function SuggestRouteClient() {
             if (result.error) throw new Error(result.error);
 
             if (user) {
-                const totalPoints = 20 + (legs.length * 5) + (detailedDirections.length > 50 ? 10 : 0);
+                const totalPoints = 30 + (detailedDirections.length > 50 ? 20 : 0);
                 await supabase.from('community_points').insert({
                     user_id: user.id,
                     points: totalPoints,
@@ -163,9 +127,10 @@ export default function SuggestRouteClient() {
     };
 
     const resetForm = () => {
-        setLegs([{ id: '1', from: '', to: '', vehicle: 'Keke', fare: '' }]);
         setRouteTitle('');
+        setStartLocation('');
         setDestination('');
+        setVehicleTypeUsed('Keke bus');
         setTimeMin('');
         setTimeMax('');
         setFareMin('');
@@ -191,7 +156,7 @@ export default function SuggestRouteClient() {
                     <h1 className={styles.successTitle}>Route Intelligence Captured!</h1>
                     <p className={styles.successDesc}>
                         Your route details have been saved. The DAL community thanks you for mapping the network.
-                        <span className={styles.pointReward}> +{10 + (legs.length > 1 ? 5 : 0) + (description.length > 20 ? 5 : 0)} XP</span>
+                        <span className={styles.pointReward}> +{30 + (detailedDirections.length > 50 ? 20 : 0)} XP</span>
                     </p>
                     <div className={styles.successActions}>
                         <button className={styles.primaryBtn} onClick={resetForm}>Map Another Route</button>
@@ -238,9 +203,9 @@ export default function SuggestRouteClient() {
                                 <label><MapPin size={12} /> Start Origin</label>
                                 <input 
                                     placeholder="Major landmark or park" 
-                                    value={legs[0].from} 
-                                    onChange={e => updateLeg(legs[0].id, 'from', e.target.value)}
-                                    className={errors.from_0 ? styles.errorInput : ''}
+                                    value={startLocation} 
+                                    onChange={e => setStartLocation(e.target.value)}
+                                    className={errors.startLocation ? styles.errorInput : ''}
                                 />
                             </div>
                             <div className={styles.field}>
@@ -253,81 +218,6 @@ export default function SuggestRouteClient() {
                                 />
                             </div>
                         </div>
-                    </section>
-
-                    <section className={styles.formSection}>
-                        <h2 className={styles.sectionTitle}>Route Steps & Transport</h2>
-                        <div className={styles.timeline}>
-                            {legs.map((leg, index) => (
-                                <div key={leg.id} className={styles.legSegment}>
-                                    <div className={styles.segmentIndicator}>
-                                        <div className={styles.dot} />
-                                        {index < legs.length - 1 && <div className={styles.connector} />}
-                                    </div>
-                                    <div className={styles.legContent}>
-                                        <div className={styles.legHeader}>
-                                            {/* Leg title removed */}
-                                            {legs.length > 1 && (
-                                                <button onClick={() => removeLeg(leg.id)} className={styles.removeBtn}>
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            )}
-                                        </div>
-                                        
-                                        <div className={styles.row}>
-                                            <div className={styles.field}>
-                                                <label><MapPin size={12} /> From</label>
-                                                <input 
-                                                    placeholder="Starting point" 
-                                                    value={leg.from} 
-                                                    onChange={e => updateLeg(leg.id, 'from', e.target.value)}
-                                                    className={errors[`from_${index}`] ? styles.errorInput : ''}
-                                                />
-                                            </div>
-                                            <div className={styles.field}>
-                                                <label><Navigation size={12} /> To</label>
-                                                <input 
-                                                    placeholder="Junction or End" 
-                                                    value={leg.to} 
-                                                    onChange={e => updateLeg(leg.id, 'to', e.target.value)}
-                                                    className={errors[`to_${index}`] ? styles.errorInput : ''}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className={styles.row}>
-                                            <div className={styles.field}>
-                                                <label><Bus size={12} /> Vehicle</label>
-                                                <select 
-                                                    value={leg.vehicle} 
-                                                    onChange={e => updateLeg(leg.id, 'vehicle', e.target.value)}
-                                                >
-                                                    <option>Keke</option>
-                                                    <option>Keke bus</option>
-                                                    <option>Bus</option>
-                                                </select>
-                                            </div>
-                                            <div className={styles.field}>
-                                                <label>
-                                                    <Wallet size={12} /> Fare (₦)
-                                                    <span className={styles.pointIncentive}>+5 XP</span>
-                                                </label>
-                                                <input 
-                                                    placeholder="Amount" 
-                                                    value={leg.fare} 
-                                                    onChange={e => updateLeg(leg.id, 'fare', e.target.value)}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        
-                        <button className={styles.addLegBtn} onClick={addLeg}>
-                            <Plus size={16} /> Add a Connection or Stop
-                            <span className={styles.pointIncentive}>+10 XP</span>
-                        </button>
                     </section>
 
                     <section className={styles.formSection}>
@@ -368,13 +258,23 @@ export default function SuggestRouteClient() {
                                 </select>
                             </div>
                             <div className={styles.field}>
-                                <label><Info size={12} /> Primary Difficulty</label>
-                                <select value={difficulty} onChange={e => setDifficulty(e.target.value)}>
-                                    <option>Easy</option>
-                                    <option>Moderate</option>
-                                    <option>Challenging</option>
+                                <label><Bus size={12} /> Primary Vehicle</label>
+                                <select value={vehicleTypeUsed} onChange={e => setVehicleTypeUsed(e.target.value)}>
+                                    <option>Keke</option>
+                                    <option>Keke bus</option>
+                                    <option>Bus</option>
+                                    <option>Taxi</option>
+                                    <option>Bike</option>
                                 </select>
                             </div>
+                        </div>
+                        <div className={styles.field}>
+                            <label><Info size={12} /> Primary Difficulty</label>
+                            <select value={difficulty} onChange={e => setDifficulty(e.target.value)}>
+                                <option>Easy</option>
+                                <option>Moderate</option>
+                                <option>Challenging</option>
+                            </select>
                         </div>
                     </section>
 
