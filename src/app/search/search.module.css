@@ -2,35 +2,33 @@
     min-height: 100vh;
     background-color: #0D0D0D;
     color: #FFFFFF;
-    padding-bottom: 80px;
+    padding: 60px 20px;
 }
 
 .contentWrapper {
-    max-width: 640px;
+    max-width: 800px;
     margin: 0 auto;
-    padding: 24px 16px;
 }
 
 /* SECTION 1 - HEADER */
 .headerSection {
-    margin-bottom: 32px;
+    margin-bottom: 40px;
 }
 
 .subLabel {
+    display: block;
     color: #C9A227;
     font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.15em;
     margin-bottom: 8px;
-    display: block;
+    text-transform: uppercase;
 }
 
 .pageTitle {
-    font-size: 28px;
+    font-size: 36px;
     font-weight: 800;
     margin: 0;
-    letter-spacing: -0.5px;
 }
 
 .goldText {
@@ -40,55 +38,50 @@
 /* SECTION 2 - SEARCH INPUT BOX */
 .searchContainer {
     background-color: #1A1A1A;
-    border: 1px solid #2A2A2A;
+    border: 0.5px solid #2A2A2A;
     border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
+    padding: 8px 0;
     position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.connectorLine {
+    position: absolute;
+    left: 27px;
+    top: 34px;
+    bottom: 34px;
+    width: 0.5px;
+    background-color: #2A2A2A;
+    z-index: 1;
 }
 
 .inputRow {
     display: flex;
     align-items: center;
+    padding: 12px 20px;
     position: relative;
-    z-index: 2;
-    min-height: 24px;
 }
 
 .iconWrapper {
-    width: 24px;
+    width: 14px;
     display: flex;
     justify-content: center;
-    align-items: center;
-    margin-right: 12px;
-    flex-shrink: 0;
+    margin-right: 16px;
+    z-index: 2;
 }
 
 .dotGold {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
     background-color: #C9A227;
+    border-radius: 50%;
 }
 
 .dotWhite {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
     background-color: #FFFFFF;
-}
-
-.connectorLine {
-    position: absolute;
-    left: 27.5px;
-    top: 32px;
-    bottom: 32px;
-    width: 1px;
-    background-color: #2A2A2A;
-    z-index: 1;
+    border-radius: 50%;
 }
 
 .inputField {
@@ -98,25 +91,22 @@
     color: #FFFFFF;
     font-size: 16px;
     outline: none;
-    padding: 10px 0;
-    min-width: 0;
 }
 
 .inputField::placeholder {
-    color: #666666;
+    color: #555555;
 }
 
 .swapBtn {
     background: transparent;
     border: none;
-    color: #888888;
+    color: #555555;
     cursor: pointer;
     padding: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: color 0.2s;
-    flex-shrink: 0;
 }
 
 .swapBtn:hover {
@@ -127,95 +117,245 @@
     width: 100%;
     background-color: #C9A227;
     color: #0D0D0D;
-    font-weight: 600;
     border: none;
     border-radius: 8px;
-    padding: 14px;
-    font-size: 15px;
+    padding: 13px;
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s;
     margin-bottom: 40px;
-    min-height: 48px;
+    transition: opacity 0.2s;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .submitBtn:hover {
     opacity: 0.9;
 }
 
-/* SECTION 3 - DEFAULT GRID */
-.popularHeader {
-    color: #888888;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-    padding-left: 4px;
+.submitBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
-/* SECTION 4 - RESULTS */
-.resultsHeader {
-    color: #888888;
-    font-size: 12px;
+/* SECTION 3 - POPULAR ROUTES */
+.sectionLabel {
+    font-size: 11px;
+    font-weight: 800;
+    color: #555555;
+    letter-spacing: 0.1em;
     margin-bottom: 20px;
-    font-weight: 700;
+    display: block;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding-left: 4px;
+}
+
+.popularGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.routeCard {
+    background-color: #1A1A1A;
+    border: 0.5px solid #2A2A2A;
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.routeCard:hover {
+    border-color: #C9A227;
+    transform: translateY(-2px);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.pill {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.pillPopular { background: rgba(201, 162, 39, 0.15); color: #C9A227; }
+.pillFast { background: rgba(34, 197, 94, 0.15); color: #22C55E; }
+.pillBusy { background: rgba(249, 115, 22, 0.15); color: #F97316; }
+
+.routeName {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #FFFFFF;
+}
+
+.arrow {
+    color: #C9A227;
+}
+
+.cardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid #2A2A2A;
+    padding-top: 12px;
+}
+
+.conditionRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #888888;
+    text-transform: capitalize;
+}
+
+.dotStatus {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.dotClear { background-color: #22C55E; }
+.dotSlow { background-color: #F97316; }
+.dotBlocked { background-color: #EF4444; }
+.dotUnknown { background-color: #666666; }
+
+.metaText {
+    font-size: 11px;
+    color: #888888;
+}
+
+/* SECTION 4 - SEARCH RESULTS */
+.resultsHeader {
+    font-size: 12px;
+    font-weight: 800;
+    color: #555555;
+    margin-bottom: 16px;
+    text-transform: uppercase;
 }
 
 .resultsList {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 1px;
+    background-color: #2A2A2A;
+    border: 0.5px solid #2A2A2A;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
-/* EMPTY STATE */
-.emptyState {
+.resultRow {
     background-color: #1A1A1A;
-    border: 1px dashed #3A3A3A;
-    border-radius: 12px;
-    padding: 60px 24px;
-    text-align: center;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s;
+    border: none;
+    width: 100%;
+    text-align: left;
+}
+
+.resultRow:hover {
+    background-color: #222222;
+}
+
+.resultMain {
     display: flex;
     flex-direction: column;
+    gap: 4px;
+}
+
+.resultTitle {
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.resultMeta {
+    display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
+    font-size: 12px;
+    color: #888888;
+}
+
+.resultStats {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.resultFare {
+    font-size: 14px;
+    font-weight: 700;
+    color: #C9A227;
+}
+
+.resultDuration {
+    font-size: 11px;
+    color: #888888;
+}
+
+/* EMPTY STATES */
+.emptyState {
+    padding: 60px 20px;
+    text-align: center;
 }
 
 .emptyTitle {
-    color: #FFFFFF;
-    font-size: 1.2rem;
-    font-weight: 800;
-    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
 }
 
 .emptySub {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin: 0 0 12px 0;
+    color: #888888;
+    margin-bottom: 24px;
 }
 
 .suggestLink {
-    background-color: #1A1A1A;
-    color: #C9A227;
-    font-size: 0.9rem;
-    font-weight: 700;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 20px;
-    border-radius: 99px;
-    border: 1px solid rgba(201, 162, 39, 0.3);
-    transition: all 0.2s;
+    color: #C9A227;
+    font-weight: 600;
+    text-decoration: none;
 }
 
-.suggestLink:hover {
-    background-color: #C9A227;
-    color: #0D0D0D;
-    transform: translateY(-2px);
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 640px) {
+    .pageContainer {
+        padding: 40px 16px;
+    }
+
+    .pageTitle {
+        font-size: 28px;
+    }
+
+    .popularGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .submitBtn {
+        min-height: 48px;
+    }
+
+    .resultRow {
+        padding: 14px;
+    }
 }

@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { ArrowDownUp, Loader2, ArrowRight } from 'lucide-react';
-import RouteResultCard from '@/components/RouteResults/RouteResultCard';
 import styles from './search.module.css';
 
 interface RouteData {
@@ -12,17 +11,12 @@ interface RouteData {
     route_title: string;
     start_location: string;
     destination: string;
-    stops_along_the_way: string;
-    vehicle_type_used: string;
-    estimated_travel_time_min: number;
-    estimated_travel_time_max: number;
     fare_price_range_min: number;
     fare_price_range_max: number;
-    difficulty_level: string;
-    detailed_directions: string;
-    tips_and_warnings: string;
-    created_at: string;
+    estimated_travel_time_min: number;
+    estimated_travel_time_max: number;
     road_condition: string;
+    is_featured: boolean;
 }
 
 export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: RouteData[] }) {
@@ -31,73 +25,93 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
     const [isSearching, setIsSearching] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
     const [results, setResults] = useState<RouteData[]>([]);
-    const [didYouMean, setDidYouMean] = useState<RouteData[]>([]);
-    const [expandedRouteId, setExpandedRouteId] = useState<string | null>(null);
     const supabase = createClient();
 
     const handleSwap = () => {
+        const temp = fromInput;
         setFromInput(toInput);
-        setToInput(fromInput);
+        setToInput(temp);
     };
 
     const handleSearch = async () => {
         const cleanFrom = fromInput.trim();
         const cleanTo = toInput.trim();
         
-        // If neither, return the first 20 alpha routes (but the requirement says "when neither filled")
-        // But the search button shouldn't do nothing if empty.
-        
+        if (!cleanFrom && !cleanTo) {
+            setHasSearched(false);
+            return;
+        }
+
         setIsSearching(true);
         setHasSearched(true);
-        setDidYouMean([]);
-        setExpandedRouteId(null);
 
-        const fetchRoutes = async (start: string, dest: string, isFallback = false) => {
+        try {
             let query = supabase.from('routes').select(`
-                id, route_title, start_location, destination, stops_along_the_way, 
-                vehicle_type_used, estimated_travel_time_min, estimated_travel_time_max, 
-                fare_price_range_min, fare_price_range_max, difficulty_level, 
-                detailed_directions, tips_and_warnings, created_at, road_condition
+                id, route_title, start_location, destination, 
+                fare_price_range_min, fare_price_range_max, 
+                estimated_travel_time_min, estimated_travel_time_max, 
+                road_condition, is_featured
             `);
 
-            if (start && dest) {
-                query = query
-                    .or(`start_location.ilike.%${start}%,route_title.ilike.%${start}%`)
-                    .or(`destination.ilike.%${dest}%,route_title.ilike.%${dest}%`);
-            } else if (start) {
-                query = query.or(`start_location.ilike.%${start}%,route_title.ilike.%${start}%`);
-            } else if (dest) {
-                query = query.or(`destination.ilike.%${dest}%,route_title.ilike.%${dest}%`);
-            } else {
-                // If neither is filled, return first 20 alpha
-                query = query.order('route_title', { ascending: true }).limit(20);
-            }
-
-            const { data, error } = await query;
-            return data || [];
-        };
-
-        const initialResults = await fetchRoutes(cleanFrom, cleanTo);
-        
-        if (initialResults.length > 0) {
-            setResults(initialResults);
-        } else {
-            setResults([]);
-            // BUG 1 fallback logic: split on space and use first word
-            const fallbackFrom = cleanFrom.split(' ')[0];
-            const fallbackTo = cleanTo.split(' ')[0];
+            // Fuzzy logic: 
+            // If both: match both. 
+            // If one: match that one (either start or dest if only one field is used? 
+            // The prompt says: "typing 'mile' should match 'Mile 1', 'Mile 3', etc. 
+            // If only From is filled, return all routes where origin matches. 
+            // If only To is filled, return all routes where destination matches.")
             
-            if (fallbackFrom || fallbackTo) {
-                const fallbackResults = await fetchRoutes(fallbackFrom, fallbackTo, true);
-                setDidYouMean(fallbackResults);
+            if (cleanFrom && cleanTo) {
+                query = query
+                    .ilike('start_location', `%${cleanFrom}%`)
+                    .ilike('destination', `%${cleanTo}%`);
+            } else if (cleanFrom) {
+                query = query.ilike('start_location', `%${cleanFrom}%`);
+            } else if (cleanTo) {
+                query = query.ilike('destination', `%${cleanTo}%`);
             }
+
+            const { data, error } = await query.order('route_title', { ascending: true }).limit(50);
+            
+            if (error) throw error;
+            setResults(data || []);
+        } catch (err) {
+            console.error('Search failed:', err);
+            setResults([]);
+        } finally {
+            setIsSearching(false);
         }
-        
-        setIsSearching(false);
     };
 
-    const handleToggleExpand = (id: string, isExpanded: boolean) => {
-        setExpandedRouteId(isExpanded ? id : null);
+    const handleFeaturedClick = (start: string, dest: string) => {
+        setFromInput(start);
+        setToInput(dest);
+        // We use a small delay or just call search directly with the new values
+        // To be safe, we'll implement a functional search that takes params
+        performDirectSearch(start, dest);
+    };
+
+    const performDirectSearch = async (start: string, dest: string) => {
+        setIsSearching(true);
+        setHasSearched(true);
+        try {
+            const { data } = await supabase.from('routes')
+                .select('*')
+                .ilike('start_location', `%${start}%`)
+                .ilike('destination', `%${dest}%`)
+                .limit(50);
+            setResults(data || []);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const getConditionColor = (condition: string) => {
+        switch (condition?.toLowerCase()) {
+            case 'clear': return styles.dotClear;
+            case 'slow': return styles.dotSlow;
+            case 'blocked': return styles.dotBlocked;
+            default: return styles.dotUnknown;
+        }
     };
 
     return (
@@ -147,50 +161,93 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
                 </div>
 
                 <button className={styles.submitBtn} onClick={handleSearch} disabled={isSearching} type="button">
-                    {isSearching ? <Loader2 size={20} className="animate-spin" /> : 'Find Route'}
+                    {isSearching ? <Loader2 size={18} className="animate-spin" /> : 'Find Route'}
                 </button>
 
-                {/* SECTION 3 - RESULTS */}
-                {hasSearched ? (
+                {/* SECTION 3 & 4 - CONTENT AREA */}
+                {!hasSearched ? (
                     <section>
-                        {results.length > 0 ? (
-                            <>
-                                <h2 className={styles.resultsHeader}>
-                                    {results.length} results found
-                                </h2>
-                                <div className={styles.resultsList}>
-                                    {results.map((route) => (
-                                        <RouteResultCard 
-                                            key={route.id} 
-                                            {...route} 
-                                            isExpanded={expandedRouteId === route.id}
-                                            onToggleExpand={(expanded) => handleToggleExpand(route.id, expanded)}
-                                        />
-                                    ))}
-                                </div>
-                                {results.length >= 20 && (
-                                    <div style={{ textAlign: 'center', marginTop: '32px' }}>
-                                        <button className={styles.submitBtn} style={{ background: 'transparent', border: '1px solid var(--border)', width: 'auto', padding: '12px 32px' }}>
-                                            Load more results…
-                                        </button>
-                                    </div>
-                                )}
-                            </>
+                        <span className={styles.sectionLabel}>POPULAR ROUTES</span>
+                        {featuredRoutes.length > 0 ? (
+                            <div className={styles.popularGrid}>
+                                {featuredRoutes.map((route) => (
+                                    <button 
+                                        key={route.id} 
+                                        className={styles.routeCard}
+                                        onClick={() => handleFeaturedClick(route.start_location, route.destination)}
+                                    >
+                                        <div className={styles.cardHeader}>
+                                            <span className={`${styles.pill} ${
+                                                route.road_condition === 'clear' ? styles.pillFast : 
+                                                route.road_condition === 'slow' ? styles.pillBusy : styles.pillPopular
+                                            }`}>
+                                                {route.road_condition === 'clear' ? 'Fast' : 
+                                                 route.road_condition === 'slow' ? 'Busy now' : 'Popular'}
+                                            </span>
+                                        </div>
+                                        <div className={styles.routeName}>
+                                            {route.start_location} <span className={styles.arrow}>→</span> {route.destination}
+                                        </div>
+                                        <div className={styles.cardFooter}>
+                                            <div className={styles.conditionRow}>
+                                                <div className={`${styles.dotStatus} ${getConditionColor(route.road_condition)}`}></div>
+                                                {route.road_condition || 'Unknown'}
+                                            </div>
+                                            <div className={styles.metaText}>
+                                                {route.estimated_travel_time_min}-{route.estimated_travel_time_max}m • ₦{route.fare_price_range_min}-₦{route.fare_price_range_max}
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
                         ) : (
+                            <div className={styles.emptyState}>
+                                <p className={styles.emptySub}>Routes loading — check back shortly.</p>
+                            </div>
+                        )}
+                    </section>
+                ) : (
+                    <section>
+                        <div className={styles.resultsHeader}>
+                            {isSearching ? 'Searching...' : `${results.length} ROUTES FOUND`}
+                        </div>
+                        
+                        {results.length > 0 ? (
+                            <div className={styles.resultsList}>
+                                {results.map((route) => (
+                                    <div key={route.id} className={styles.resultRow}>
+                                        <div className={styles.resultMain}>
+                                            <div className={styles.resultTitle}>
+                                                {route.start_location} <span className={styles.arrow}>→</span> {route.destination}
+                                            </div>
+                                            <div className={styles.resultMeta}>
+                                                <div className={`${styles.dotStatus} ${getConditionColor(route.road_condition)}`}></div>
+                                                {route.road_condition || 'Unknown'}
+                                            </div>
+                                        </div>
+                                        <div className={styles.resultStats}>
+                                            <div className={styles.resultFare}>
+                                                ₦{route.fare_price_range_min}-{route.fare_price_range_max}
+                                            </div>
+                                            <div className={styles.resultDuration}>
+                                                {route.estimated_travel_time_min}-{route.estimated_travel_time_max} mins
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            !isSearching && (
                                 <div className={styles.emptyState}>
                                     <div className={styles.emptyTitle}>0 routes found</div>
-                                    <p className={styles.emptySub}>No results for "{fromInput || '[Any]'}" to "{toInput || '[Any]'}".</p>
+                                    <p className={styles.emptySub}>No routes found from "{fromInput || '[Any]'}" to "{toInput || '[Any]'}".</p>
                                     <Link href="/suggest-route" className={styles.suggestLink}>
                                         Suggest this route <ArrowRight size={14} />
                                     </Link>
                                 </div>
+                            )
                         )}
                     </section>
-                ) : (
-                    <div className={styles.emptyState} style={{ padding: '80px 20px', opacity: 0.7 }}>
-                        <div className={styles.emptyTitle}>Enter locations to begin</div>
-                        <p className={styles.emptySub}>Search over 40+ verified routes across Port Harcourt.</p>
-                    </div>
                 )}
             </div>
         </div>
