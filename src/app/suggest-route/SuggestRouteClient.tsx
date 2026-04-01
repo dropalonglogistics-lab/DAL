@@ -3,17 +3,17 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
-    MapPin, Bus, Navigation, Info, 
+    MapPin, Navigation, Info, 
     Clock, Wallet, Plus, Trash2,
     Zap, Award, ShieldCheck, User as UserIcon,
-    ChevronRight, Eye, Car, Bike as BikeIcon
+    Eye, Car
 } from 'lucide-react';
 import RouteResultCard from '@/components/RouteResults/RouteResultCard';
 import styles from './suggest-route.module.css';
 
 const VEHICLE_OPTIONS = [
     { id: 'keke', label: 'Keke', icon: '🛺' },
-    { id: 'keke bus', label: 'Keke bus', icon: '🚐' },
+    { id: 'keke bus', label: 'Keke Bus', icon: '🚐' },
     { id: 'bus', label: 'Bus', icon: '🚌' },
     { id: 'taxi', label: 'Taxi', icon: '🚕' },
     { id: 'bike', label: 'Bike', icon: '🏍️' }
@@ -24,18 +24,10 @@ interface Stop {
     location: string;
 }
 
-interface RouteLeg {
-    id: string;
-    from: string;
-    to: string;
-    vehicle: string;
-    fare: string;
-}
-
-type Step = 'builder' | 'success';
+type FormStep = 'builder' | 'success';
 
 export default function SuggestRouteClient() {
-    const [step, setStep] = useState<Step>('builder');
+    const [step, setStep] = useState<FormStep>('builder');
     const [routeTitle, setRouteTitle] = useState('');
     const [startLocation, setStartLocation] = useState('');
     const [destination, setDestination] = useState('');
@@ -60,7 +52,6 @@ export default function SuggestRouteClient() {
     const [errorMsg, setErrorMsg] = useState('');
     const [user, setUser] = useState<any>(null);
     const [isAdmin, setIsAdmin] = useState(false);
-    const [showPreview, setShowPreview] = useState(true);
 
     const supabase = createClient();
 
@@ -71,7 +62,6 @@ export default function SuggestRouteClient() {
             if (authUser?.user_metadata?.full_name) {
                 setAttributionName(authUser.user_metadata.full_name);
             }
-
             if (authUser) {
                 const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', authUser.id).single();
                 setIsAdmin(!!profile?.is_admin);
@@ -104,7 +94,6 @@ export default function SuggestRouteClient() {
         if (!startLocation.trim()) newErrors.startLocation = 'Start point required';
         if (!destination.trim()) newErrors.destination = 'Final destination required';
         if (selectedVehicles.length === 0) newErrors.vehicles = 'Select at least one vehicle';
-        
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -131,14 +120,6 @@ export default function SuggestRouteClient() {
             formData.append('tipsAndWarnings', tipsAndWarnings);
             formData.append('description', description);
 
-            // Serialize stops for database insertion
-            const stopsString = [
-                startLocation,
-                ...stops.filter(s => s.location.trim()).map(s => s.location),
-                destination
-            ].join(' → ');
-
-            // Map to stops_along_the_way JSONB for routes table
             const stopsAlongTheWay = [
                 { type: 'start', location: startLocation, instruction: 'Starting point.', vehicle: selectedVehicles[0], fare: 0 },
                 ...stops.filter(s => s.location.trim()).map(s => ({
@@ -147,10 +128,8 @@ export default function SuggestRouteClient() {
                 { type: 'end', location: destination, instruction: 'Final destination.', vehicle: 'None', fare: 0 }
             ];
 
-            formData.append('stopsAlongTheWay', stopsString);
             formData.append('stopsJSON', JSON.stringify(stopsAlongTheWay));
 
-            // Run the server action
             const { suggestRoute } = await import('./actions');
             const result = await suggestRoute(formData);
 
@@ -195,6 +174,9 @@ export default function SuggestRouteClient() {
         setErrorMsg('');
     };
 
+    // Computed preview values
+    const previewStops = [startLocation, ...stops.map(s => s.location), destination].filter(Boolean).join(' → ');
+
     if (step === 'success') {
         return (
             <div className={styles.container}>
@@ -220,39 +202,49 @@ export default function SuggestRouteClient() {
     return (
         <div className={styles.container}>
             <div className={styles.architectCard}>
-                {/* Header */}
+                {/* ─── Header ─── */}
                 <header className={styles.header}>
                     <div className={styles.badgeRow}>
                         <div className={styles.intelligenceBadge}>
-                            <Zap size={14} /> LIVE INTELLIGENCE
+                            <Zap size={14} /> ROUTE ARCHITECT
                         </div>
-                        {user && (
-                            <div className={styles.pointsBadge}>
-                                <Award size={14} /> Current Level: {user.user_metadata?.points || 0}
+                        {isAdmin && (
+                            <div className={styles.adminBadge}>
+                                <ShieldCheck size={14} /> ADMIN — Direct Insert
                             </div>
                         )}
                     </div>
-                     <h1 className={styles.title}>Route Architect</h1>
-                    <p className={styles.subtitle}>Map the platform. Reach verified status faster.</p>
+                    <h1 className={styles.title}>Suggest a Route</h1>
+                    <p className={styles.subtitle}>
+                        Fill in the details below. Your submission maps directly to the routes database.
+                    </p>
                 </header>
 
+                {/* ─── Two-Column Layout ─── */}
                 <div className={styles.layoutWrapper}>
+
+                    {/* ─── LEFT: Form Builder ─── */}
                     <div className={styles.builderBody}>
-                        {/* 1. ROUTE CORE */}
+
+                        {/* Section 1: Route Identity */}
                         <section className={styles.formSection}>
-                            <h2 className={styles.sectionTitle}>1. Route Identity</h2>
+                            <h2 className={styles.sectionTitle}>
+                                <span className={styles.sectionNum}>1</span>
+                                Route Identity
+                            </h2>
                             <div className={styles.field}>
-                                <label><Info size={12} /> Route Title (Summary)</label>
+                                <label><Info size={12} /> Route Title</label>
                                 <input 
                                     placeholder="e.g. Rumuokoro to Choba via University" 
                                     value={routeTitle} 
                                     onChange={e => setRouteTitle(e.target.value)}
                                     className={errors.routeTitle ? styles.errorInput : ''}
                                 />
+                                {errors.routeTitle && <span className={styles.errorText}>{errors.routeTitle}</span>}
                             </div>
                             <div className={styles.row}>
                                 <div className={styles.field}>
-                                    <label><MapPin size={12} /> Start Origin</label>
+                                    <label><MapPin size={12} /> Start Location</label>
                                     <input 
                                         placeholder="Major park or landmark" 
                                         value={startLocation} 
@@ -261,7 +253,7 @@ export default function SuggestRouteClient() {
                                     />
                                 </div>
                                 <div className={styles.field}>
-                                    <label><Navigation size={12} /> Final Destination</label>
+                                    <label><Navigation size={12} /> Destination</label>
                                     <input 
                                         placeholder="Target destination" 
                                         value={destination} 
@@ -272,39 +264,45 @@ export default function SuggestRouteClient() {
                             </div>
                         </section>
 
-                        {/* 2. STOPS ALONG THE WAY */}
+                        {/* Section 2: Stops Along the Way */}
                         <section className={styles.formSection}>
-                            <h2 className={styles.sectionTitle}>2. Stops Along the Way</h2>
+                            <h2 className={styles.sectionTitle}>
+                                <span className={styles.sectionNum}>2</span>
+                                Stops Along the Way
+                            </h2>
                             <div className={styles.stopsBuilder}>
                                 {stops.map((stop, index) => (
                                     <div key={stop.id} className={styles.stopRow}>
                                         <div className={styles.stopIndicator}>
                                             <div className={styles.stopDot} />
-                                            <div className={styles.stopLine} />
+                                            {index < stops.length - 1 && <div className={styles.stopLine} />}
                                         </div>
                                         <input 
-                                            placeholder={`Stop #${index + 1} landmark`}
+                                            placeholder={`Stop #${index + 1} — landmark or junction`}
                                             value={stop.location}
                                             onChange={e => updateStop(stop.id, e.target.value)}
                                         />
                                         {stops.length > 1 && (
-                                            <button onClick={() => removeStop(stop.id)} className={styles.stopRemove}>
+                                            <button type="button" onClick={() => removeStop(stop.id)} className={styles.stopRemove}>
                                                 <Trash2 size={12} />
                                             </button>
                                         )}
                                     </div>
                                 ))}
-                                <button onClick={addStop} className={styles.addStopBtn}>
-                                    <Plus size={14} /> Add major stop or junction
+                                <button type="button" onClick={addStop} className={styles.addStopBtn}>
+                                    <Plus size={14} /> Add another stop
                                 </button>
                             </div>
                         </section>
 
-                        {/* 3. LOGISTICS (VEHICLES & CONDITION) */}
+                        {/* Section 3: Vehicles & Condition */}
                         <section className={styles.formSection}>
-                            <h2 className={styles.sectionTitle}>3. Logistics & Transport</h2>
+                            <h2 className={styles.sectionTitle}>
+                                <span className={styles.sectionNum}>3</span>
+                                Vehicles & Transport
+                            </h2>
                             <div className={styles.field}>
-                                <label><Car size={12} /> Vehicles Type Used (Multiple Select)</label>
+                                <label><Car size={12} /> Vehicle Types (select all that apply)</label>
                                 <div className={styles.vehicleGrid}>
                                     {VEHICLE_OPTIONS.map(v => (
                                         <button 
@@ -332,7 +330,7 @@ export default function SuggestRouteClient() {
                                     </select>
                                 </div>
                                 <div className={styles.field}>
-                                    <label><Info size={12} /> Difficulty</label>
+                                    <label><Info size={12} /> Difficulty Level</label>
                                     <select value={difficulty} onChange={e => setDifficulty(e.target.value)}>
                                         <option>Easy</option>
                                         <option>Moderate</option>
@@ -342,19 +340,22 @@ export default function SuggestRouteClient() {
                             </div>
                         </section>
 
-                        {/* 4. PERFORMANCE (TIME & FARE) */}
+                        {/* Section 4: Journey Metrics */}
                         <section className={styles.formSection}>
-                            <h2 className={styles.sectionTitle}>4. Journey Metrics</h2>
+                            <h2 className={styles.sectionTitle}>
+                                <span className={styles.sectionNum}>4</span>
+                                Journey Metrics
+                            </h2>
                             <div className={styles.row}>
                                 <div className={styles.field}>
-                                    <label><Clock size={12} /> Time (Min/Max Mins)</label>
+                                    <label><Clock size={12} /> Estimated Travel Time (minutes)</label>
                                     <div className={styles.miniRow}>
                                         <input type="number" value={timeMin} onChange={e => setTimeMin(e.target.value)} placeholder="Min" />
                                         <input type="number" value={timeMax} onChange={e => setTimeMax(e.target.value)} placeholder="Max" />
                                     </div>
                                 </div>
                                 <div className={styles.field}>
-                                    <label><Wallet size={12} /> Fare (Min/Max ₦)</label>
+                                    <label><Wallet size={12} /> Fare Price Range (₦)</label>
                                     <div className={styles.miniRow}>
                                         <input type="number" value={fareMin} onChange={e => setFareMin(e.target.value)} placeholder="Min" />
                                         <input type="number" value={fareMax} onChange={e => setFareMax(e.target.value)} placeholder="Max" />
@@ -363,34 +364,36 @@ export default function SuggestRouteClient() {
                             </div>
                         </section>
 
-                        {/* 5. EXPERT INTEL */}
+                        {/* Section 5: Directions & Tips */}
                         <section className={styles.formSection}>
-                            <h2 className={styles.sectionTitle}>5. High-Fidelity Directions</h2>
+                            <h2 className={styles.sectionTitle}>
+                                <span className={styles.sectionNum}>5</span>
+                                Directions & Tips
+                            </h2>
                             <div className={styles.field}>
-                                <label><Navigation size={12} /> Detailed Navigational Instructions</label>
+                                <label><Navigation size={12} /> Detailed Directions</label>
                                 <textarea 
                                     value={detailedDirections} 
                                     onChange={e => setDetailedDirections(e.target.value)}
-                                    placeholder="Exact turns, landmarks to watch for..."
-                                    rows={3}
+                                    placeholder="Step-by-step: Take a keke from X park, stop at Y junction, then board a bus to Z..."
+                                    rows={4}
                                 />
                             </div>
-
                             <div className={styles.field}>
                                 <label><ShieldCheck size={12} /> Tips & Warnings</label>
                                 <textarea 
                                     value={tipsAndWarnings} 
                                     onChange={e => setTipsAndWarnings(e.target.value)}
-                                    placeholder="Pickpocket zones, busy hours, security notes..."
+                                    placeholder="Safety tips, best times to travel, areas to avoid..."
                                     rows={3}
                                 />
                             </div>
 
                             {!user && (
                                 <div className={styles.field}>
-                                    <label><UserIcon size={12} /> Contributor Identity</label>
+                                    <label><UserIcon size={12} /> Your Name (for attribution)</label>
                                     <input 
-                                        placeholder="Name for attribution" 
+                                        placeholder="Name or alias" 
                                         value={attributionName} 
                                         onChange={e => setAttributionName(e.target.value)} 
                                     />
@@ -398,48 +401,65 @@ export default function SuggestRouteClient() {
                             )}
                         </section>
 
-                        {errorMsg && <div className={styles.errorAlert}>{errorMsg}</div>}
+                        {/* Submit Area */}
+                        <div className={styles.submitSection}>
+                            {errorMsg && <div className={styles.errorAlert}>{errorMsg}</div>}
+                            <button 
+                                className={styles.submitBtn} 
+                                onClick={handleSubmit} 
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <span className={styles.spinner} />
+                                        Submitting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <ShieldCheck size={18} />
+                                        {isAdmin ? 'Publish Route' : 'Submit for Review'}
+                                    </>
+                                )}
+                            </button>
+                        </div>
 
-                        <button 
-                            className={styles.submitBtn} 
-                            onClick={handleSubmit} 
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? 'Synthesizing...' : 'Submit to Database'}
-                            <ShieldCheck size={18} />
-                        </button>
-                    </div>
+                    </div>{/* END builderBody */}
 
-                    {/* LIVE PREVIEW SIDEBAR */}
-                    <div className={styles.previewSidebar}>
+                    {/* ─── RIGHT: Live Preview ─── */}
+                    <aside className={styles.previewSidebar}>
                         <div className={styles.stickyPreview}>
                             <div className={styles.previewHeader}>
-                                <span><Eye size={14} /> LIVE PREVIEW</span>
+                                <span className={styles.previewLabel}>
+                                    <Eye size={14} /> LIVE PREVIEW
+                                </span>
                                 <div className={styles.liveIndicator} />
                             </div>
-                            
+                            <p className={styles.previewHint}>
+                                This is how your route will appear to other users.
+                            </p>
                             <div className={styles.previewCardWrap}>
                                 <RouteResultCard 
-                                    id="preview-id"
-                                    route_title={routeTitle}
-                                    start_location={startLocation}
-                                    destination={destination}
-                                    vehicle_type_used={selectedVehicles.join(', ')}
+                                    id="preview"
+                                    route_title={routeTitle || 'Your Route Title'}
+                                    start_location={startLocation || 'Start Location'}
+                                    destination={destination || 'Destination'}
+                                    vehicle_type_used={selectedVehicles.join(', ') || 'None selected'}
                                     estimated_travel_time_min={parseInt(timeMin) || 0}
                                     estimated_travel_time_max={parseInt(timeMax) || 0}
                                     fare_price_range_min={parseInt(fareMin) || 0}
                                     fare_price_range_max={parseInt(fareMax) || 0}
                                     difficulty_level={difficulty}
-                                    detailed_directions={detailedDirections}
-                                    tips_and_warnings={tipsAndWarnings}
-                                    stops_along_the_way={[startLocation, ...stops.map(s => s.location), destination].filter(Boolean).join(' → ')}
+                                    detailed_directions={detailedDirections || 'Directions will appear here...'}
+                                    tips_and_warnings={tipsAndWarnings || 'Tips will appear here...'}
+                                    stops_along_the_way={previewStops || 'Start → Destination'}
                                     isExpanded={true}
                                 />
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
+                    </aside>{/* END previewSidebar */}
+
+                </div>{/* END layoutWrapper */}
+            </div>{/* END architectCard */}
         </div>
-    </div>
     );
 }

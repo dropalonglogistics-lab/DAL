@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import styles from '@/app/content-pages.module.css';
-import { Mail, MapPin, Twitter, CheckCircle } from 'lucide-react';
+import { Mail, MapPin, AtSign, CheckCircle } from 'lucide-react';
 
 export default function ContactPage() {
     const [name, setName] = useState('');
@@ -144,7 +144,7 @@ export default function ContactPage() {
 
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                                <Twitter size={18} color="#C9A227" />
+                                <AtSign size={18} color="#C9A227" />
                                 <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800 }}>Social</h4>
                             </div>
                             <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>@dropalong on X and Instagram</p>
