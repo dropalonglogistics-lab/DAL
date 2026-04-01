@@ -87,7 +87,7 @@ export async function suggestRoute(formData: FormData) {
         route_title: formData.get('routeTitle') as string,
         start_location: formData.get('start_location') as string,
         destination: formData.get('destination') as string,
-        vehicle_type_used: Array.from(vehicleTypes).join(', ') || 'Various',
+        vehicle_type_used: (formData.get('vehicle_type_used') as string) || Array.from(vehicleTypes).join(', ') || 'Various',
         fare_price_range_min: parseFloat(formData.get('fareMin') as string) || null,
         fare_price_range_max: parseFloat(formData.get('fareMax') as string) || null,
         estimated_travel_time_min: parseInt(formData.get('timeMin') as string) || null,

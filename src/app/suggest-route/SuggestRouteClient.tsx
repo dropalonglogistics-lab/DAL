@@ -5,9 +5,24 @@ import { createClient } from '@/utils/supabase/client';
 import { 
     MapPin, Bus, Navigation, Info, 
     Clock, Wallet, Plus, Trash2,
-    Zap, Award, ShieldCheck, User as UserIcon
+    Zap, Award, ShieldCheck, User as UserIcon,
+    ChevronRight, Eye, Car, Bike as BikeIcon
 } from 'lucide-react';
+import RouteResultCard from '@/components/RouteResults/RouteResultCard';
 import styles from './suggest-route.module.css';
+
+const VEHICLE_OPTIONS = [
+    { id: 'keke', label: 'Keke', icon: '🛺' },
+    { id: 'keke bus', label: 'Keke bus', icon: '🚐' },
+    { id: 'bus', label: 'Bus', icon: '🚌' },
+    { id: 'taxi', label: 'Taxi', icon: '🚕' },
+    { id: 'bike', label: 'Bike', icon: '🏍️' }
+];
+
+interface Stop {
+    id: string;
+    location: string;
+}
 
 interface RouteLeg {
     id: string;
@@ -24,7 +39,10 @@ export default function SuggestRouteClient() {
     const [routeTitle, setRouteTitle] = useState('');
     const [startLocation, setStartLocation] = useState('');
     const [destination, setDestination] = useState('');
-    const [vehicleTypeUsed, setVehicleTypeUsed] = useState('Keke bus');
+    const [stops, setStops] = useState<Stop[]>([
+        { id: '1', location: '' }
+    ]);
+    const [selectedVehicles, setSelectedVehicles] = useState<string[]>(['keke bus']);
     const [timeMin, setTimeMin] = useState('');
     const [timeMax, setTimeMax] = useState('');
     const [fareMin, setFareMin] = useState('');
@@ -42,6 +60,7 @@ export default function SuggestRouteClient() {
     const [errorMsg, setErrorMsg] = useState('');
     const [user, setUser] = useState<any>(null);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [showPreview, setShowPreview] = useState(true);
 
     const supabase = createClient();
 
@@ -61,11 +80,30 @@ export default function SuggestRouteClient() {
         getAuth();
     }, [supabase]);
 
+    const toggleVehicle = (id: string) => {
+        setSelectedVehicles(prev => 
+            prev.includes(id) ? prev.filter(v => v !== id) : [...prev, id]
+        );
+    };
+
+    const addStop = () => {
+        setStops([...stops, { id: Math.random().toString(36).substr(2, 9), location: '' }]);
+    };
+
+    const removeStop = (id: string) => {
+        if (stops.length > 1) setStops(stops.filter(s => s.id !== id));
+    };
+
+    const updateStop = (id: string, val: string) => {
+        setStops(stops.map(s => s.id === id ? { ...s, location: val } : s));
+    };
+
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
         if (!routeTitle.trim()) newErrors.routeTitle = 'Route title required';
         if (!startLocation.trim()) newErrors.startLocation = 'Start point required';
         if (!destination.trim()) newErrors.destination = 'Final destination required';
+        if (selectedVehicles.length === 0) newErrors.vehicles = 'Select at least one vehicle';
         
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -82,7 +120,7 @@ export default function SuggestRouteClient() {
             formData.append('routeTitle', routeTitle);
             formData.append('start_location', startLocation);
             formData.append('destination', destination);
-            formData.append('vehicle_type_used', vehicleTypeUsed);
+            formData.append('vehicle_type_used', selectedVehicles.join(', '));
             formData.append('timeMin', timeMin);
             formData.append('timeMax', timeMax);
             formData.append('fareMin', fareMin);
@@ -93,12 +131,23 @@ export default function SuggestRouteClient() {
             formData.append('tipsAndWarnings', tipsAndWarnings);
             formData.append('description', description);
 
-            // Send simplified stops
+            // Serialize stops for database insertion
+            const stopsString = [
+                startLocation,
+                ...stops.filter(s => s.location.trim()).map(s => s.location),
+                destination
+            ].join(' → ');
+
+            // Map to stops_along_the_way JSONB for routes table
             const stopsAlongTheWay = [
-                { type: 'start', location: startLocation, instruction: 'Starting point.', vehicle: vehicleTypeUsed, fare: 0 },
+                { type: 'start', location: startLocation, instruction: 'Starting point.', vehicle: selectedVehicles[0], fare: 0 },
+                ...stops.filter(s => s.location.trim()).map(s => ({
+                    type: 'stop', location: s.location, instruction: 'Stop along the way.', vehicle: selectedVehicles[0], fare: 0
+                })),
                 { type: 'end', location: destination, instruction: 'Final destination.', vehicle: 'None', fare: 0 }
             ];
 
+            formData.append('stopsAlongTheWay', stopsString);
             formData.append('stopsJSON', JSON.stringify(stopsAlongTheWay));
 
             // Run the server action
@@ -108,7 +157,7 @@ export default function SuggestRouteClient() {
             if (result.error) throw new Error(result.error);
 
             if (user) {
-                const totalPoints = 30 + (detailedDirections.length > 50 ? 20 : 0);
+                const totalPoints = 50 + (detailedDirections.length > 50 ? 50 : 0);
                 await supabase.from('community_points').insert({
                     user_id: user.id,
                     points: totalPoints,
@@ -130,7 +179,8 @@ export default function SuggestRouteClient() {
         setRouteTitle('');
         setStartLocation('');
         setDestination('');
-        setVehicleTypeUsed('Keke bus');
+        setStops([{ id: '1', location: '' }]);
+        setSelectedVehicles(['keke bus']);
         setTimeMin('');
         setTimeMax('');
         setFareMin('');
@@ -156,7 +206,7 @@ export default function SuggestRouteClient() {
                     <h1 className={styles.successTitle}>Route Intelligence Captured!</h1>
                     <p className={styles.successDesc}>
                         Your route details have been saved. The DAL community thanks you for mapping the network.
-                        <span className={styles.pointReward}> +{30 + (detailedDirections.length > 50 ? 20 : 0)} XP</span>
+                        <span className={styles.pointReward}> +{50 + (detailedDirections.length > 50 ? 50 : 0)} XP</span>
                     </p>
                     <div className={styles.successActions}>
                         <button className={styles.primaryBtn} onClick={resetForm}>Map Another Route</button>
@@ -182,159 +232,215 @@ export default function SuggestRouteClient() {
                             </div>
                         )}
                     </div>
-                    <h1 className={styles.title}>Map a New Route</h1>
-                    <p className={styles.subtitle}>Share your knowledge to help the community navigate better</p>
+                     <h1 className={styles.title}>Route Architect</h1>
+                    <p className={styles.subtitle}>Map the platform. Reach verified status faster.</p>
                 </header>
 
-                <div className={styles.builderBody}>
-                    <section className={styles.formSection}>
-                        <h2 className={styles.sectionTitle}>Route Overview</h2>
-                        <div className={styles.field}>
-                            <label><Info size={12} /> Route Title (e.g., Mile 3 to Choba)</label>
-                            <input 
-                                placeholder="Descriptive title" 
-                                value={routeTitle} 
-                                onChange={e => setRouteTitle(e.target.value)}
-                                className={errors.routeTitle ? styles.errorInput : ''}
-                            />
-                        </div>
-                        <div className={styles.row}>
+                <div className={styles.layoutWrapper}>
+                    <div className={styles.builderBody}>
+                        {/* 1. ROUTE CORE */}
+                        <section className={styles.formSection}>
+                            <h2 className={styles.sectionTitle}>1. Route Identity</h2>
                             <div className={styles.field}>
-                                <label><MapPin size={12} /> Start Origin</label>
+                                <label><Info size={12} /> Route Title (Summary)</label>
                                 <input 
-                                    placeholder="Major landmark or park" 
-                                    value={startLocation} 
-                                    onChange={e => setStartLocation(e.target.value)}
-                                    className={errors.startLocation ? styles.errorInput : ''}
+                                    placeholder="e.g. Rumuokoro to Choba via University" 
+                                    value={routeTitle} 
+                                    onChange={e => setRouteTitle(e.target.value)}
+                                    className={errors.routeTitle ? styles.errorInput : ''}
                                 />
                             </div>
+                            <div className={styles.row}>
+                                <div className={styles.field}>
+                                    <label><MapPin size={12} /> Start Origin</label>
+                                    <input 
+                                        placeholder="Major park or landmark" 
+                                        value={startLocation} 
+                                        onChange={e => setStartLocation(e.target.value)}
+                                        className={errors.startLocation ? styles.errorInput : ''}
+                                    />
+                                </div>
+                                <div className={styles.field}>
+                                    <label><Navigation size={12} /> Final Destination</label>
+                                    <input 
+                                        placeholder="Target destination" 
+                                        value={destination} 
+                                        onChange={e => setDestination(e.target.value)}
+                                        className={errors.destination ? styles.errorInput : ''}
+                                    />
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 2. STOPS ALONG THE WAY */}
+                        <section className={styles.formSection}>
+                            <h2 className={styles.sectionTitle}>2. Stops Along the Way</h2>
+                            <div className={styles.stopsBuilder}>
+                                {stops.map((stop, index) => (
+                                    <div key={stop.id} className={styles.stopRow}>
+                                        <div className={styles.stopIndicator}>
+                                            <div className={styles.stopDot} />
+                                            <div className={styles.stopLine} />
+                                        </div>
+                                        <input 
+                                            placeholder={`Stop #${index + 1} landmark`}
+                                            value={stop.location}
+                                            onChange={e => updateStop(stop.id, e.target.value)}
+                                        />
+                                        {stops.length > 1 && (
+                                            <button onClick={() => removeStop(stop.id)} className={styles.stopRemove}>
+                                                <Trash2 size={12} />
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                <button onClick={addStop} className={styles.addStopBtn}>
+                                    <Plus size={14} /> Add major stop or junction
+                                </button>
+                            </div>
+                        </section>
+
+                        {/* 3. LOGISTICS (VEHICLES & CONDITION) */}
+                        <section className={styles.formSection}>
+                            <h2 className={styles.sectionTitle}>3. Logistics & Transport</h2>
                             <div className={styles.field}>
-                                <label><Navigation size={12} /> Final Destination</label>
-                                <input 
-                                    placeholder="Final stop" 
-                                    value={destination} 
-                                    onChange={e => setDestination(e.target.value)}
-                                    className={errors.destination ? styles.errorInput : ''}
+                                <label><Car size={12} /> Vehicles Type Used (Multiple Select)</label>
+                                <div className={styles.vehicleGrid}>
+                                    {VEHICLE_OPTIONS.map(v => (
+                                        <button 
+                                            key={v.id} 
+                                            type="button"
+                                            className={`${styles.vehicleChip} ${selectedVehicles.includes(v.id) ? styles.selected : ''}`}
+                                            onClick={() => toggleVehicle(v.id)}
+                                        >
+                                            <span className={styles.chipIcon}>{v.icon}</span>
+                                            <span className={styles.chipLabel}>{v.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                {errors.vehicles && <span className={styles.errorText}>{errors.vehicles}</span>}
+                            </div>
+                            <div className={styles.row}>
+                                <div className={styles.field}>
+                                    <label><Zap size={12} /> Road Condition</label>
+                                    <select value={roadCondition} onChange={e => setRoadCondition(e.target.value)}>
+                                        <option>Good</option>
+                                        <option>Fair</option>
+                                        <option>Potholes</option>
+                                        <option>Flooded</option>
+                                        <option>Under Construction</option>
+                                    </select>
+                                </div>
+                                <div className={styles.field}>
+                                    <label><Info size={12} /> Difficulty</label>
+                                    <select value={difficulty} onChange={e => setDifficulty(e.target.value)}>
+                                        <option>Easy</option>
+                                        <option>Moderate</option>
+                                        <option>Challenging</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 4. PERFORMANCE (TIME & FARE) */}
+                        <section className={styles.formSection}>
+                            <h2 className={styles.sectionTitle}>4. Journey Metrics</h2>
+                            <div className={styles.row}>
+                                <div className={styles.field}>
+                                    <label><Clock size={12} /> Time (Min/Max Mins)</label>
+                                    <div className={styles.miniRow}>
+                                        <input type="number" value={timeMin} onChange={e => setTimeMin(e.target.value)} placeholder="Min" />
+                                        <input type="number" value={timeMax} onChange={e => setTimeMax(e.target.value)} placeholder="Max" />
+                                    </div>
+                                </div>
+                                <div className={styles.field}>
+                                    <label><Wallet size={12} /> Fare (Min/Max ₦)</label>
+                                    <div className={styles.miniRow}>
+                                        <input type="number" value={fareMin} onChange={e => setFareMin(e.target.value)} placeholder="Min" />
+                                        <input type="number" value={fareMax} onChange={e => setFareMax(e.target.value)} placeholder="Max" />
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 5. EXPERT INTEL */}
+                        <section className={styles.formSection}>
+                            <h2 className={styles.sectionTitle}>5. High-Fidelity Directions</h2>
+                            <div className={styles.field}>
+                                <label><Navigation size={12} /> Detailed Navigational Instructions</label>
+                                <textarea 
+                                    value={detailedDirections} 
+                                    onChange={e => setDetailedDirections(e.target.value)}
+                                    placeholder="Exact turns, landmarks to watch for..."
+                                    rows={3}
+                                />
+                            </div>
+
+                            <div className={styles.field}>
+                                <label><ShieldCheck size={12} /> Tips & Warnings</label>
+                                <textarea 
+                                    value={tipsAndWarnings} 
+                                    onChange={e => setTipsAndWarnings(e.target.value)}
+                                    placeholder="Pickpocket zones, busy hours, security notes..."
+                                    rows={3}
+                                />
+                            </div>
+
+                            {!user && (
+                                <div className={styles.field}>
+                                    <label><UserIcon size={12} /> Contributor Identity</label>
+                                    <input 
+                                        placeholder="Name for attribution" 
+                                        value={attributionName} 
+                                        onChange={e => setAttributionName(e.target.value)} 
+                                    />
+                                </div>
+                            )}
+                        </section>
+
+                        {errorMsg && <div className={styles.errorAlert}>{errorMsg}</div>}
+
+                        <button 
+                            className={styles.submitBtn} 
+                            onClick={handleSubmit} 
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? 'Synthesizing...' : 'Submit to Database'}
+                            <ShieldCheck size={18} />
+                        </button>
+                    </div>
+
+                    {/* LIVE PREVIEW SIDEBAR */}
+                    <div className={styles.previewSidebar}>
+                        <div className={styles.stickyPreview}>
+                            <div className={styles.previewHeader}>
+                                <span><Eye size={14} /> LIVE PREVIEW</span>
+                                <div className={styles.liveIndicator} />
+                            </div>
+                            
+                            <div className={styles.previewCardWrap}>
+                                <RouteResultCard 
+                                    id="preview-id"
+                                    route_title={routeTitle}
+                                    start_location={startLocation}
+                                    destination={destination}
+                                    vehicle_type_used={selectedVehicles.join(', ')}
+                                    estimated_travel_time_min={parseInt(timeMin) || 0}
+                                    estimated_travel_time_max={parseInt(timeMax) || 0}
+                                    fare_price_range_min={parseInt(fareMin) || 0}
+                                    fare_price_range_max={parseInt(fareMax) || 0}
+                                    difficulty_level={difficulty}
+                                    detailed_directions={detailedDirections}
+                                    tips_and_warnings={tipsAndWarnings}
+                                    stops_along_the_way={[startLocation, ...stops.map(s => s.location), destination].filter(Boolean).join(' → ')}
+                                    isExpanded={true}
                                 />
                             </div>
                         </div>
-                    </section>
-
-                    <section className={styles.formSection}>
-                        <h2 className={styles.sectionTitle}>Time & Fare Estimates</h2>
-                        <div className={styles.row}>
-                            <div className={styles.field}>
-                                <label><Clock size={12} /> Time (Min Minutes)</label>
-                                <input type="number" value={timeMin} onChange={e => setTimeMin(e.target.value)} placeholder="0" />
-                            </div>
-                            <div className={styles.field}>
-                                <label><Clock size={12} /> Time (Max Minutes)</label>
-                                <input type="number" value={timeMax} onChange={e => setTimeMax(e.target.value)} placeholder="0" />
-                            </div>
+                    </div>
+                </div>
                         </div>
-                        <div className={styles.row}>
-                            <div className={styles.field}>
-                                <label><Wallet size={12} /> Fare Min (₦)</label>
-                                <input type="number" value={fareMin} onChange={e => setFareMin(e.target.value)} placeholder="0" />
-                            </div>
-                            <div className={styles.field}>
-                                <label><Wallet size={12} /> Fare Max (₦)</label>
-                                <input type="number" value={fareMax} onChange={e => setFareMax(e.target.value)} placeholder="0" />
-                            </div>
-                        </div>
-                    </section>
-
-                    <section className={styles.formSection}>
-                        <h2 className={styles.sectionTitle}>Logic & Logistics</h2>
-                        <div className={styles.row}>
-                            <div className={styles.field}>
-                                <label><Zap size={12} /> Road Condition</label>
-                                <select value={roadCondition} onChange={e => setRoadCondition(e.target.value)}>
-                                    <option>Good</option>
-                                    <option>Fair</option>
-                                    <option>Potholes</option>
-                                    <option>Flooded</option>
-                                    <option>Under Construction</option>
-                                </select>
-                            </div>
-                            <div className={styles.field}>
-                                <label><Bus size={12} /> Primary Vehicle</label>
-                                <select value={vehicleTypeUsed} onChange={e => setVehicleTypeUsed(e.target.value)}>
-                                    <option>Keke</option>
-                                    <option>Keke bus</option>
-                                    <option>Bus</option>
-                                    <option>Taxi</option>
-                                    <option>Bike</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className={styles.field}>
-                            <label><Info size={12} /> Primary Difficulty</label>
-                            <select value={difficulty} onChange={e => setDifficulty(e.target.value)}>
-                                <option>Easy</option>
-                                <option>Moderate</option>
-                                <option>Challenging</option>
-                            </select>
-                        </div>
-                    </section>
-
-                    <section className={styles.formSection}>
-                        <h2 className={styles.sectionTitle}>Expert Intelligence Layer</h2>
-                        <div className={styles.field}>
-                            <label><Navigation size={12} /> Detailed Navigational Instructions</label>
-                            <textarea 
-                                value={detailedDirections} 
-                                onChange={e => setDetailedDirections(e.target.value)}
-                                placeholder="Exact turns, landmarks to watch for, and how to spot the right vehicle..."
-                                rows={3}
-                            />
-                        </div>
-
-                        <div className={styles.field}>
-                            <label><ShieldCheck size={12} /> Survival Tips & Warnings</label>
-                            <textarea 
-                                value={tipsAndWarnings} 
-                                onChange={e => setTipsAndWarnings(e.target.value)}
-                                placeholder="Pickpocket zones, busy hours, alternative routes when flooded..."
-                                rows={3}
-                            />
-                        </div>
-
-                        <div className={styles.field}>
-                            <label>
-                                <Info size={12} /> General Expert Notes
-                                <span className={styles.pointIncentive}>+10 XP</span>
-                            </label>
-                            <textarea 
-                                value={description} 
-                                onChange={e => setDescription(e.target.value)}
-                                placeholder="Any extra 'Street Intel' — loading park location, landmarks to watch for..."
-                                rows={2}
-                            />
-                        </div>
-
-                        {!user && (
-                            <div className={styles.field}>
-                                <label><UserIcon size={12} /> Contributor Name</label>
-                                <input 
-                                    placeholder="Anonymous" 
-                                    value={attributionName} 
-                                    onChange={e => setAttributionName(e.target.value)} 
-                                />
-                            </div>
-                        )}
-                    </section>
-
-                    {errorMsg && <div className={styles.errorAlert}>{errorMsg}</div>}
-
-                    <button 
-                        className={styles.submitBtn} 
-                        onClick={handleSubmit} 
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? 'Submitting Knowledge...' : 'Submit Route Intelligence'}
-                        <ShieldCheck size={18} />
-                    </button>
+                    </div>
                 </div>
             </div>
         </div>
