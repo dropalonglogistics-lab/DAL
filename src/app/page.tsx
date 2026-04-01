@@ -99,19 +99,19 @@ export default function HomePage() {
                 </div>
                 <div className={styles.heroContent}>
                     <span className={styles.eyebrow}>PORT HARCOURT&apos;S INTELLIGENCE LAYER</span>
-                    <h1 className={styles.h1}>Move Smarter.<br />Deliver Faster.<br />Stress Less.</h1>
+                    <h1 className={styles.h1}>Move Smarter in<br />Port Harcourt.</h1>
                     <p className={styles.subText}>
-                        Community-powered routing, same-hour delivery, and personal shopping —
-                        all in one platform built for Port Harcourt.
+                        Intelligent road transit routing. Community-powered intelligence.
+                        Fare estimates, live alerts, and real-time navigation — all free.
                     </p>
                     <div className={styles.ctaRow}>
-                        <Link href="/signup" className={styles.ctaGold}>Get Started Free</Link>
-                        <Link href="/about" className={styles.ctaGhost}>See How It Works</Link>
+                        <Link href="/search" className={styles.ctaGold}>Find a Route <ArrowRight size={16} /></Link>
+                        <Link href="/suggest-route" className={styles.ctaGhost}>Suggest a Route</Link>
                     </div>
                     <div className={styles.statsRow}>
-                        <div className={styles.statItem}><MapPin size={18} color="var(--color-gold)" /> <strong>{stats.verifiedCount.toLocaleString()}</strong> verified routes</div>
-                        <div className={styles.statItem}><AlertTriangle size={18} color="#F87171" /> <strong>{stats.alertCount.toLocaleString()}</strong> alerts today</div>
-                        <div className={styles.statItem}><Users size={18} color="#60A5FA" /> <strong>{stats.memberCount.toLocaleString()}</strong> members</div>
+                        <div className={styles.statItem}><MapPin size={16} color="var(--color-gold)" /> <strong>{stats.verifiedCount.toLocaleString()}</strong> routes</div>
+                        <div className={styles.statItem}><AlertTriangle size={16} color="#F87171" /> <strong>{stats.alertCount.toLocaleString()}</strong> alerts today</div>
+                        <div className={styles.statItem}><Users size={16} color="#60A5FA" /> <strong>{stats.memberCount.toLocaleString()}</strong> members</div>
                     </div>
                 </div>
             </section>
