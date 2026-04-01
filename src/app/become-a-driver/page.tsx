@@ -15,7 +15,7 @@ import { ArrowRight, Info, ShieldCheck, Map, HandCoins } from 'lucide-react';
 const DRIVER_VEHICLE_TYPES = [
     { id: 'keke', label: 'Keke', icon: '🛺' },
     { id: 'taxi', label: 'Taxi', icon: '🚕' },
-    { id: 'shuttle', label: 'Shuttle', icon: '🚐' },
+    { id: 'shuttle', label: 'Keke bus', icon: '🚐' },
     { id: 'bus', label: 'Bus', icon: '🚌' },
 ];
 

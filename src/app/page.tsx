@@ -172,7 +172,7 @@ export default function HomePage() {
                         </div>
                         <button className={styles.findBtn} onClick={handleSearch}>Find Route</button>
                         <p style={{ fontSize: '10px', color: '#555', marginTop: '16px', textAlign: 'center' }}>
-                            Keke, Taxi, Shuttle, Bus, Bike — Port Harcourt Coverage.
+                            Keke, Taxi, Keke bus, Bus, Bike — Port Harcourt Coverage.
                         </p>
                     </div>
                 </div>

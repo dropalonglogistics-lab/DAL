@@ -6,7 +6,7 @@ import { Search, MapPin, Navigation, Loader, X } from 'lucide-react';
 import styles from './RouteSearch.module.css';
 
 const VEHICLE_ICONS: Record<string, string> = {
-    keke: '🛺', taxi: '🚕', shuttle: '🚐', bus: '🚌', bike: '🏍️', walk: '🚶',
+    keke: '🛺', taxi: '🚕', shuttle: '🚐', 'keke bus': '🚐', bus: '🚌', bike: '🏍️', walk: '🚶',
 };
 
 type Area = string;

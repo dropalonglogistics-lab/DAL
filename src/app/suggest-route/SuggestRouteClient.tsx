@@ -252,7 +252,7 @@ export default function SuggestRouteClient() {
                                     </div>
                                     <div className={styles.legContent}>
                                         <div className={styles.legHeader}>
-                                            <h3 className={styles.legTitle}>Leg {index + 1}</h3>
+                                            {/* Leg title removed */}
                                             {legs.length > 1 && (
                                                 <button onClick={() => removeLeg(leg.id)} className={styles.removeBtn}>
                                                     <Trash2 size={14} />
@@ -289,9 +289,8 @@ export default function SuggestRouteClient() {
                                                     onChange={e => updateLeg(leg.id, 'vehicle', e.target.value)}
                                                 >
                                                     <option>Keke</option>
-                                                    <option>Shuttle</option>
+                                                    <option>Keke bus</option>
                                                     <option>Bus</option>
-                                                    <option>Leg (Walking)</option>
                                                 </select>
                                             </div>
                                             <div className={styles.field}>
