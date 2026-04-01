@@ -5,3 +5,8 @@ node_modules/
 *.log
 dist/
 build/
+
+.supabase/
+supabase/.temp/
+migration.sql
+run-migration.js
