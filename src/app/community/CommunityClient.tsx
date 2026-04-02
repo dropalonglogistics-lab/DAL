@@ -50,21 +50,6 @@ export default function CommunityClient({
             <div className={styles.hero}>
                 <h1 className={styles.headline}>Growth via Intelligence</h1>
                 <p className={styles.subheadline}>Real humans. Real data. Real impact in Port Harcourt.</p>
-                
-                <div className={styles.statsRow}>
-                    <div className={styles.statItem}>
-                        <div className={styles.statValue}>{totalParticipants.toLocaleString()}</div>
-                        <div className={styles.statLabel}>Active Members</div>
-                    </div>
-                    <div className={styles.statItem}>
-                        <div className={styles.statValue}>{reportsToday}</div>
-                        <div className={styles.statLabel}>Reports Today</div>
-                    </div>
-                    <div className={styles.statItem}>
-                        <div className={styles.statValue}>{verifiedCount}</div>
-                        <div className={styles.statLabel}>Routes Verified</div>
-                    </div>
-                </div>
             </div>
 
             {/* COMPETITION BANNER */}
@@ -72,9 +57,9 @@ export default function CommunityClient({
                 <section className={styles.competitionCard}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                         <Trophy size={24} color="#C9A227" />
-                        <h2 className={styles.cardTitle}>{competition.title}</h2>
+                        <h2 className={styles.cardTitle}>{competition.title.replace(/March Madness Routes?/i, 'Easter Egg Route challenge')}</h2>
                     </div>
-                    <p className={styles.prize}>{competition.prize}</p>
+                    <p className={styles.prize}>{competition.prize.replace(/\+ \d+ months DAL Premium/i, '').replace(/\+\s*$/,'').trim()}</p>
                     <p className={styles.rules}>{competition.rules}</p>
                     
                     <div className={styles.howToEarn}>
