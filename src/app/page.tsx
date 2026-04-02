@@ -74,7 +74,6 @@ export default function HomePage() {
                             List Your Business Free <ArrowRight size={18} />
                         </Link>
                     </div>
-                    </div>
                 </div>
             </section>
 
