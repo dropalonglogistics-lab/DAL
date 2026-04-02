@@ -28,6 +28,10 @@ export async function GET() {
             verifiedCount: verifiedCount || 0,
             alertCount: alertCount || 0,
             memberCount: memberCount || 0
+        }, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=60'
+            }
         });
     } catch (error) {
         console.error('Error fetching stats:', error);

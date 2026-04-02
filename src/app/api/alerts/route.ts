@@ -48,8 +48,38 @@ export async function POST(req: Request) {
         area: area || null,
         severity: severity || 'info',
         user_id: user.id,
-    }).select('id').single()
+    }).select('id, area').single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Trigger push notifications to premium users with matching saved routes
+    if (data.area) {
+        try {
+            // Find premium users who have this area in their saved routes
+            const { data: subscribers } = await supabase
+                .from('saved_routes')
+                .select('user_id, profiles!inner(is_premium)')
+                .eq('profiles.is_premium', true)
+                .ilike('name', `%${data.area}%`);
+
+            if (subscribers && subscribers.length > 0) {
+                const userIds = [...new Set(subscribers.map(s => s.user_id))];
+                for (const userId of userIds) {
+                    await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/notifications/push`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            userId,
+                            title: `Road Alert: ${data.area} ⚠️`,
+                            body: description
+                        })
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('Alert push notification failed', e);
+        }
+    }
+
     return NextResponse.json({ id: data.id })
 }

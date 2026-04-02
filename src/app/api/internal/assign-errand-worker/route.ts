@@ -1,9 +1,17 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { serviceRoleClient, haversineKm } from '@/utils/api-helpers';
 
+export const dynamic = 'force-dynamic';
+
+// POST /api/internal/assign-errand-worker — find and assign worker after payment
 export async function POST(req: Request) {
-    const { orderId } = await req.json();
-    const supabase = await createClient();
+    const { orderId, pickup_lat, pickup_lng } = await req.json();
+
+    if (!orderId || !pickup_lat || !pickup_lng) {
+        return NextResponse.json({ error: 'orderId, pickup_lat, and pickup_lng are required' }, { status: 400 });
+    }
+
+    const supabase = serviceRoleClient();
 
     // ALGORITHM: 
     // Tier 1 (0-5 min): errand_worker profile with AVAILABLE status.
@@ -11,44 +19,57 @@ export async function POST(req: Request) {
     // Tier 3 (10-13 min): driver profiles with errand_opt_in=true and AVAILABLE.
     // After 13 min: Admin alert + customer notification.
 
-    // For this prototype, we immediately simulate a successful match with an available profile to allow the UI to proceed seamlessly.
-    
-    // Fetch a real profile to satisfy the foreign key constraint on errand_orders.worker_id
-    const { data: profiles } = await supabase.from('profiles').select('id, full_name, phone').neq('full_name', null).limit(1);
-    
-    const mockWorker = {
-        id: profiles?.[0]?.id || null,
-        full_name: profiles?.[0]?.full_name || 'Chidi Amadi',
-        phone: profiles?.[0]?.phone || '+2348000000000',
-        transport_type: 'Bike', // Simulated from Tier 1 matching
-        reputation_score: 98 // 4.9 stars
-    };
+    // TIER 1: Errand Workers (Proximity 3km)
+    const { data: errandWorkers } = await supabase
+        .from('errand_worker_profiles')
+        .select('id, user_id, last_lat, last_lng, profiles!inner(full_name, reputation_score)')
+        .eq('status', 'AVAILABLE');
 
-    if (mockWorker.id) {
-        await supabase.from('errand_orders').update({ worker_id: mockWorker.id, status: 'assigned' }).eq('id', orderId);
+    let match = (errandWorkers ?? []).find(w => w.last_lat && w.last_lng && haversineKm(pickup_lat, pickup_lng, w.last_lat, w.last_lng) <= 3);
+
+    // TIER 2: Riders (Proximity 3km)
+    if (!match) {
+        const { data: riders } = await supabase
+            .from('rider_profiles')
+            .select('id, user_id, last_lat, last_lng, profiles!inner(full_name, reputation_score)')
+            .eq('status', 'ONLINE')
+            .eq('errand_opt_in', true);
+            
+        match = (riders ?? []).find(r => r.last_lat && r.last_lng && haversineKm(pickup_lat, pickup_lng, r.last_lat, r.last_lng) <= 3);
     }
 
-    // Simulate Whatsapp/Push sent
-    console.log(`[Notification] Dispatching WhatsApp match confirmation to customer for order ${orderId}`);
-    console.log(`[Notification] Dispatching Push Notification to worker ${mockWorker.full_name}`);
+    // TIER 3: Drivers (Proximity 5km)
+    if (!match) {
+        const { data: drivers } = await supabase
+            .from('driver_profiles')
+            .select('id, user_id, last_lat, last_lng, profiles!inner(full_name, reputation_score)')
+            .eq('status', 'AVAILABLE')
+            .eq('errand_opt_in', true);
+            
+        match = (drivers ?? []).find(d => d.last_lat && d.last_lng && haversineKm(pickup_lat, pickup_lng, d.last_lat, d.last_lng) <= 5);
+    }
 
-    // Fire OneSignal Push Notification to the Customer
-    const { data: order } = await supabase.from('errand_orders').select('user_id').eq('id', orderId).single();
-    if (order?.user_id) {
+    if (match) {
+        await supabase.from('errand_orders').update({ 
+            worker_id: match.user_id, 
+            status: 'assigned' 
+        }).eq('id', orderId);
+
+        // Push notification to worker
         try {
-            await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/notifications/push`, {
+            fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/notifications/push`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    userId: order.user_id,
-                    title: 'Worker Assigned ✅',
-                    body: `${mockWorker.full_name} is on the way! 🏍️`
-                })
+                    userId: match.user_id,
+                    title: 'New Errand Assigned! 🚀',
+                    body: 'A customer needs assistance with an errand. Check your tasks!'
+                }),
             });
-        } catch (e) {
-            console.error('Push trigger failed', e);
-        }
+        } catch (_) {}
+
+        return NextResponse.json({ success: true, workerId: match.user_id });
     }
 
-    return NextResponse.json({ assigned: true, worker: mockWorker });
+    return NextResponse.json({ success: false, message: 'No worker matching the criteria was found.' });
 }
