@@ -11,7 +11,14 @@ export default async function UserDashboardLayout({
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        redirect('/login?next=/dashboard');
+        redirect('/auth/login?next=/dashboard');
+    }
+
+    const { data: profile } = await supabase.from('profiles').select('onboarding_completed').eq('id', user.id).maybeSingle();
+    
+    // Fallback if column exists and is false
+    if (profile && profile.onboarding_completed === false) {
+        redirect('/welcome');
     }
 
     return <DashboardLayout>{children}</DashboardLayout>;

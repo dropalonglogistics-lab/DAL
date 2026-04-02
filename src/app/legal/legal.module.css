@@ -1,0 +1,155 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 120px 24px 80px;
+    display: flex;
+    gap: 60px;
+    background-color: var(--brand-black, #0D0D0D);
+    color: #FFFFFF;
+    min-height: 100vh;
+}
+
+.sidebar {
+    flex: 0 0 240px;
+    position: sticky;
+    top: 100px;
+    align-self: flex-start;
+}
+
+.sidebarTitle {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: var(--brand-gold, #C9A227);
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.navLink {
+    color: #A0A0A0;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+    font-weight: 500;
+}
+
+.navLink:hover, .activeLink {
+    color: #FFFFFF;
+}
+
+.activeLink::before {
+    content: "— ";
+    color: var(--brand-gold, #C9A227);
+}
+
+.content {
+    flex: 1;
+    min-width: 0;
+}
+
+.header {
+    margin-bottom: 48px;
+}
+
+.title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    font-family: 'Syne', sans-serif;
+    color: var(--brand-gold, #C9A227);
+    margin-bottom: 12px;
+}
+
+.updatedDate {
+    display: block;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+/* Typography for legal docs inside content */
+.content h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 48px 0 24px;
+    color: var(--brand-gold, #C9A227);
+}
+
+.content h3 {
+    font-size: 1.3rem;
+    margin: 32px 0 16px;
+    color: #EEEEEE;
+}
+
+.content p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    color: #CCCCCC;
+}
+
+.content ul {
+    margin: 20px 0 32px 24px;
+    color: #CCCCCC;
+}
+
+.content li {
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+.tableContainer {
+    overflow-x: auto;
+    margin: 32px 0;
+}
+
+.content table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #DDDDDD;
+}
+
+.content th, .content td {
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: left;
+}
+
+.content th {
+    background-color: rgba(201, 162, 39, 0.1);
+    color: var(--brand-gold, #C9A227);
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+    .container {
+        flex-direction: column;
+        padding-top: 100px;
+        gap: 40px;
+    }
+    
+    .sidebar {
+        flex: none;
+        position: static;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 24px;
+    }
+
+    .nav {
+        flex-direction: row;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 8px;
+    }
+
+    .activeLink::before {
+        display: none;
+    }
+
+    .activeLink {
+        border-bottom: 2px solid var(--brand-gold, #C9A227);
+        padding-bottom: 2px;
+    }
+}

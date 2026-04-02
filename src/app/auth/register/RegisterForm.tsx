@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
@@ -27,8 +27,16 @@ export default function RegisterForm() {
     const supabase = createClient();
 
     const [fields, setFields] = useState({
-        fullName: '', phone: '', email: '', password: '', confirmPassword: '',
+        fullName: '', phone: '', email: '', password: '', confirmPassword: '', referralCode: ''
     });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const ref = params.get('ref');
+            if (ref) setFields(f => ({ ...f, referralCode: ref }));
+        }
+    }, []);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [tosChecked, setTosChecked] = useState(false);
@@ -83,11 +91,16 @@ export default function RegisterForm() {
 
             // 2. Save phone to profile (no SMS verification — collected for future use)
             if (authData.user) {
-                await supabase.from('profiles').update({
+                const profileUpdate: any = {
                     full_name: fields.fullName,
                     phone: normalizedPhone,
                     email: fields.email,
-                }).eq('id', authData.user.id);
+                };
+                if (fields.referralCode) {
+                    profileUpdate.referred_by = fields.referralCode.trim();
+                }
+                
+                await supabase.from('profiles').update(profileUpdate).eq('id', authData.user.id);
             }
 
             // 3. Redirect to email OTP verification page
@@ -209,6 +222,20 @@ export default function RegisterForm() {
                     {errors.confirmPassword && <span className={styles.errorText}><AlertCircle size={12} />{errors.confirmPassword}</span>}
                 </div>
 
+                {/* Referral Code (Optional) */}
+                <div className={styles.fieldGroup}>
+                    <label className={styles.label}>Referral Code (Optional)</label>
+                    <div className={styles.inputWrap}>
+                        <input
+                            type="text"
+                            placeholder="e.g. 5a1b2c3d"
+                            value={fields.referralCode}
+                            onChange={set('referralCode')}
+                            className={styles.input}
+                        />
+                    </div>
+                </div>
+
                 {/* ToS */}
                 <div className={styles.checkboxGroup}>
                     <input
@@ -222,8 +249,8 @@ export default function RegisterForm() {
                         }}
                     />
                     <label htmlFor="tos" className={styles.checkboxLabel}>
-                        I agree to the <Link href="/terms" target="_blank">Terms of Service</Link> and{' '}
-                        <Link href="/privacy" target="_blank">Privacy Policy</Link>
+                        I agree to the <Link href="/legal/terms" target="_blank">Terms of Service</Link> and{' '}
+                        <Link href="/legal/privacy" target="_blank">Privacy Policy</Link>
                     </label>
                 </div>
                 {errors.tos && (

@@ -1,0 +1,110 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--brand-black, #0D0D0D);
+    color: #FFFFFF;
+    text-align: center;
+    padding: 24px;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.gradientBg {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(201, 162, 39, 0.15) 0%, rgba(13, 13, 13, 0) 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 48px 32px;
+    max-width: 500px;
+    width: 100%;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.avatar {
+    width: 64px;
+    height: 64px;
+    background: var(--brand-gold, #C9A227);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--brand-black, #0D0D0D);
+    margin-bottom: 24px;
+}
+
+.title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    font-weight: 800;
+    margin-bottom: 16px;
+    line-height: 1.2;
+}
+
+.subtitle {
+    color: #A0A0A0;
+    font-size: 1.1rem;
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+
+.features {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    margin-bottom: 40px;
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 16px;
+    border-radius: 12px;
+    color: #FFF;
+    text-align: left;
+}
+
+.iconWrap {
+    color: var(--brand-gold, #C9A227);
+    display: flex;
+}
+
+.primaryBtn {
+    width: 100%;
+    background-color: var(--brand-gold, #C9A227);
+    color: var(--brand-black, #0D0D0D);
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    display: inline-block;
+}
+
+.primaryBtn:hover {
+    opacity: 0.9;
+}

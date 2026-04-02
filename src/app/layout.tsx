@@ -3,6 +3,7 @@ import './globals.css';
 import PublicLayout from '@/components/layout/PublicLayout';
 import OneSignalInit from '@/components/OneSignalInit';
 import PostHogProvider from '@/components/Providers/PostHogProvider';
+import CookieBanner from '@/components/legal/CookieBanner';
 
 
 
@@ -49,6 +50,7 @@ export default function RootLayout({
                 <PublicLayout>
                     {children}
                 </PublicLayout>
+                <CookieBanner />
             </body>
         </html>
     );

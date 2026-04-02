@@ -1,0 +1,64 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--brand-black, #0D0D0D);
+    color: #FFFFFF;
+    text-align: center;
+    padding: 20px;
+    font-family: 'Inter', sans-serif;
+}
+
+.title {
+    font-size: clamp(6rem, 15vw, 12rem);
+    font-weight: 800;
+    color: var(--brand-gold, #C9A227);
+    margin: 0;
+    line-height: 1;
+    font-family: 'Clash Display', 'Syne', sans-serif;
+}
+
+.subtitle {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-weight: 500;
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+.btnGroup {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.primaryBtn {
+    background-color: var(--brand-gold, #C9A227);
+    color: var(--brand-black, #0D0D0D);
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.primaryBtn:hover {
+    opacity: 0.9;
+}
+
+.secondaryBtn {
+    background-color: transparent;
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.secondaryBtn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}

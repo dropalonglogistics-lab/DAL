@@ -97,7 +97,15 @@ export default function ProfileClient() {
                     }
                 }
 
-                // 4. Admin Stats
+                // 4. Onboarding check
+                if (profileData && profileData.onboarding_completed === false) {
+                    if (isMounted) {
+                        router.push('/welcome');
+                        return;
+                    }
+                }
+
+                // 5. Admin Stats
                 if (profileData?.is_admin) {
                     try {
                         const stats = await fetchAdminStats()
