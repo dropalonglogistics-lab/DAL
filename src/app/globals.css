@@ -77,6 +77,12 @@
   --border: #E2E8F0;
   --glass-bg: rgba(255, 255, 255, 0.8);
   --color-shadow: rgba(15, 23, 42, 0.08);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-border-heavy: rgba(0, 0, 0, 0.15);
+  --glass-overlay: rgba(0, 0, 0, 0.02);
+  --glass-overlay-hover: rgba(0, 0, 0, 0.06);
+  --text-gradient-start: #0F172A;
+  --text-gradient-end: rgba(15, 23, 42, 0.6);
 }
 
 /* Dark Mode Overrides */
@@ -92,6 +98,12 @@
   --border: #262626;
   --glass-bg: rgba(5, 5, 5, 0.85);
   --color-shadow: rgba(0, 0, 0, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-border-heavy: rgba(255, 255, 255, 0.1);
+  --glass-overlay: rgba(255, 255, 255, 0.02);
+  --glass-overlay-hover: rgba(255, 255, 255, 0.05);
+  --text-gradient-start: #FFFFFF;
+  --text-gradient-end: rgba(255, 255, 255, 0.7);
 }
 
 .light-mode {
@@ -106,6 +118,12 @@
   --border: #E2E8F0;
   --glass-bg: rgba(255, 255, 255, 0.8);
   --color-shadow: rgba(15, 23, 42, 0.08);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-border-heavy: rgba(0, 0, 0, 0.15);
+  --glass-overlay: rgba(0, 0, 0, 0.02);
+  --glass-overlay-hover: rgba(0, 0, 0, 0.06);
+  --text-gradient-start: #0F172A;
+  --text-gradient-end: rgba(15, 23, 42, 0.6);
 }
 
 * {

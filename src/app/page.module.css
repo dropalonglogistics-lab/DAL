@@ -68,8 +68,8 @@
     z-index: 10;
     width: 400px;
     flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: var(--glass-overlay);
+    border: 1px solid var(--glass-border);
     border-radius: 20px;
     padding: 36px;
     backdrop-filter: blur(16px);
@@ -90,7 +90,8 @@
 
 .heroSearchVehicles {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--text-secondary);
+    opacity: 0.8;
     margin: 16px 0 0;
     text-align: center;
     line-height: 1.8;
@@ -121,7 +122,7 @@
     margin-bottom: 20px;
     max-width: 680px;
     letter-spacing: -0.02em;
-    background: linear-gradient(180deg, #FFFFFF 30%, rgba(255, 255, 255, 0.7) 100%);
+    background: linear-gradient(180deg, var(--text-gradient-start) 30%, var(--text-gradient-end) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -165,7 +166,7 @@
 
 .ctaGhost {
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border-heavy);
     color: var(--text-primary);
     padding: 15px 32px;
     border-radius: 12px;
@@ -179,8 +180,8 @@
 }
 
 .ctaGhost:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--glass-overlay-hover);
+    border-color: var(--glass-border-heavy);
     transform: translateY(-2px);
 }
 
@@ -189,7 +190,7 @@
     gap: 28px;
     font-size: 13px;
     color: var(--text-secondary);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--glass-border);
     padding-top: 28px;
 }
 
@@ -210,7 +211,7 @@
 .darkSection {
     background-color: var(--background);
     padding: 120px 6%;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid var(--glass-border);
     position: relative;
 }
 
@@ -248,8 +249,8 @@
 }
 
 .alertCard {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--glass-overlay);
+    border: 1px solid var(--glass-border);
     border-left: 4px solid var(--color-gold);
     padding: 28px;
     border-radius: 16px;
@@ -260,8 +261,8 @@
 
 .alertCard:hover {
     transform: translateX(6px);
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.08);
+    background: var(--glass-overlay-hover);
+    border-color: var(--glass-border-heavy);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
@@ -297,7 +298,7 @@
 
 .alertDesc {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-secondary);
     line-height: 1.6;
     margin-bottom: 12px;
 }
@@ -335,10 +336,10 @@
 
 /* Search Widget */
 .searchWidget {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--glass-overlay);
     padding: 36px;
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     position: sticky;
     top: 100px;
@@ -362,8 +363,8 @@
 
 .darkInput {
     width: 100%;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: var(--glass-overlay);
+    border: 1px solid var(--glass-border);
     border-radius: 10px;
     padding: 14px 18px;
     color: var(--text-primary);
@@ -375,7 +376,7 @@
 .darkInput:focus {
     border-color: rgba(201, 162, 39, 0.4);
     box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.08);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--glass-overlay-hover);
 }
 
 .findBtn {
@@ -403,7 +404,7 @@
 .featureSection {
     background-color: var(--background);
     padding: 120px 6%;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid var(--glass-border);
 }
 
 .featureGrid {
@@ -424,7 +425,7 @@
     text-decoration: none;
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
 }
 
 .featureCard::before {
@@ -449,7 +450,7 @@
 }
 
 .blackCard {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--glass-overlay);
     color: var(--text-primary);
 }
 
@@ -496,7 +497,7 @@
 .splitSection {
     padding: 120px 6%;
     background: var(--background);
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid var(--glass-border);
 }
 
 .splitGrid {
@@ -513,7 +514,7 @@
     background: var(--background);
     padding: 120px 6%;
     text-align: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid var(--glass-border);
     position: relative;
 }
 
@@ -550,7 +551,7 @@
     background: var(--background);
     color: var(--text-primary);
     padding: 120px 6%;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid var(--glass-border);
 }
 
 .testimonialGrid {
@@ -561,17 +562,17 @@
 }
 
 .testimonialCard {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--glass-overlay);
     padding: 36px;
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
     transition: all 0.3s ease;
 }
 
 .testimonialCard:hover {
     transform: translateY(-4px);
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.08);
+    background: var(--glass-overlay-hover);
+    border-color: var(--glass-border-heavy);
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
 }
 
@@ -579,9 +580,9 @@
    SECTION 7 — WHATSAPP
    ═══════════════════════════════════════════════ */
 .whatsappStrip {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--glass-overlay);
     padding: 48px 8%;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid var(--glass-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
