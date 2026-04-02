@@ -137,7 +137,7 @@ export default function AlertsPageClient() {
                 <div>
                     <h1 style={{ fontSize: '2rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
                         <Bell size={28} style={{ color: 'var(--color-gold)' }} />
-                        Community Alerts
+                        Alerts
                     </h1>
                     <p style={{ color: 'var(--text-secondary)', marginTop: '6px', margin: 0 }}>
                         Real-time road reports from Port Harcourt commuters
