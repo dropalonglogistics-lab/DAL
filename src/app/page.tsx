@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
 import { 
     MapPin, 
     ArrowRight, MessageCircle 
@@ -14,30 +13,9 @@ import styles from './page.module.css';
 export default function HomePage() {
     const [from, setFrom] = useState('');
     const [to, setTo] = useState('');
-    const [leaderboard, setLeaderboard] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
     const router = useRouter();
-    const supabase = createClient();
-
-    // 1. Fetch Leaderboard (Top 3)
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const lbRes = await fetch('/api/community/leaderboard');
-                const lbData = await lbRes.json();
-                setLeaderboard(lbData.leaderboard?.slice(0, 3) || []);
-            } catch (e) {
-                console.error('Initial data fetch failed', e);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-    const handleSearch = () => {
+    
+        const handleSearch = () => {
         if (!from && !to) return;
         router.push(`/search?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
     };
@@ -51,7 +29,7 @@ export default function HomePage() {
                 </div>
                 <div className={styles.heroContent}>
                     <span className={styles.eyebrow}>PORT HARCOURT&apos;S INTELLIGENCE LAYER</span>
-                    <h1 className={styles.h1}>Move Smarter in<br />Port Harcourt.</h1>
+                    <h1 className={styles.h1}>Move Smarter.<br />Deliver Faster.<br />Stress Less.</h1>
                     <p className={styles.subText}>
                         Intelligent road transit routing. Community-powered intelligence.
                         Fare estimates, live alerts, and real-time navigation — all free.
@@ -96,49 +74,11 @@ export default function HomePage() {
                             List Your Business Free <ArrowRight size={18} />
                         </Link>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-                        <div className={styles.statItem} style={{ flexDirection: 'column', textAlign: 'center' }}>
-                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-gold)' }}>500+</span>
-                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Vendors</span>
-                        </div>
-                        <div className={styles.statItem} style={{ flexDirection: 'column', textAlign: 'center' }}>
-                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-gold)' }}>12k+</span>
-                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Orders</span>
-                        </div>
-                        <div className={styles.statItem} style={{ flexDirection: 'column', textAlign: 'center' }}>
-                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-gold)' }}>100%</span>
-                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Coverage</span>
-                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* SECTION 6 — SOCIAL PROOF / LEADERBOARD */}
-            <section className={styles.socialProofSection}>
-                <div style={{ background: 'var(--foreground)', color: 'var(--background)', padding: '60px', borderRadius: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: 'var(--shadow-lg)' }}>
-                    <div>
-                        <h3 className={styles.sectionTitle} style={{ fontSize: '28px', color: 'inherit' }}>Community Leaderboard</h3>
-                        <div style={{ display: 'flex', gap: '40px', marginTop: '32px' }}>
-                            {leaderboard.map((user, i) => (
-                                <div key={user.id || i} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--color-gold)', display: 'flex', alignItems: 'center', justifySelf: 'center', fontWeight: '900', color: '#000', justifyContent: 'center', fontSize: '20px' }}>
-                                        {user.name?.[0] || 'U'}
-                                    </div>
-                                    <div>
-                                        <div style={{ fontWeight: '800', fontSize: '16px' }}>#{user.rank || i+1} {user.name}</div>
-                                        <div style={{ fontSize: '14px', color: 'var(--color-gold)', fontWeight: '700' }}>{user.points?.toLocaleString()} pts</div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <Link href="/community" className={styles.ctaGhost} style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
-                        See Full Leaderboard <ArrowRight size={18} />
-                    </Link>
-                </div>
-            </section>
-
-            {/* SECTION 7 — WHATSAPP STRIP */}
+                        {/* SECTION 7 — WHATSAPP STRIP */}
             <section className={styles.whatsappStrip}>
                 <div>
                     <h3 className={styles.sectionTitle} style={{ fontSize: '24px', marginBottom: '8px' }}>DAL is also on WhatsApp</h3>

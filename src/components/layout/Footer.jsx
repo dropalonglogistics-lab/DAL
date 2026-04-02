@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Share2, MessageCircle } from 'lucide-react';
+import { Share2, MessageCircle, Instagram } from 'lucide-react';
 import styles from './Footer.module.css';
 
 const PLATFORM_LINKS = [
@@ -48,7 +48,7 @@ export default function Footer() {
                                 <Share2 size={18} />
                             </a>
                             <a href="https://instagram.com/dropalong" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} aria-label="Instagram">
-                                IG
+                                <Instagram size={18} />
                             </a>
                             <a href="https://wa.me/2348000000000" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} aria-label="WhatsApp">
                                 <MessageCircle size={18} />
