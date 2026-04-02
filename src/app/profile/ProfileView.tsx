@@ -43,15 +43,41 @@ export default function ProfileClient() {
 
                 let user = authUser
 
-                // 2. Fetch Profile
-                let { data: profileData, error: profileError } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single()
+                // 2. Fetch Profile with Retry Logic
+                let profileData = null;
+                let profileError = null;
+                let retryCount = 0;
+                const maxRetries = 3;
+
+                while (retryCount < maxRetries) {
+                    const { data, error } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', user.id)
+                        .single()
+                    
+                    profileData = data;
+                    profileError = error;
+
+                    if (!error) break; // Success
+                    
+                    if (error.message?.includes('aborted') || error.message?.includes('fetch')) {
+                        retryCount++;
+                        await new Promise(r => setTimeout(r, 400 * retryCount)); // Exponential backoff
+                        continue;
+                    }
+                    
+                    break; // Other fatal errors stop retrying
+                }
 
                 // 3. Handle Missing Profile (Auto-Create)
                 if (profileError || !profileData) {
+                    if (profileError && !profileError.message?.includes('Row not found') && !profileError.message?.includes('aborted')) {
+                        // Throw if it's a hard database error that's not just a missing row or an abort.
+                        throw profileError;
+                    }
+
+                    // Otherwise, try creating
                     const { data: neu, error: insErr } = await supabase.from('profiles').insert([{
                         id: user.id,
                         email: user.email,
@@ -60,11 +86,12 @@ export default function ProfileClient() {
                     }]).select().single()
 
                     if (insErr) {
-                        const { data: retryData } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+                        // Check if it already exists due to race condition
+                        const { data: retryData, error: verifyErr } = await supabase.from('profiles').select('*').eq('id', user.id).single()
                         if (retryData) {
                             profileData = retryData
                         } else {
-                            throw insErr
+                            throw insErr // Throw the insert error
                         }
                     } else {
                         profileData = neu
