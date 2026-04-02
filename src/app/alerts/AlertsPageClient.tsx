@@ -52,7 +52,7 @@ export default function AlertsPageClient() {
     // Reporting form state
     const [showReportForm, setShowReportForm] = useState(false);
     const [newAlertType, setNewAlertType] = useState('traffic');
-    const [newAlertArea, setNewAlertArea] = useState('Mile 1');
+    const [newAlertArea, setNewAlertArea] = useState('');
     const [newAlertDesc, setNewAlertDesc] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -96,7 +96,7 @@ export default function AlertsPageClient() {
     };
 
     const handleSubmitAlert = async () => {
-        if (!newAlertDesc) return;
+        if (!newAlertDesc.trim() || !newAlertArea.trim()) return;
         setIsSubmitting(true);
         try {
             const res = await fetch('/api/alerts', {
@@ -177,13 +177,13 @@ export default function AlertsPageClient() {
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Area</label>
-                            <select 
+                            <input 
+                                type="text"
                                 value={newAlertArea} 
                                 onChange={e => setNewAlertArea(e.target.value)}
+                                placeholder="e.g. Mile 1, Rumuola, Aba Road"
                                 style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#111', border: '1px solid var(--border)', color: '#fff' }}
-                            >
-                                {PH_AREAS_TOP.map(a => <option key={a} value={a}>{a}</option>)}
-                            </select>
+                            />
                         </div>
                     </div>
                     <div style={{ marginBottom: '16px' }}>
@@ -198,12 +198,12 @@ export default function AlertsPageClient() {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                         <button 
-                            disabled={isSubmitting || !newAlertDesc}
+                            disabled={isSubmitting || !newAlertDesc.trim() || !newAlertArea.trim()}
                             onClick={handleSubmitAlert}
                             style={{
                                 background: 'var(--color-gold)', color: '#000', fontWeight: 800,
                                 padding: '10px 24px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-                                opacity: (!newAlertDesc || isSubmitting) ? 0.6 : 1
+                                opacity: (!newAlertDesc.trim() || !newAlertArea.trim() || isSubmitting) ? 0.6 : 1
                             }}
                         >
                             {isSubmitting ? 'Posting...' : 'Post Alert'}
