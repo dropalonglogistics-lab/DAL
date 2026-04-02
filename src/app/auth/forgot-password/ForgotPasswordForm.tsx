@@ -66,7 +66,7 @@ export default function AuthForgotPasswordForm() {
             </form>
 
             <div className={styles.formFooter}>
-                <Link href="/login" className={styles.formLink} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Link href="/auth/login" className={styles.formLink} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     <ArrowLeft size={14} /> Back to Sign In
                 </Link>
             </div>

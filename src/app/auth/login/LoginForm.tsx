@@ -94,6 +94,7 @@ export default function LoginForm() {
             }
 
             // Success
+            setLoading(false);
             router.push('/profile');
             router.refresh();
         } catch {

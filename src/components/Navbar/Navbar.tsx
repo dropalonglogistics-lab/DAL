@@ -208,7 +208,7 @@ export default function Navbar() {
                             )}
                         </div>
                     ) : (
-                        <Link href="/login" className={`${styles.signInBtn} ${styles.desktopOnly}`}>
+                        <Link href="/auth/login" className={`${styles.signInBtn} ${styles.desktopOnly}`}>
                             Sign In
                         </Link>
                     )}
@@ -251,7 +251,7 @@ export default function Navbar() {
                             </button>
                         </>
                     ) : (
-                        <Link href="/login" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
+                        <Link href="/auth/login" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
                             Sign In
                         </Link>
                     )}
