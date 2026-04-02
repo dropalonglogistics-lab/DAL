@@ -139,7 +139,7 @@ function LockScreen() {
                 </p>
             </div>
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <a href="/login?next=/community" style={{
+                <a href="/auth/login?next=/community" style={{
                     display: 'inline-flex', alignItems: 'center', gap: '8px',
                     backgroundColor: '#C9A227', color: '#0D0D0D',
                     padding: '14px 32px', borderRadius: '8px', fontWeight: 800, fontSize: '1rem',

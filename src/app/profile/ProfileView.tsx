@@ -35,9 +35,8 @@ export default function ProfileClient() {
             try {
                 // 1. Get Session / User
                 const { data: { user: authUser }, error: userError } = await supabase.auth.getUser()
-
                 if (userError || !authUser) {
-                    if (isMounted) router.push('/login')
+                    if (isMounted) router.push('/auth/login')
                     return
                 }
 
@@ -219,9 +218,8 @@ export default function ProfileClient() {
             // 2. Clear local storage
             localStorage.clear()
             sessionStorage.clear()
-            // 3. Hard redirect
             setTimeout(() => {
-                window.location.href = '/login'
+                window.location.href = '/auth/login'
             }, 1000)
         } catch (e: any) {
             window.location.href = '/' // Force move

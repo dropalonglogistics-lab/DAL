@@ -204,7 +204,7 @@ export default function LoginForm() {
 
             <div className={styles.formFooter}>
                 New to DAL?
-                <Link href="/signup" className={styles.formLink}>Create account</Link>
+                <Link href="/auth/register" className={styles.formLink}>Create account</Link>
             </div>
         </div>
     );
