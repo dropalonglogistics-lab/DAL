@@ -63,7 +63,7 @@ export async function POST(req: Request) {
                 .ilike('name', `%${data.area}%`);
 
             if (subscribers && subscribers.length > 0) {
-                const userIds = [...new Set(subscribers.map(s => s.user_id))];
+                const userIds = Array.from(new Set(subscribers.map(s => s.user_id)));
                 for (const userId of userIds) {
                     await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/notifications/push`, {
                         method: 'POST',
