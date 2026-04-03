@@ -1,9 +1,10 @@
 .pageContainer {
     min-height: 100vh;
-    background-color: #0D0D0D;
-    color: #FFFFFF;
+    background-color: var(--background);
+    color: var(--text-primary);
     padding: 60px 20px;
 }
+
 
 .contentWrapper {
     max-width: 800px;
@@ -37,13 +38,15 @@
 
 /* SECTION 2 - SEARCH INPUT BOX */
 .searchContainer {
-    background-color: #1A1A1A;
-    border: 0.5px solid #2A2A2A;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 8px 0;
     position: relative;
     margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
 }
+
 
 .connectorLine {
     position: absolute;
@@ -51,9 +54,10 @@
     top: 34px;
     bottom: 34px;
     width: 0.5px;
-    background-color: #2A2A2A;
+    background-color: var(--border);
     z-index: 1;
 }
+
 
 .inputRow {
     display: flex;
@@ -80,18 +84,20 @@
 .dotWhite {
     width: 8px;
     height: 8px;
-    background-color: #FFFFFF;
+    background-color: var(--text-primary);
     border-radius: 50%;
 }
+
 
 .inputField {
     flex: 1;
     background: transparent;
     border: none;
-    color: #FFFFFF;
+    color: var(--text-primary);
     font-size: 16px;
     outline: none;
 }
+
 
 .inputField::placeholder {
     color: #555555;
@@ -158,14 +164,16 @@
 }
 
 .routeCard {
-    background-color: #1A1A1A;
-    border: 0.5px solid #2A2A2A;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 14px;
     cursor: pointer;
     transition: all 0.2s;
     text-align: left;
+    box-shadow: var(--shadow-sm);
 }
+
 
 .routeCard:hover {
     border-color: #C9A227;
@@ -197,8 +205,9 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #FFFFFF;
+    color: var(--text-primary);
 }
+
 
 .arrow {
     color: #C9A227;
@@ -251,14 +260,15 @@
     display: flex;
     flex-direction: column;
     gap: 1px;
-    background-color: #2A2A2A;
-    border: 0.5px solid #2A2A2A;
+    background-color: var(--border);
+    border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
 }
 
+
 .resultRow {
-    background-color: #1A1A1A;
+    background-color: var(--card-bg);
     padding: 16px 20px;
     display: flex;
     justify-content: space-between;
@@ -269,9 +279,11 @@
     text-align: left;
 }
 
+
 .resultRow:hover {
-    background-color: #222222;
+    background-color: var(--glass-overlay-hover);
 }
+
 
 .resultMain {
     display: flex;
@@ -282,8 +294,9 @@
 .resultTitle {
     font-size: 13px;
     font-weight: 700;
-    color: #FFFFFF;
+    color: var(--text-primary);
 }
+
 
 .resultMeta {
     display: flex;

@@ -67,9 +67,6 @@
     color: var(--text-primary);
 }
 
-:global(.light-mode) .title {
-    color: #0F172A;
-}
 
 @media (min-width: 768px) {
     .title {
@@ -96,15 +93,13 @@
     -webkit-backdrop-filter: blur(16px);
     padding: 20px;
     border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow:
-        0 4px 6px -1px rgba(0, 0, 0, 0.05),
-        0 10px 40px -4px var(--color-shadow),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--glass-border-heavy);
+    box-shadow: var(--shadow-lg);
     animation: authCardEntry 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
 }
+
 
 @keyframes authCardEntry {
     from {
@@ -205,11 +200,12 @@
 
 .input:focus {
     outline: none;
-    border-color: var(--color-gold);
+    border-color: var(--input-focus);
     background-color: var(--card-bg);
-    box-shadow: 0 0 0 4px rgba(161, 125, 22, 0.15);
+    box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.15);
     transform: translateY(-1px);
 }
+
 
 .avatarSection {
     display: flex;
@@ -610,8 +606,8 @@
 }
 
 .statCard {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 20px;
     display: flex;
@@ -622,39 +618,15 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-}
-
-.statCard::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
-    opacity: 0;
-    transition: opacity 0.3s;
+    box-shadow: var(--shadow-sm);
 }
 
 .statCard:hover {
     transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
+    border-color: var(--color-gold);
+    box-shadow: var(--shadow-md);
 }
 
-.statCard:hover::before {
-    opacity: 1;
-}
-
-:global(.light-mode) .statCard {
-    background: white;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--border);
-}
-
-:global(.light-mode) .statCard:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
 
 .statIconWrapper {
     width: 48px;

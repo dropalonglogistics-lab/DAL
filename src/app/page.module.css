@@ -25,10 +25,11 @@
     padding: 0 6%;
     overflow: hidden;
     background: 
-        radial-gradient(ellipse 80% 60% at 70% 40%, rgba(201, 162, 39, 0.06) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 20% 80%, rgba(201, 162, 39, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse 80% 60% at 70% 40%, rgba(201, 162, 39, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 20% 80%, rgba(201, 162, 39, 0.02) 0%, transparent 50%),
         var(--background);
 }
+
 
 .heroSection::after {
     content: '';
@@ -68,17 +69,16 @@
     z-index: 10;
     width: 400px;
     flex-shrink: 0;
-    background: var(--glass-overlay);
-    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border-heavy);
     border-radius: 20px;
     padding: 36px;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    box-shadow: 
-        0 4px 6px rgba(0, 0, 0, 0.1),
-        0 24px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-lg);
     animation: heroFadeIn 1s ease-out 0.15s both;
 }
+
 
 .heroSearchTitle {
     font-family: var(--font-syne), sans-serif;
@@ -139,9 +139,10 @@
 
 .ctaRow {
     display: flex;
-    gap: 14px;
+    gap: 16px;
     margin-bottom: 56px;
 }
+
 
 .ctaGold {
     background: linear-gradient(135deg, #C9A227, #B8922A);
@@ -336,16 +337,17 @@
 
 /* Search Widget */
 .searchWidget {
-    background: var(--glass-overlay);
+    background: var(--glass-bg);
     padding: 36px;
     border-radius: 20px;
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border-heavy);
+    box-shadow: var(--shadow-lg);
     position: sticky;
     top: 100px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
+
 
 .inputGroup {
     margin-bottom: 20px;
@@ -363,8 +365,8 @@
 
 .darkInput {
     width: 100%;
-    background: var(--glass-overlay);
-    border: 1px solid var(--glass-border);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
     border-radius: 10px;
     padding: 14px 18px;
     color: var(--text-primary);
@@ -372,6 +374,7 @@
     outline: none;
     transition: all 0.25s ease;
 }
+
 
 .darkInput:focus {
     border-color: rgba(201, 162, 39, 0.4);
@@ -425,8 +428,10 @@
     text-decoration: none;
     position: relative;
     overflow: hidden;
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border);
+    background-color: var(--card-bg);
 }
+
 
 .featureCard::before {
     content: '';
@@ -450,9 +455,10 @@
 }
 
 .blackCard {
-    background: var(--glass-overlay);
+    background: var(--card-bg);
     color: var(--text-primary);
 }
+
 
 .goldCard {
     background: linear-gradient(135deg, #C9A227, #B8922A);
