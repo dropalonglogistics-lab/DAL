@@ -17,37 +17,31 @@ export async function GET(req: Request) {
 
     let query = supabase
         .from('routes')
-        .select('id, origin, destination, fare_min, fare_max, duration_minutes, vehicle_type, description, verified, created_at')
-        .eq('verified', true);
+        .select('id, name, origin, destination, legs, created_at')
+        .eq('status', 'approved');
 
-    // Try exact match first, then partial
-    const { data: exact } = await query
+    // Try partial match on origin and destination
+    const { data: routes, error: queryError } = await query
         .ilike('origin', `%${from}%`)
         .ilike('destination', `%${to}%`);
 
-    const routes = exact ?? [];
+    if (queryError) {
+        return NextResponse.json({ error: queryError.message }, { status: 500 });
+    }
+
+    const results = routes ?? [];
 
     // Enrich with active alerts count for each route
     const enriched = await Promise.all(
-        routes.map(async (route) => {
+        results.map(async (route) => {
             const { count: alertCount } = await supabase
                 .from('alerts')
                 .select('*', { count: 'exact', head: true })
                 .ilike('area', `%${route.origin}%`)
                 .gte('created_at', new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
 
-            // Build structured legs from vehicle_type
-            const vehicles = (route.vehicle_type || 'bus').split(',').map((v: string) => v.trim());
-            const legs = vehicles.map((vehicle: string, i: number) => ({
-                step: i + 1,
-                vehicle: vehicle.toLowerCase(),
-                description: `${vehicle} from ${i === 0 ? route.origin : 'connection'} to ${i === vehicles.length - 1 ? route.destination : 'connection'}`,
-                estimated_fare: route.fare_min ? Math.round(route.fare_min / vehicles.length) : null,
-            }));
-
             return {
                 ...route,
-                legs,
                 activeAlerts: alertCount ?? 0,
             };
         })

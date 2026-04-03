@@ -8,15 +8,15 @@ import styles from './search.module.css';
 
 interface RouteData {
     id: string;
-    route_title: string;
-    start_location: string;
+    name: string;
+    origin: string;
     destination: string;
-    fare_price_range_min: number;
-    fare_price_range_max: number;
-    estimated_travel_time_min: number;
-    estimated_travel_time_max: number;
-    road_condition: string;
-    is_featured: boolean;
+    legs: Array<{
+        vehicle: string;
+        description: string;
+        estimated_fare: number;
+        estimated_minutes: number;
+    }>;
 }
 
 export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: RouteData[] }) {
@@ -26,6 +26,14 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
     const [hasSearched, setHasSearched] = useState(false);
     const [results, setResults] = useState<RouteData[]>([]);
     const supabase = createClient();
+
+    const getLegsInfo = (legs: RouteData['legs']) => {
+        if (!legs || !Array.isArray(legs)) return { fare: 0, minutes: 0 };
+        return legs.reduce((acc, leg) => ({
+            fare: acc.fare + (Number(leg.estimated_fare) || 0),
+            minutes: acc.minutes + (Number(leg.estimated_minutes) || 0)
+        }), { fare: 0, minutes: 0 });
+    };
 
     const handleSwap = () => {
         const temp = fromInput;
@@ -47,30 +55,20 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
 
         try {
             let query = supabase.from('routes').select(`
-                id, route_title, start_location, destination, 
-                fare_price_range_min, fare_price_range_max, 
-                estimated_travel_time_min, estimated_travel_time_max, 
-                road_condition, is_featured
-            `);
+                id, name, origin, destination, legs
+            `).eq('status', 'approved');
 
-            // Fuzzy logic: 
-            // If both: match both. 
-            // If one: match that one (either start or dest if only one field is used? 
-            // The prompt says: "typing 'mile' should match 'Mile 1', 'Mile 3', etc. 
-            // If only From is filled, return all routes where origin matches. 
-            // If only To is filled, return all routes where destination matches.")
-            
             if (cleanFrom && cleanTo) {
                 query = query
-                    .ilike('start_location', `%${cleanFrom}%`)
+                    .ilike('origin', `%${cleanFrom}%`)
                     .ilike('destination', `%${cleanTo}%`);
             } else if (cleanFrom) {
-                query = query.ilike('start_location', `%${cleanFrom}%`);
+                query = query.ilike('origin', `%${cleanFrom}%`);
             } else if (cleanTo) {
                 query = query.ilike('destination', `%${cleanTo}%`);
             }
 
-            const { data, error } = await query.order('route_title', { ascending: true }).limit(50);
+            const { data, error } = await query.order('name', { ascending: true }).limit(50);
             
             if (error) throw error;
             setResults(data || []);
@@ -85,8 +83,6 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
     const handleFeaturedClick = (start: string, dest: string) => {
         setFromInput(start);
         setToInput(dest);
-        // We use a small delay or just call search directly with the new values
-        // To be safe, we'll implement a functional search that takes params
         performDirectSearch(start, dest);
     };
 
@@ -96,21 +92,13 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
         try {
             const { data } = await supabase.from('routes')
                 .select('*')
-                .ilike('start_location', `%${start}%`)
+                .eq('status', 'approved')
+                .ilike('origin', `%${start}%`)
                 .ilike('destination', `%${dest}%`)
                 .limit(50);
             setResults(data || []);
         } finally {
             setIsSearching(false);
-        }
-    };
-
-    const getConditionColor = (condition: string) => {
-        switch (condition?.toLowerCase()) {
-            case 'clear': return styles.dotClear;
-            case 'slow': return styles.dotSlow;
-            case 'blocked': return styles.dotBlocked;
-            default: return styles.dotUnknown;
         }
     };
 
@@ -170,35 +158,32 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
                         <span className={styles.sectionLabel}>POPULAR ROUTES</span>
                         {featuredRoutes.length > 0 ? (
                             <div className={styles.popularGrid}>
-                                {featuredRoutes.map((route) => (
-                                    <button 
-                                        key={route.id} 
-                                        className={styles.routeCard}
-                                        onClick={() => handleFeaturedClick(route.start_location, route.destination)}
-                                    >
-                                        <div className={styles.cardHeader}>
-                                            <span className={`${styles.pill} ${
-                                                route.road_condition === 'clear' ? styles.pillFast : 
-                                                route.road_condition === 'slow' ? styles.pillBusy : styles.pillPopular
-                                            }`}>
-                                                {route.road_condition === 'clear' ? 'Fast' : 
-                                                 route.road_condition === 'slow' ? 'Busy now' : 'Popular'}
-                                            </span>
-                                        </div>
-                                        <div className={styles.routeName}>
-                                            {route.start_location} <span className={styles.arrow}>→</span> {route.destination}
-                                        </div>
-                                        <div className={styles.cardFooter}>
-                                            <div className={styles.conditionRow}>
-                                                <div className={`${styles.dotStatus} ${getConditionColor(route.road_condition)}`}></div>
-                                                {route.road_condition || 'Unknown'}
+                                {featuredRoutes.map((route) => {
+                                    const info = getLegsInfo(route.legs);
+                                    return (
+                                        <button 
+                                            key={route.id} 
+                                            className={styles.routeCard}
+                                            onClick={() => handleFeaturedClick(route.origin, route.destination)}
+                                        >
+                                            <div className={styles.cardHeader}>
+                                                <span className={styles.pillPopular}>Popular</span>
                                             </div>
-                                            <div className={styles.metaText}>
-                                                {route.estimated_travel_time_min}-{route.estimated_travel_time_max}m • ₦{route.fare_price_range_min}-₦{route.fare_price_range_max}
+                                            <div className={styles.routeName}>
+                                                {route.origin} <span className={styles.arrow}>→</span> {route.destination}
                                             </div>
-                                        </div>
-                                    </button>
-                                ))}
+                                            <div className={styles.cardFooter}>
+                                                <div className={styles.conditionRow}>
+                                                    <div className={`${styles.dotStatus} ${styles.dotClear}`}></div>
+                                                    Active
+                                                </div>
+                                                <div className={styles.metaText}>
+                                                    {info.minutes}m • ₦{info.fare}
+                                                </div>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
                             </div>
                         ) : (
                             <div className={styles.emptyState}>
@@ -214,27 +199,30 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
                         
                         {results.length > 0 ? (
                             <div className={styles.resultsList}>
-                                {results.map((route) => (
-                                    <div key={route.id} className={styles.resultRow}>
-                                        <div className={styles.resultMain}>
-                                            <div className={styles.resultTitle}>
-                                                {route.start_location} <span className={styles.arrow}>→</span> {route.destination}
+                                {results.map((route) => {
+                                    const info = getLegsInfo(route.legs);
+                                    return (
+                                        <div key={route.id} className={styles.resultRow}>
+                                            <div className={styles.resultMain}>
+                                                <div className={styles.resultTitle}>
+                                                    {route.origin} <span className={styles.arrow}>→</span> {route.destination}
+                                                </div>
+                                                <div className={styles.resultMeta}>
+                                                    <div className={`${styles.dotStatus} ${styles.dotClear}`}></div>
+                                                    Active
+                                                </div>
                                             </div>
-                                            <div className={styles.resultMeta}>
-                                                <div className={`${styles.dotStatus} ${getConditionColor(route.road_condition)}`}></div>
-                                                {route.road_condition || 'Unknown'}
+                                            <div className={styles.resultStats}>
+                                                <div className={styles.resultFare}>
+                                                    ₦{info.fare}
+                                                </div>
+                                                <div className={styles.resultDuration}>
+                                                    {info.minutes} mins
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className={styles.resultStats}>
-                                            <div className={styles.resultFare}>
-                                                ₦{route.fare_price_range_min}-{route.fare_price_range_max}
-                                            </div>
-                                            <div className={styles.resultDuration}>
-                                                {route.estimated_travel_time_min}-{route.estimated_travel_time_max} mins
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         ) : (
                             !isSearching && (

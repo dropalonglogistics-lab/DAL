@@ -11,24 +11,17 @@ export default async function SearchPage() {
         .from('routes')
         .select(`
             id,
-            route_title,
-            start_location,
+            name,
+            origin,
             destination,
-            stops_along_the_way,
-            vehicle_type_used,
-            estimated_travel_time_min,
-            estimated_travel_time_max,
-            fare_price_range_min,
-            fare_price_range_max,
-            difficulty_level,
-            detailed_directions,
-            tips_and_warnings,
-            created_at,
-            is_featured,
-            road_condition
+            description,
+            legs,
+            status,
+            upvote_count,
+            created_at
         `)
-        .eq('is_featured', true)
-        .order('route_title', { ascending: true })
+        .eq('status', 'approved')
+        .order('name', { ascending: true })
         .limit(6);
 
     return <SearchPageClient featuredRoutes={featuredRoutes || []} />;

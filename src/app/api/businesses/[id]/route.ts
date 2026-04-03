@@ -4,35 +4,38 @@ import { requireUser } from '@/utils/api-helpers';
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/businesses/[slug] — public-ish detail or owner view
+// GET /api/businesses/[id] — public-ish detail or owner view
+// The parameter is named [id] to match the sibling /products route, 
+// but it is currently used as a 'slug' in the database query.
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { slug } = await params;
+  const { id } = await params;
   const supabase = await createClient();
 
+  // We query by slug using the 'id' parameter name to avoid Next.js routing conflicts
   const { data, error } = await supabase
     .from('businesses')
     .select('*, products(*)')
-    .eq('slug', slug)
+    .eq('slug', id)
     .single();
 
   if (error || !data) return NextResponse.json({ error: 'Business not found' }, { status: 404 });
   return NextResponse.json({ business: data });
 }
 
-// PUT /api/businesses/[slug] — update business (owner only)
+// PUT /api/businesses/[id] — update business (owner only)
 export async function PUT(
   req: Request,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { slug } = await params;
+  const { id } = await params;
   const auth = await requireUser();
   if (!auth.ok) return auth.response;
 
   const supabase = await createClient();
-  const { data: business } = await supabase.from('businesses').select('owner_id').eq('slug', slug).single();
+  const { data: business } = await supabase.from('businesses').select('owner_id').eq('slug', id).single();
   if (!business) return NextResponse.json({ error: 'Business not found' }, { status: 404 });
 
   if (business.owner_id !== auth.data.id) {
@@ -43,7 +46,7 @@ export async function PUT(
   const { data: updated, error } = await supabase
     .from('businesses')
     .update(updates)
-    .eq('slug', slug)
+    .eq('slug', id)
     .select()
     .single();
 
