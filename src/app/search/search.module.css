@@ -164,88 +164,9 @@
 }
 
 .popularGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 16px;
-}
-
-.routeCard {
-    background-color: #1A1A1A;
-    border: 0.5px solid #2A2A2A;
-    border-radius: 12px;
-    padding: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: left;
-}
-
-.routeCard:hover {
-    border-color: #C9A227;
-}
-
-.cardHeader {
-    display: flex;
-    justify-content: flex-start;
-    margin-bottom: 12px;
-}
-
-.pill {
-    font-size: 10px;
-    font-weight: 800;
-    padding: 4px 8px;
-    border-radius: 4px;
-    text-transform: uppercase;
-}
-
-.pillPopular { background: rgba(201, 162, 39, 0.15); color: #C9A227; }
-.pillFast { background: rgba(34, 197, 94, 0.15); color: #22C55E; }
-.pillBusy { background: rgba(249, 115, 22, 0.15); color: #F97316; }
-.pillBlocked { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-
-.routeName {
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #FFFFFF;
-}
-
-.arrow {
-    color: #C9A227;
-}
-
-.cardFooter {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.conditionRow {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: #888888;
-    text-transform: capitalize;
-}
-
-.dotStatus {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-}
-
-.dotClear { background-color: #22C55E; }
-.dotSlow { background-color: #F97316; }
-.dotBlocked { background-color: #EF4444; }
-.dotUnknown { background-color: #666666; }
-
-.metaText {
-    font-size: 11px;
-    color: #888888;
 }
 
 /* SECTION 4 - SEARCH RESULTS */
@@ -261,59 +182,6 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-}
-
-.resultRow {
-    background-color: #1A1A1A;
-    border: 0.5px solid #2A2A2A;
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    text-align: left;
-}
-
-.resultMain {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.resultTitle {
-    font-size: 13px;
-    font-weight: 700;
-    color: #FFFFFF;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.resultMeta {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: #888888;
-}
-
-.resultStats {
-    text-align: right;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.resultFare {
-    font-size: 14px;
-    font-weight: 700;
-    color: #C9A227;
-}
-
-.resultDuration {
-    font-size: 11px;
-    color: #888888;
 }
 
 /* EMPTY STATES */

@@ -4,15 +4,27 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { ArrowDownUp, Loader2, ArrowRight } from 'lucide-react';
+import { ArrowDownUp, Loader2, ArrowRight, Info } from 'lucide-react';
+import RouteResultCard from '@/components/RouteResults/RouteResultCard';
 import styles from './search.module.css';
 
 interface RouteData {
     id: string;
-    name: string;
-    origin: string;
-    destination: string;
-    legs: Array<{
+    name?: string;
+    origin?: string;
+    destination?: string;
+    route_title?: string;
+    start_location?: string;
+    vehicle_type_used?: string;
+    fare_price_range_min?: number;
+    fare_price_range_max?: number;
+    estimated_travel_time_min?: number;
+    estimated_travel_time_max?: number;
+    difficulty_level?: string;
+    stops_along_the_way?: any;
+    detailed_directions?: string;
+    tips_and_warnings?: string;
+    legs?: Array<{
         vehicle: string;
         description: string;
         estimated_fare: number;
@@ -31,9 +43,8 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
     const [isSearching, setIsSearching] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
     const [results, setResults] = useState<RouteData[]>([]);
+    const [expandedRouteId, setExpandedRouteId] = useState<string | null>(null);
     
-    // We handle the "routes are loading" completely empty state 
-    // where Supabase returns 0 elements even for "featured"
     const [isDataLoaded, setIsDataLoaded] = useState(true);
 
     const supabase = createClient();
@@ -159,6 +170,46 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
     const getOriginDisplay = (origin?: string) => origin && origin !== 'undefined' ? origin : 'Unknown Origin';
     const getDestDisplay = (dest?: string) => dest && dest !== 'undefined' ? dest : 'Unknown Destination';
 
+    // Helper to map DB record to RouteResultCard props
+    const mapToCardProps = (route: RouteData) => {
+        // Handle name consistency
+        const start = route.start_location || getOriginDisplay(route.origin);
+        const dest = route.destination || getDestDisplay(route.destination);
+        const title = route.route_title || route.name || `${start} to ${dest}`;
+
+        // Handle stats consistency
+        const fareMin = route.fare_price_range_min ?? route.fare_min ?? 0;
+        const fareMax = route.fare_price_range_max ?? route.fare_max ?? fareMin;
+        const timeMin = route.estimated_travel_time_min ?? route.duration_minutes ?? 0;
+        const timeMax = route.estimated_travel_time_max ?? route.duration_minutes ?? timeMin;
+
+        // Handle stops format (DB might have JSON array or string)
+        let stops = '';
+        if (typeof route.stops_along_the_way === 'string') {
+            stops = route.stops_along_the_way;
+        } else if (Array.isArray(route.stops_along_the_way)) {
+            stops = route.stops_along_the_way.map((s: any) => s.location || s).join(' → ');
+        }
+
+        return {
+            id: route.id,
+            route_title: title,
+            start_location: start,
+            destination: dest,
+            vehicle_type_used: route.vehicle_type_used || (route.legs && Array.isArray(route.legs) ? route.legs.map(l => l.vehicle).join(', ') : 'Various'),
+            estimated_travel_time_min: timeMin,
+            estimated_travel_time_max: timeMax,
+            fare_price_range_min: fareMin,
+            fare_price_range_max: fareMax,
+            difficulty_level: route.difficulty_level || 'Moderate',
+            stops_along_the_way: stops,
+            detailed_directions: route.detailed_directions,
+            tips_and_warnings: route.tips_and_warnings,
+            isExpanded: expandedRouteId === route.id,
+            onToggleExpand: (expanded: boolean) => setExpandedRouteId(expanded ? route.id : null)
+        };
+    };
+
     return (
         <div className={styles.pageContainer}>
             <div className={styles.contentWrapper}>
@@ -219,37 +270,12 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
                         <span className={styles.sectionLabel}>POPULAR ROUTES</span>
                         {featuredRoutes.length > 0 ? (
                             <div className={styles.popularGrid}>
-                                {featuredRoutes.map((route) => {
-                                    const badge = getConditionBadge(route.road_condition);
-                                    
-                                    return (
-                                        <button 
-                                            key={route.id} 
-                                            className={styles.routeCard}
-                                            onClick={() => handleFeaturedClick(getOriginDisplay(route.origin), getDestDisplay(route.destination))}
-                                        >
-                                            <div className={styles.cardHeader}>
-                                                {badge ? (
-                                                     <span className={`${styles.pill} ${badge.colorClass}`}>{badge.text}</span>
-                                                ) : (
-                                                     <span className={`${styles.pill} ${styles.pillPopular}`}>Popular</span>
-                                                )}
-                                            </div>
-                                            <div className={styles.routeName}>
-                                                {getOriginDisplay(route.origin)} <span className={styles.arrow}>→</span> {getDestDisplay(route.destination)}
-                                            </div>
-                                            <div className={styles.cardFooter}>
-                                                <div className={styles.conditionRow}>
-                                                    <div className={`${styles.dotStatus} ${getConditionDot(route.road_condition)}`}></div>
-                                                    {getConditionText(route.road_condition)}
-                                                </div>
-                                                <div className={styles.metaText}>
-                                                    {getEstimatedDuration(route)} • {getEstimatedFare(route)}
-                                                </div>
-                                            </div>
-                                        </button>
-                                    );
-                                })}
+                                {featuredRoutes.map((route) => (
+                                    <RouteResultCard 
+                                        key={route.id}
+                                        {...mapToCardProps(route)}
+                                    />
+                                ))}
                             </div>
                         ) : (
                             <div className={styles.loadingState}>
@@ -265,29 +291,12 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
                         
                         {results.length > 0 ? (
                             <div className={styles.resultsList}>
-                                {results.map((route) => {
-                                    return (
-                                        <div key={route.id} className={styles.resultRow}>
-                                            <div className={styles.resultMain}>
-                                                <div className={styles.resultTitle}>
-                                                    {getOriginDisplay(route.origin)} <span className={styles.arrow}>→</span> {getDestDisplay(route.destination)}
-                                                </div>
-                                                <div className={styles.resultMeta}>
-                                                    <div className={`${styles.dotStatus} ${getConditionDot(route.road_condition)}`}></div>
-                                                    {getConditionText(route.road_condition)}
-                                                </div>
-                                            </div>
-                                            <div className={styles.resultStats}>
-                                                <div className={styles.resultFare}>
-                                                    {getEstimatedFare(route)}
-                                                </div>
-                                                <div className={styles.resultDuration}>
-                                                    {getEstimatedDuration(route)}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                {results.map((route) => (
+                                    <RouteResultCard 
+                                        key={route.id}
+                                        {...mapToCardProps(route)}
+                                    />
+                                ))}
                             </div>
                         ) : (
                             !isSearching && (
