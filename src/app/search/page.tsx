@@ -14,13 +14,16 @@ export default async function SearchPage() {
             name,
             origin,
             destination,
-            description,
             legs,
             status,
-            upvote_count,
-            created_at
+            fare_min,
+            fare_max,
+            duration_minutes,
+            road_condition,
+            is_featured
         `)
         .eq('status', 'approved')
+        .eq('is_featured', true)
         .order('name', { ascending: true })
         .limit(6);
 

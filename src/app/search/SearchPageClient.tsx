@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { ArrowDownUp, Loader2, ArrowRight } from 'lucide-react';
 import styles from './search.module.css';
@@ -17,6 +18,11 @@ interface RouteData {
         estimated_fare: number;
         estimated_minutes: number;
     }>;
+    fare_min?: number;
+    fare_max?: number;
+    duration_minutes?: number;
+    road_condition?: string;
+    is_featured?: boolean;
 }
 
 export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: RouteData[] }) {
@@ -25,15 +31,25 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
     const [isSearching, setIsSearching] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
     const [results, setResults] = useState<RouteData[]>([]);
-    const supabase = createClient();
+    
+    // We handle the "routes are loading" completely empty state 
+    // where Supabase returns 0 elements even for "featured"
+    const [isDataLoaded, setIsDataLoaded] = useState(true);
 
-    const getLegsInfo = (legs: RouteData['legs']) => {
-        if (!legs || !Array.isArray(legs)) return { fare: 0, minutes: 0 };
-        return legs.reduce((acc, leg) => ({
-            fare: acc.fare + (Number(leg.estimated_fare) || 0),
-            minutes: acc.minutes + (Number(leg.estimated_minutes) || 0)
-        }), { fare: 0, minutes: 0 });
-    };
+    const supabase = createClient();
+    const searchParams = useSearchParams();
+
+    // Auto-search on mount if params are present
+    useEffect(() => {
+        const from = searchParams.get('from');
+        const to = searchParams.get('to');
+        if (from) setFromInput(from);
+        if (to) setToInput(to);
+        
+        if (from || to) {
+            performSearch(from || '', to || '');
+        }
+    }, [searchParams]);
 
     const handleSwap = () => {
         const temp = fromInput;
@@ -41,9 +57,9 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
         setToInput(temp);
     };
 
-    const handleSearch = async () => {
-        const cleanFrom = fromInput.trim();
-        const cleanTo = toInput.trim();
+    const performSearch = async (start: string, dest: string) => {
+        const cleanFrom = start.trim();
+        const cleanTo = dest.trim();
         
         if (!cleanFrom && !cleanTo) {
             setHasSearched(false);
@@ -54,9 +70,7 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
         setHasSearched(true);
 
         try {
-            let query = supabase.from('routes').select(`
-                id, name, origin, destination, legs
-            `).eq('status', 'approved');
+            let query = supabase.from('routes').select('*').eq('status', 'approved');
 
             if (cleanFrom && cleanTo) {
                 query = query
@@ -80,27 +94,70 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
         }
     };
 
+    const handleSearchClick = () => {
+        performSearch(fromInput, toInput);
+    };
+
     const handleFeaturedClick = (start: string, dest: string) => {
         setFromInput(start);
         setToInput(dest);
-        performDirectSearch(start, dest);
+        performSearch(start, dest);
     };
 
-    const performDirectSearch = async (start: string, dest: string) => {
-        setIsSearching(true);
-        setHasSearched(true);
-        try {
-            const { data } = await supabase.from('routes')
-                .select('*')
-                .eq('status', 'approved')
-                .ilike('origin', `%${start}%`)
-                .ilike('destination', `%${dest}%`)
-                .limit(50);
-            setResults(data || []);
-        } finally {
-            setIsSearching(false);
+    // Helper to get road condition rendering details
+    const getConditionBadge = (condition?: string) => {
+        switch (condition?.toLowerCase()) {
+            case 'clear': return { text: 'Fast', colorClass: styles.pillFast, dotClass: styles.dotClear, label: 'Clear' };
+            case 'slow': return { text: 'Slow', colorClass: styles.pillBusy, dotClass: styles.dotSlow, label: 'Slow' };
+            case 'blocked': return { text: 'Blocked', colorClass: styles.pillBlocked, dotClass: styles.dotBlocked, label: 'Blocked' };
+            default: return null;
         }
     };
+
+    const getConditionDot = (condition?: string) => {
+        switch (condition?.toLowerCase()) {
+            case 'clear': return styles.dotClear;
+            case 'slow': return styles.dotSlow;
+            case 'blocked': return styles.dotBlocked;
+            default: return styles.dotUnknown;
+        }
+    };
+
+    const getConditionText = (condition?: string) => {
+        switch (condition?.toLowerCase()) {
+            case 'clear': return 'Clear';
+            case 'slow': return 'Slow traffic';
+            case 'blocked': return 'Blocked';
+            default: return 'Unknown condition';
+        }
+    };
+
+    // Fallbacks if data isn't backfilled yet
+    const getEstimatedFare = (route: RouteData) => {
+        if (route.fare_min && route.fare_max) return `₦${route.fare_min} - ₦${route.fare_max}`;
+        if (route.fare_min) return `₦${route.fare_min}`;
+        
+        // Fallback to legs calculation
+        if (route.legs && Array.isArray(route.legs)) {
+             const sum = route.legs.reduce((acc, leg) => acc + (Number(leg.estimated_fare) || 0), 0);
+             if (sum > 0) return `₦${sum}`;
+        }
+        return 'Est. unavailable';
+    };
+
+    const getEstimatedDuration = (route: RouteData) => {
+        if (route.duration_minutes) return `${route.duration_minutes} min`;
+        
+        // Fallback to legs calculation
+        if (route.legs && Array.isArray(route.legs)) {
+             const sum = route.legs.reduce((acc, leg) => acc + (Number(leg.estimated_minutes) || 0), 0);
+             if (sum > 0) return `${sum} min`;
+        }
+        return '--';
+    };
+
+    const getOriginDisplay = (origin?: string) => origin && origin !== 'undefined' ? origin : 'Unknown Origin';
+    const getDestDisplay = (dest?: string) => dest && dest !== 'undefined' ? dest : 'Unknown Destination';
 
     return (
         <div className={styles.pageContainer}>
@@ -114,41 +171,45 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
 
                 {/* SECTION 2 - SEARCH INPUT BOX */}
                 <div className={styles.searchContainer}>
-                    <div className={styles.connectorLine}></div>
-                    
-                    <div className={styles.inputRow}>
-                        <div className={styles.iconWrapper}>
-                            <div className={styles.dotGold}></div>
+                    <div className={styles.inputInner}>
+                        <div className={styles.connectorLine}></div>
+                        
+                        <div className={styles.inputRow}>
+                            <div className={styles.iconWrapper}>
+                                <div className={styles.dotGold}></div>
+                            </div>
+                            <input 
+                                type="text" 
+                                className={styles.inputField} 
+                                placeholder="Where from?" 
+                                value={fromInput}
+                                onChange={(e) => setFromInput(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSearchClick()}
+                            />
+                            <button className={styles.swapBtn} onClick={handleSwap} aria-label="Swap locations" type="button">
+                                <ArrowDownUp size={16} />
+                            </button>
                         </div>
-                        <input 
-                            type="text" 
-                            className={styles.inputField} 
-                            placeholder="Where from?" 
-                            value={fromInput}
-                            onChange={(e) => setFromInput(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        />
-                        <button className={styles.swapBtn} onClick={handleSwap} aria-label="Swap locations" type="button">
-                            <ArrowDownUp size={16} />
-                        </button>
-                    </div>
 
-                    <div className={styles.inputRow}>
-                        <div className={styles.iconWrapper}>
-                            <div className={styles.dotWhite}></div>
+                        <div className={styles.inputGroupDivider}></div>
+
+                        <div className={styles.inputRow}>
+                            <div className={styles.iconWrapper}>
+                                <div className={styles.dotWhite}></div>
+                            </div>
+                            <input 
+                                type="text" 
+                                className={styles.inputField} 
+                                placeholder="Where to?" 
+                                value={toInput}
+                                onChange={(e) => setToInput(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSearchClick()}
+                            />
                         </div>
-                        <input 
-                            type="text" 
-                            className={styles.inputField} 
-                            placeholder="Where to?" 
-                            value={toInput}
-                            onChange={(e) => setToInput(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        />
                     </div>
                 </div>
 
-                <button className={styles.submitBtn} onClick={handleSearch} disabled={isSearching} type="button">
+                <button className={styles.submitBtn} onClick={handleSearchClick} disabled={isSearching} type="button">
                     {isSearching ? <Loader2 size={18} className="animate-spin" /> : 'Find Route'}
                 </button>
 
@@ -159,26 +220,31 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
                         {featuredRoutes.length > 0 ? (
                             <div className={styles.popularGrid}>
                                 {featuredRoutes.map((route) => {
-                                    const info = getLegsInfo(route.legs);
+                                    const badge = getConditionBadge(route.road_condition);
+                                    
                                     return (
                                         <button 
                                             key={route.id} 
                                             className={styles.routeCard}
-                                            onClick={() => handleFeaturedClick(route.origin, route.destination)}
+                                            onClick={() => handleFeaturedClick(getOriginDisplay(route.origin), getDestDisplay(route.destination))}
                                         >
                                             <div className={styles.cardHeader}>
-                                                <span className={styles.pillPopular}>Popular</span>
+                                                {badge ? (
+                                                     <span className={`${styles.pill} ${badge.colorClass}`}>{badge.text}</span>
+                                                ) : (
+                                                     <span className={`${styles.pill} ${styles.pillPopular}`}>Popular</span>
+                                                )}
                                             </div>
                                             <div className={styles.routeName}>
-                                                {route.origin} <span className={styles.arrow}>→</span> {route.destination}
+                                                {getOriginDisplay(route.origin)} <span className={styles.arrow}>→</span> {getDestDisplay(route.destination)}
                                             </div>
                                             <div className={styles.cardFooter}>
                                                 <div className={styles.conditionRow}>
-                                                    <div className={`${styles.dotStatus} ${styles.dotClear}`}></div>
-                                                    Active
+                                                    <div className={`${styles.dotStatus} ${getConditionDot(route.road_condition)}`}></div>
+                                                    {getConditionText(route.road_condition)}
                                                 </div>
                                                 <div className={styles.metaText}>
-                                                    {info.minutes}m • ₦{info.fare}
+                                                    {getEstimatedDuration(route)} • {getEstimatedFare(route)}
                                                 </div>
                                             </div>
                                         </button>
@@ -186,7 +252,7 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
                                 })}
                             </div>
                         ) : (
-                            <div className={styles.emptyState}>
+                            <div className={styles.loadingState}>
                                 <p className={styles.emptySub}>Routes loading — check back shortly.</p>
                             </div>
                         )}
@@ -194,30 +260,29 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
                 ) : (
                     <section>
                         <div className={styles.resultsHeader}>
-                            {isSearching ? 'Searching...' : `${results.length} ROUTES FOUND`}
+                            {isSearching ? 'Searching...' : `${results.length > 0 ? results.length : 'No'} routes found`}
                         </div>
                         
                         {results.length > 0 ? (
                             <div className={styles.resultsList}>
                                 {results.map((route) => {
-                                    const info = getLegsInfo(route.legs);
                                     return (
                                         <div key={route.id} className={styles.resultRow}>
                                             <div className={styles.resultMain}>
                                                 <div className={styles.resultTitle}>
-                                                    {route.origin} <span className={styles.arrow}>→</span> {route.destination}
+                                                    {getOriginDisplay(route.origin)} <span className={styles.arrow}>→</span> {getDestDisplay(route.destination)}
                                                 </div>
                                                 <div className={styles.resultMeta}>
-                                                    <div className={`${styles.dotStatus} ${styles.dotClear}`}></div>
-                                                    Active
+                                                    <div className={`${styles.dotStatus} ${getConditionDot(route.road_condition)}`}></div>
+                                                    {getConditionText(route.road_condition)}
                                                 </div>
                                             </div>
                                             <div className={styles.resultStats}>
                                                 <div className={styles.resultFare}>
-                                                    ₦{info.fare}
+                                                    {getEstimatedFare(route)}
                                                 </div>
                                                 <div className={styles.resultDuration}>
-                                                    {info.minutes} mins
+                                                    {getEstimatedDuration(route)}
                                                 </div>
                                             </div>
                                         </div>
@@ -227,11 +292,20 @@ export default function SearchPageClient({ featuredRoutes }: { featuredRoutes: R
                         ) : (
                             !isSearching && (
                                 <div className={styles.emptyState}>
-                                    <div className={styles.emptyTitle}>0 routes found</div>
-                                    <p className={styles.emptySub}>No routes found from "{fromInput || '[Any]'}" to "{toInput || '[Any]'}".</p>
-                                    <Link href="/suggest-route" className={styles.suggestLink}>
-                                        Suggest this route <ArrowRight size={14} />
-                                    </Link>
+                                    <h3 className={styles.emptyTitle}>Route not found yet</h3>
+                                    <p className={styles.emptySub}>
+                                        No routes found from <strong>"{fromInput || 'anywhere'}"</strong> to <strong>"{toInput || 'anywhere'}"</strong>.
+                                    </p>
+                                    
+                                    <div className={styles.suggestBox}>
+                                        <p className={styles.suggestText}>Are you an expert on this route? Help the community by mapping it.</p>
+                                        <Link 
+                                            href={`/suggest-route?from=${encodeURIComponent(fromInput)}&to=${encodeURIComponent(toInput)}`} 
+                                            className={styles.primarySuggestBtn}
+                                        >
+                                            Suggest this route <ArrowRight size={18} />
+                                        </Link>
+                                    </div>
                                 </div>
                             )
                         )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { 
     MapPin, Navigation, Info, 
@@ -54,8 +55,15 @@ export default function SuggestRouteClient() {
     const [isAdmin, setIsAdmin] = useState(false);
 
     const supabase = createClient();
+    const searchParams = useSearchParams();
 
     useEffect(() => {
+        // Pre-fill from query params if available
+        const from = searchParams.get('from');
+        const to = searchParams.get('to');
+        if (from) setStartLocation(from);
+        if (to) setDestination(to);
+
         async function getAuth() {
             const { data: { user: authUser } } = await supabase.auth.getUser();
             setUser(authUser);
