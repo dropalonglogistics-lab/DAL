@@ -56,58 +56,43 @@ export default function ProfileClient() {
                     return
                 }
 
-                // 2. Parallelize Core Profile and Contributions
-                console.log("[Profile] Fetching profile from Supabase...");
-                const [profileRes, contributionRes] = await Promise.all([
-                    supabase.from('profiles').select('*').eq('id', user.id).single(),
-                    Promise.all([
-                        supabase.from('routes').select('*', { count: 'exact', head: true }).eq('submitted_by', user.id),
-                        supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('reported_by', user.id)
-                    ]).catch(() => [{ count: 0 }, { count: 0 }])
-                ]);
+                // 2. Fetch Profile FAST (Core Information)
+                console.log("[Profile] Fetching core profile...");
+                const { data: profileData, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
 
-                console.log(`[Profile] DB Queries finished: ${Math.round(performance.now() - startTime)}ms`);
+                console.log(`[Profile] Core data loaded: ${Math.round(performance.now() - startTime)}ms`);
 
                 if (!isMounted) return;
-                clearTimeout(timer);
 
-                let profileData = profileRes.data;
-                let profileError = profileRes.error;
-
-                // 3. Handle Profile Missing or Aborted
-                if (profileError) {
-                    if (profileError.code === 'PGRST116') {
-                        console.log("[Profile] Record not found, creating...");
-                        const { data: neu, error: insErr } = await supabase.from('profiles').insert([{
-                            id: user.id,
-                            email: user.email,
-                            full_name: user.user_metadata?.full_name || 'Member',
-                            is_admin: false
-                        }]).select().single()
-
-                        if (insErr) {
-                            const { data: retryData } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-                            profileData = retryData
-                        } else {
-                            profileData = neu
-                        }
-                    } else {
-                        throw profileError;
-                    }
-                }
-
-                // 4. Update core state immediately
-                if (isMounted && profileData) {
-                    console.log("[Profile] Core data loaded.");
+                // 3. Update core state immediately (Show name and bio)
+                if (profileData) {
                     setProfile(profileData)
                     setPreviewUrl(profileData.avatar_url)
-                    
-                    const [routeRes, alertRes] = contributionRes as any;
-                    setCounts({
-                        routes: routeRes.count || 0,
-                        reports: alertRes.count || 0
-                    })
+                    setLoading(false) // UNBLOCK THE UI NOW!
                 }
+
+                if (profileError) {
+                    throw profileError;
+                }
+
+                // 4. Fetch Secondary Stats in BACKGROUND (Deferred)
+                console.log("[Profile] Background fetch for stats started...");
+                Promise.all([
+                    supabase.from('routes').select('*', { count: 'exact', head: true }).eq('submitted_by', user.id),
+                    supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('reported_by', user.id)
+                ]).then(([routeRes, alertRes]) => {
+                    if (isMounted) {
+                        setCounts({
+                            routes: (routeRes as any).count || 0,
+                            reports: (alertRes as any).count || 0
+                        })
+                        console.log(`[Profile] Background stats loaded: ${Math.round(performance.now() - startTime)}ms`);
+                    }
+                }).catch(err => console.warn("[Profile] Background stats failed:", err.message));
 
                 // 5. DEFER Admin Stats to speed up rendering
                 if (isMounted && profileData?.is_admin) {
@@ -115,6 +100,8 @@ export default function ProfileClient() {
                       if (isMounted) setAdminStats(stats);
                    }).catch(() => null);
                 }
+
+                clearTimeout(timer);
 
             } catch (error: any) {
                 console.error('[Profile] Loading Error:', error.message)
