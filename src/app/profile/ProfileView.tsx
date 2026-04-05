@@ -31,6 +31,7 @@ export default function ProfileClient() {
 
         async function loadProfile() {
             setLoading(true)
+            setMessage(null)
 
             try {
                 // 1. Get Session / User
@@ -40,43 +41,26 @@ export default function ProfileClient() {
                     return
                 }
 
-                let user = authUser
+                const user = authUser
 
-                // 2. Fetch Profile with Retry Logic
-                let profileData = null;
-                let profileError = null;
-                let retryCount = 0;
-                const maxRetries = 3;
+                // 2. Parallelize ALL remaining requests
+                // We fire Profile, Admin Stats, and Counts at the same time.
+                const [profileRes, statsRes, contributionRes] = await Promise.all([
+                    supabase.from('profiles').select('*').eq('id', user.id).single(),
+                    fetchAdminStats().catch(() => null), // Gracefully handle if not admin
+                    Promise.all([
+                        supabase.from('routes').select('*', { count: 'exact', head: true }).eq('submitted_by', user.id),
+                        supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('reported_by', user.id)
+                    ]).catch(() => [{ count: 0 }, { count: 0 }])
+                ]);
 
-                while (retryCount < maxRetries) {
-                    const { data, error } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', user.id)
-                        .single()
-                    
-                    profileData = data;
-                    profileError = error;
+                if (!isMounted) return;
 
-                    if (!error) break; // Success
-                    
-                    if (error.message?.includes('aborted') || error.message?.includes('fetch')) {
-                        retryCount++;
-                        await new Promise(r => setTimeout(r, 400 * retryCount)); // Exponential backoff
-                        continue;
-                    }
-                    
-                    break; // Other fatal errors stop retrying
-                }
+                let profileData = profileRes.data;
+                let profileError = profileRes.error;
 
-                // 3. Handle Missing Profile (Auto-Create)
-                if (profileError || !profileData) {
-                    if (profileError && !profileError.message?.includes('Row not found') && !profileError.message?.includes('aborted')) {
-                        // Throw if it's a hard database error that's not just a missing row or an abort.
-                        throw profileError;
-                    }
-
-                    // Otherwise, try creating
+                // 3. Handle Missing Profile (Auto-Create only if row not found)
+                if ((profileError && profileError.code === 'PGRST116') || (!profileData && !profileError)) {
                     const { data: neu, error: insErr } = await supabase.from('profiles').insert([{
                         id: user.id,
                         email: user.email,
@@ -86,52 +70,45 @@ export default function ProfileClient() {
 
                     if (insErr) {
                         // Check if it already exists due to race condition
-                        const { data: retryData, error: verifyErr } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-                        if (retryData) {
-                            profileData = retryData
-                        } else {
-                            throw insErr // Throw the insert error
-                        }
+                        const { data: retryData } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+                        profileData = retryData
                     } else {
                         profileData = neu
                     }
-                }
-
-                // 4. Onboarding check
-                if (profileData && profileData.onboarding_completed === false) {
-                    if (isMounted) {
-                        router.push('/welcome');
-                        return;
+                } else if (profileError) {
+                    // Ignore planned aborts, but throw real errors
+                    if (!profileError.message?.includes('aborted')) {
+                        throw profileError;
                     }
                 }
 
-                // 5. Admin Stats
-                if (profileData?.is_admin) {
-                    try {
-                        const stats = await fetchAdminStats()
-                        if (isMounted) setAdminStats(stats)
-                    } catch (err: any) {
-                        // ignore
-                    }
-                }
-
-                // 5. Fetch User Counts (Parallel)
-                try {
-                const [{ count: rCount }, { count: repCount }] = await Promise.all([
-                        supabase.from('routes').select('*', { count: 'exact', head: true }).eq('submitted_by', user.id),
-                        supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('reported_by', user.id)
-                    ])
-                    if (isMounted) setCounts({ routes: rCount || 0, reports: repCount || 0 })
-                } catch (err) {
-                    console.error("[Profile] Error fetching contribution counts:", err)
-                }
-
-                if (isMounted) {
+                // 4. Update State
+                if (isMounted && profileData) {
                     setProfile(profileData)
-                    setPreviewUrl(profileData?.avatar_url)
+                    setPreviewUrl(profileData.avatar_url)
+                    
+                    if (profileData.is_admin && statsRes) {
+                        setAdminStats(statsRes)
+                    }
+
+                    const [rRes, aRes] = contributionRes as any;
+                    setCounts({ 
+                        routes: rRes?.count || 0, 
+                        reports: aRes?.count || 0 
+                    })
+
+                    // Onboarding check
+                    if (profileData.onboarding_completed === false) {
+                        router.push('/welcome');
+                    }
                 }
+
             } catch (err: any) {
-                if (isMounted) setMessage({ type: 'error', text: err.message })
+                // Completely ignore "aborted" errors from the UI
+                if (isMounted && !err.message?.includes('aborted')) {
+                    console.error("[Profile] Fatal error:", err)
+                    setMessage({ type: 'error', text: err.message || 'An unexpected error occurred' })
+                }
             } finally {
                 if (isMounted) setLoading(false)
             }
