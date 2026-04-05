@@ -44,11 +44,7 @@
 }
 
 .mobileMenuBtn:hover {
-    background: rgba(0, 0, 0, 0.05);
-}
-
-body.dark-mode .mobileMenuBtn:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--glass-overlay-hover);
 }
 
 /* Breadcrumb */
@@ -106,11 +102,7 @@ body.dark-mode .mobileMenuBtn:hover {
 
 .bellBtn:hover {
     color: var(--text-primary);
-    background: rgba(0, 0, 0, 0.04);
-}
-
-body.dark-mode .bellBtn:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--glass-overlay-hover);
 }
 
 .bellDot {
@@ -153,4 +145,4 @@ body.dark-mode .bellBtn:hover {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-}
+}

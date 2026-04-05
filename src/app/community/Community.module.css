@@ -1,7 +1,7 @@
 /* DAL Community Hub Styling */
 .container {
-    background-color: #0D0D0D;
-    color: #FFFFFF;
+    background-color: var(--background);
+    color: var(--text-primary);
     min-height: 100vh;
     padding: 60px 20px;
     font-family: var(--font-body), sans-serif;
@@ -23,7 +23,7 @@
 
 .subheadline {
     font-size: 14px;
-    color: #666666;
+    color: var(--text-secondary);
     margin-bottom: 40px;
 }
 
@@ -41,12 +41,12 @@
 .statValue {
     font-size: 24px;
     font-weight: 800;
-    color: #C9A227;
+    color: var(--color-gold);
 }
 
 .statLabel {
     font-size: 10px;
-    color: #555555;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-top: 4px;
@@ -60,15 +60,16 @@
 .sectionTitle {
     font-size: 16px;
     font-weight: 700;
-    color: #FFFFFF;
+    color: var(--text-primary);
 }
 
 .competitionCard {
-    background-color: #111111;
-    border: 0.5px solid rgba(201, 162, 39, 0.4);
+    background-color: var(--card-bg);
+    border: 1px solid var(--color-gold);
     border-radius: 12px;
     padding: 24px;
     margin-bottom: 60px;
+    box-shadow: var(--shadow-md);
 }
 
 .cardTitle {
@@ -80,21 +81,21 @@
 .prize {
     font-size: 14px;
     font-weight: 700;
-    color: #C9A227;
+    color: var(--color-gold);
     margin-bottom: 12px;
 }
 
 .rules {
     font-size: 13px;
-    color: #666666;
+    color: var(--text-secondary);
     line-height: 1.6;
     margin-bottom: 20px;
 }
 
 .ghostBtn {
     background: transparent;
-    border: 0.5px solid #333333;
-    color: #888888;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
     border-radius: 8px;
     padding: 8px 16px;
     font-size: 12px;
@@ -103,15 +104,15 @@
 }
 
 .ghostBtn:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #FFFFFF;
+    background-color: var(--glass-overlay);
+    color: var(--text-primary);
 }
 
 .earnList {
     font-size: 13px;
-    color: #AAAAAA;
-    background-color: #0A0A0A;
-    border: 1px solid #1A1A1A;
+    color: var(--text-secondary);
+    background-color: var(--input-bg);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 16px;
     display: flex;
@@ -127,17 +128,17 @@
 }
 
 .earnPoints {
-    color: #C9A227;
+    color: var(--color-gold);
     font-weight: 700;
 }
 
 /* LEADERBOARD */
 .leaderboardCard {
-    background: linear-gradient(180deg, #111111 0%, #0A0A0A 100%);
-    border: 1px solid #1E1E1E;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    box-shadow: var(--shadow-lg);
 }
 
 .table {
@@ -147,23 +148,24 @@
 
 .table th {
     font-size: 11px;
-    color: #888888;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 1.5px;
     padding: 18px 24px;
-    background-color: #161616;
-    border-bottom: 1px solid #1E1E1E;
+    background-color: var(--glass-overlay);
+    border-bottom: 1px solid var(--border);
 }
 
 .table td {
     padding: 20px 24px;
     font-size: 14px;
-    border-bottom: 1px solid #1E1E1E;
+    border-bottom: 1px solid var(--border);
     transition: background-color 0.2s;
+    color: var(--text-primary);
 }
 
 .table tr:hover td {
-    background-color: rgba(201, 162, 39, 0.03);
+    background-color: var(--glass-overlay-hover);
 }
 
 .table tr:last-child td {
@@ -175,8 +177,8 @@
     border-radius: 6px;
     font-weight: 800;
     font-size: 12px;
-    background-color: #1A1A1A;
-    color: #FFFFFF;
+    background-color: var(--input-bg);
+    color: var(--text-primary);
 }
 
 .top1 .rankBadge { background: linear-gradient(135deg, #FFD700 0%, #C9A227 100%); color: #000; }
@@ -186,47 +188,50 @@
 .pointsValue {
     font-family: var(--font-display), sans-serif;
     font-weight: 700;
-    color: #FFFFFF;
+    color: var(--text-primary);
 }
 
 .myRow {
-    background-color: rgba(201, 162, 39, 0.08);
+    background-color: rgba(201, 162, 39, 0.1);
 }
 .myRow td {
-    border-left: 2px solid #C9A227 !important;
+    border-left: 2px solid var(--color-gold) !important;
 }
 
 /* STANDING CARD */
 .standingCard {
-    background-color: #111111;
-    border: 0.5px solid #1E1E1E;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 24px;
+    box-shadow: var(--shadow-md);
 }
 
 .standingTitle {
     font-size: 14px;
     font-weight: 700;
     margin-bottom: 4px;
+    color: var(--text-primary);
 }
 
 .standingValue {
     font-size: 13px;
-    color: #C9A227;
+    color: var(--color-gold);
     font-weight: 600;
 }
 
 .progressBar {
     height: 6px;
-    background-color: #1A1A1A;
+    background-color: var(--input-bg);
     border-radius: 10px;
     overflow: hidden;
     margin-top: 8px;
+    border: 1px solid var(--border);
 }
 
 .progressFill {
     height: 100%;
-    background-color: #C9A227;
+    background-color: var(--color-gold);
     border-radius: 10px;
     transition: width 0.5s ease-out;
 }

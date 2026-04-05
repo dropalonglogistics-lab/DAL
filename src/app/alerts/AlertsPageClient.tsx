@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, type ReactElement } from 'react';
 import { Bell, Filter, ThumbsUp, ThumbsDown, MapPin, AlertTriangle, Shield, TrafficCone, Loader, ChevronRight, Plus, X } from 'lucide-react';
 import Link from 'next/link';
+import styles from './Alerts.module.css';
 
 const PH_AREAS_TOP = [
     'All Areas', 'Mile 1', 'Mile 3', 'Aba Road', 'Ada George', 'Choba', 'D-Line',
@@ -11,7 +12,7 @@ const PH_AREAS_TOP = [
 ];
 
 const SEVERITY_TABS = [
-    { key: 'all', label: 'All', color: '#94a3b8' },
+    { key: 'all', label: 'All', color: 'var(--text-secondary)' },
     { key: 'critical', label: '🔴 Critical', color: '#ef4444' },
     { key: 'warning', label: '🟡 Warning', color: '#f59e0b' },
     { key: 'info', label: '🔵 Info', color: '#3b82f6' },
@@ -131,25 +132,21 @@ export default function AlertsPageClient() {
     };
 
     return (
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 20px' }}>
+        <div className={styles.container}>
             {/* Header */}
-            <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+            <div className={styles.header}>
                 <div>
-                    <h1 style={{ fontSize: '2rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
+                    <h1 className={styles.title}>
                         <Bell size={28} style={{ color: 'var(--color-gold)' }} />
                         Alerts
                     </h1>
-                    <p style={{ color: 'var(--text-secondary)', marginTop: '6px', margin: 0 }}>
+                    <p className={styles.subtitle}>
                         Real-time road reports from Port Harcourt commuters
                     </p>
                 </div>
                 <button 
                     onClick={() => setShowReportForm(!showReportForm)}
-                    style={{
-                        background: 'transparent', border: '1px solid var(--color-gold)', color: 'var(--color-gold)',
-                        padding: '10px 20px', borderRadius: '12px', fontWeight: 700, fontSize: '0.9rem',
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s'
-                    }}
+                    className={styles.reportBtn}
                 >
                     {showReportForm ? <X size={18} /> : <Plus size={18} />}
                     {showReportForm ? 'Cancel' : 'Report Alert'}
@@ -158,15 +155,15 @@ export default function AlertsPageClient() {
 
             {/* Inline Report Form */}
             {showReportForm && (
-                <div style={{ background: 'var(--card-bg)', border: '1.5px solid var(--color-gold)', borderRadius: '18px', padding: '24px', marginBottom: '32px', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
-                    <h3 style={{ margin: '0 0 16px', fontWeight: 800 }}>Submit New Road Alert</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Type</label>
+                <div className={styles.reportForm}>
+                    <h3 style={{ margin: '0 0 20px', fontWeight: 800 }}>Submit New Road Alert</h3>
+                    <div className={styles.formGrid}>
+                        <div className={styles.fieldGroup}>
+                            <label className={styles.label}>Type</label>
                             <select 
                                 value={newAlertType} 
                                 onChange={e => setNewAlertType(e.target.value)}
-                                style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#111', border: '1px solid var(--border)', color: '#fff' }}
+                                className={styles.select}
                             >
                                 <option value="traffic">🚦 Traffic</option>
                                 <option value="police">👮 Checkpoint</option>
@@ -175,36 +172,32 @@ export default function AlertsPageClient() {
                                 <option value="other">ℹ️ Other</option>
                             </select>
                         </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Area</label>
+                        <div className={styles.fieldGroup}>
+                            <label className={styles.label}>Area</label>
                             <input 
                                 type="text"
                                 value={newAlertArea} 
                                 onChange={e => setNewAlertArea(e.target.value)}
                                 placeholder="e.g. Mile 1, Rumuola, Aba Road"
-                                style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#111', border: '1px solid var(--border)', color: '#fff' }}
+                                className={styles.input}
                             />
                         </div>
                     </div>
-                    <div style={{ marginBottom: '16px' }}>
-                        <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</label>
+                    <div className={styles.fieldGroup} style={{ marginBottom: '24px' }}>
+                        <label className={styles.label}>Description</label>
                         <textarea 
                             value={newAlertDesc}
                             onChange={e => setNewAlertDesc(e.target.value)}
                             placeholder="e.g. Heavy traffic build up at Rumuokoro flyover due to broken down truck..."
                             rows={3}
-                            style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#111', border: '1px solid var(--border)', color: '#fff' }}
+                            className={styles.textarea}
                         />
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <button 
                             disabled={isSubmitting || !newAlertDesc.trim() || !newAlertArea.trim()}
                             onClick={handleSubmitAlert}
-                            style={{
-                                background: 'var(--color-gold)', color: '#000', fontWeight: 800,
-                                padding: '10px 24px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-                                opacity: (!newAlertDesc.trim() || !newAlertArea.trim() || isSubmitting) ? 0.6 : 1
-                            }}
+                            className={styles.postBtn}
                         >
                             {isSubmitting ? 'Posting...' : 'Post Alert'}
                         </button>
@@ -213,16 +206,16 @@ export default function AlertsPageClient() {
             )}
 
             {/* Severity Tabs */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+            <div className={styles.tabsRow}>
                 {SEVERITY_TABS.map(tab => (
                     <button
                         key={tab.key}
                         onClick={() => setSeverity(tab.key)}
+                        className={`${styles.tabBtn} ${severity === tab.key ? styles.activeTab : ''}`}
                         style={{
-                            padding: '7px 16px', borderRadius: '20px', border: `1.5px solid ${severity === tab.key ? tab.color : 'var(--border)'}`,
-                            background: severity === tab.key ? `${tab.color}18` : 'transparent',
+                            borderColor: severity === tab.key ? tab.color : 'var(--border)',
                             color: severity === tab.key ? tab.color : 'var(--text-secondary)',
-                            fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s',
+                            background: severity === tab.key ? `${tab.color}10` : 'transparent',
                         }}
                     >
                         {tab.label}
@@ -231,109 +224,89 @@ export default function AlertsPageClient() {
             </div>
 
             {/* Area Filter */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '28px', flexWrap: 'wrap' }}>
+            <div className={styles.filterRow}>
                 <Filter size={16} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
                 <select
                     value={area}
                     onChange={e => setArea(e.target.value)}
-                    style={{
-                        padding: '8px 14px', borderRadius: '10px', border: '1.5px solid var(--border)',
-                        background: 'var(--card-bg)', color: 'var(--text-primary)', fontSize: '0.9rem',
-                        cursor: 'pointer', fontWeight: 500, outline: 'none',
-                    }}
+                    className={styles.select}
+                    style={{ width: 'auto', minWidth: '160px' }}
                 >
                     {PH_AREAS_TOP.map(a => <option key={a} value={a}>{a}</option>)}
                 </select>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    {loading ? 'Loading…' : `${alerts.length} alerts`}
+                <span className={styles.countText}>
+                    {loading ? 'Updating…' : `${alerts.length} reports active`}
                 </span>
             </div>
 
             {/* Alert List */}
             {loading ? (
-                <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
-                    <Loader size={28} style={{ animation: 'spin 1s linear infinite', marginBottom: '12px' }} />
-                    <p>Loading alerts…</p>
+                <div className={styles.loading}>
+                    <Loader size={32} className={styles.spinner} />
+                    <p>Fetching road intelligence reports…</p>
                 </div>
             ) : alerts.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
-                    <MapPin size={40} style={{ opacity: 0.3, marginBottom: '12px' }} />
-                    <p>No alerts match your filters. Roads look clear!</p>
+                <div className={styles.loading}>
+                    <MapPin size={40} style={{ opacity: 0.3, marginBottom: '16px' }} />
+                    <p>No alerts match your current filters. Roads look clear!</p>
                 </div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div className={styles.alertList}>
                     {alerts.map(alert => (
-                        <div key={alert.id} style={{
-                            background: 'var(--card-bg)', border: `1px solid var(--border)`, borderRadius: '16px',
-                            padding: '18px 20px', display: 'flex', gap: '16px', alignItems: 'flex-start',
-                            transition: 'border-color 0.2s', position: 'relative',
-                        }}>
+                        <div key={alert.id} className={styles.alertCard}>
                             {/* Severity bar */}
-                            <div style={{
-                                position: 'absolute', left: 0, top: '14px', bottom: '14px',
-                                width: '3px', borderRadius: '0 2px 2px 0',
-                                background: severityColor(alert.severity),
-                            }} />
+                            <div className={styles.severityIndicator} style={{ background: severityColor(alert.severity) }} />
+                            
                             {/* Icon */}
-                            <div style={{
-                                width: '40px', height: '40px', borderRadius: '12px', flexShrink: 0,
-                                background: `${severityColor(alert.severity)}18`,
-                                color: severityColor(alert.severity),
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            }}>
+                            <div className={styles.iconWrap} style={{ background: `${severityColor(alert.severity)}15`, color: severityColor(alert.severity) }}>
                                 {ICON_MAP[alert.type] ?? <AlertTriangle size={18} />}
                             </div>
+
                             {/* Content */}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
-                                    <span style={{ fontWeight: 700, textTransform: 'capitalize' }}>{alert.type}</span>
+                            <div className={styles.alertMain}>
+                                <div className={styles.alertHeader}>
+                                    <span className={styles.alertType}>{alert.type}</span>
                                     {alert.area && (
-                                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                            <MapPin size={11} /> {alert.area}
+                                        <span className={styles.areaBadge}>
+                                            <MapPin size={12} /> {alert.area}
                                         </span>
                                     )}
                                     {alert.severity && alert.severity !== 'info' && (
-                                        <span style={{
-                                            fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '10px',
-                                            background: `${severityColor(alert.severity)}20`, color: severityColor(alert.severity), textTransform: 'uppercase',
-                                        }}>
+                                        <span className={styles.severityBadge} style={{ background: `${severityColor(alert.severity)}20`, color: severityColor(alert.severity) }}>
                                             {alert.severity}
                                         </span>
                                     )}
                                 </div>
-                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>
+                                <p className={styles.alertDesc}>
                                     {alert.description}
                                 </p>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', flexWrap: 'wrap', gap: '8px' }}>
-                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{timeAgo(alert.created_at)}</span>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        {/* Vote buttons */}
+                                <div className={styles.alertFooter}>
+                                    <span className={styles.timeText}>{timeAgo(alert.created_at)}</span>
+                                    <div className={styles.actions}>
                                         <button
                                             onClick={() => handleVote(alert.id, 1)}
+                                            className={styles.voteBtn}
                                             style={{
-                                                display: 'flex', alignItems: 'center', gap: '4px',
-                                                padding: '4px 10px', borderRadius: '14px', border: '1px solid var(--border)',
-                                                background: voted[alert.id] === 1 ? 'rgba(34,197,94,0.12)' : 'transparent',
+                                                background: voted[alert.id] === 1 ? 'rgba(34,197,94,0.1)' : 'transparent',
                                                 color: voted[alert.id] === 1 ? '#22c55e' : 'var(--text-secondary)',
-                                                cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', transition: 'all 0.2s',
+                                                borderColor: voted[alert.id] === 1 ? '#22c55e40' : 'var(--border)',
                                             }}
                                         >
-                                            <ThumbsUp size={13} /> {(alert.vote_score ?? 0) > 0 ? `+${alert.vote_score}` : ''}
+                                            <ThumbsUp size={14} /> {(alert.vote_score ?? 0) > 0 ? alert.vote_score : ''}
                                         </button>
                                         <button
                                             onClick={() => handleVote(alert.id, -1)}
+                                            className={styles.voteBtn}
                                             style={{
-                                                display: 'flex', alignItems: 'center', gap: '4px',
-                                                padding: '4px 10px', borderRadius: '14px', border: '1px solid var(--border)',
-                                                background: voted[alert.id] === -1 ? 'rgba(239,68,68,0.12)' : 'transparent',
+                                                background: voted[alert.id] === -1 ? 'rgba(239,68,68,0.1)' : 'transparent',
                                                 color: voted[alert.id] === -1 ? '#ef4444' : 'var(--text-secondary)',
-                                                cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', transition: 'all 0.2s',
+                                                borderColor: voted[alert.id] === -1 ? '#ef444440' : 'var(--border)',
                                             }}
                                         >
-                                            <ThumbsDown size={13} />
+                                            <ThumbsDown size={14} />
                                         </button>
-                                        <Link href={`/alerts/${alert.id}`} style={{ fontSize: '0.78rem', color: 'var(--color-gold)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            Details <ChevronRight size={12} />
+                                        <Link href={`/alerts/${alert.id}`} className={styles.detailsLink}>
+                                            View <ChevronRight size={14} />
                                         </Link>
                                     </div>
                                 </div>

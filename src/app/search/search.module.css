@@ -1,13 +1,13 @@
 .pageContainer {
     min-height: 100vh;
-    background-color: #0D0D0D;
-    color: #FFFFFF;
+    background-color: var(--background);
+    color: var(--text-primary);
     padding: 60px 20px;
     font-family: var(--font-body), sans-serif;
 }
 
 .contentWrapper {
-    max-width: 600px; /* narrowed slightly for better proportion */
+    max-width: 600px;
     margin: 0 auto;
 }
 
@@ -18,7 +18,7 @@
 
 .subLabel {
     display: block;
-    color: #C9A227;
+    color: var(--color-gold);
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.15em;
@@ -30,11 +30,11 @@
     font-size: 36px;
     font-weight: 800;
     margin: 0;
-    color: #FFFFFF;
+    color: var(--text-primary);
 }
 
 .goldText {
-    color: #C9A227;
+    color: var(--color-gold);
 }
 
 /* SECTION 2 - SEARCH INPUT BOX */
@@ -44,8 +44,8 @@
 }
 
 .inputInner {
-    background-color: #1A1A1A;
-    border: 0.5px solid #2A2A2A;
+    background-color: var(--input-bg);
+    border: 0.5px solid var(--border);
     border-radius: 12px;
     position: relative;
     padding: 4px 0;
@@ -57,7 +57,7 @@
     top: 36px;
     bottom: 36px;
     width: 0.5px;
-    background-color: #2A2A2A;
+    background-color: var(--border);
     z-index: 1;
 }
 
@@ -70,7 +70,7 @@
 
 .inputGroupDivider {
     height: 0.5px;
-    background-color: #2A2A2A;
+    background-color: var(--border);
     margin: 0 16px;
 }
 
@@ -85,14 +85,14 @@
 .dotGold {
     width: 8px;
     height: 8px;
-    background-color: #C9A227;
+    background-color: var(--color-gold);
     border-radius: 50%;
 }
 
 .dotWhite {
     width: 8px;
     height: 8px;
-    background-color: #FFFFFF;
+    background-color: var(--text-primary);
     border-radius: 50%;
 }
 
@@ -100,19 +100,20 @@
     flex: 1;
     background: transparent;
     border: none;
-    color: #FFFFFF;
+    color: var(--text-primary);
     font-size: 16px;
     outline: none;
 }
 
 .inputField::placeholder {
-    color: #555555;
+    color: var(--text-secondary);
+    opacity: 0.6;
 }
 
 .swapBtn {
     background: transparent;
     border: none;
-    color: #555555;
+    color: var(--text-secondary);
     cursor: pointer;
     padding: 8px;
     display: flex;
@@ -122,13 +123,13 @@
 }
 
 .swapBtn:hover {
-    color: #C9A227;
+    color: var(--color-gold);
 }
 
 .submitBtn {
     width: 100%;
-    background-color: #C9A227;
-    color: #0D0D0D;
+    background-color: var(--color-gold);
+    color: #000;
     border: none;
     border-radius: 8px;
     padding: 13px;
@@ -156,7 +157,7 @@
 .sectionLabel {
     font-size: 11px;
     font-weight: 800;
-    color: #888888;
+    color: var(--text-secondary);
     letter-spacing: 0.1em;
     margin-bottom: 20px;
     display: block;
@@ -173,7 +174,7 @@
 .resultsHeader {
     font-size: 12px;
     font-weight: 800;
-    color: #888888;
+    color: var(--text-secondary);
     margin-bottom: 16px;
     text-transform: uppercase;
 }
@@ -193,9 +194,9 @@
 .emptyState {
     padding: 40px 20px;
     text-align: center;
-    background: rgba(201, 162, 39, 0.05);
+    background: var(--glass-overlay);
     border-radius: 16px;
-    border: 1px dashed #2A2A2A;
+    border: 1px dashed var(--border);
     margin-top: 20px;
 }
 
@@ -208,11 +209,11 @@
     font-size: 20px;
     font-weight: 800;
     margin-bottom: 12px;
-    color: #FFFFFF;
+    color: var(--text-primary);
 }
 
 .emptySub {
-    color: #888888;
+    color: var(--text-secondary);
     font-size: 14px;
     max-width: 400px;
     margin: 0 auto 24px;
@@ -220,21 +221,21 @@
 }
 
 .suggestBox {
-    background-color: #0D0D0D;
+    background-color: var(--card-bg);
     padding: 20px;
     border-radius: 12px;
-    border: 1px solid #2A2A2A;
+    border: 1px solid var(--border);
 }
 
 .suggestText {
     font-size: 13px;
-    color: #888888;
+    color: var(--text-secondary);
     margin-bottom: 16px;
 }
 
 .primarySuggestBtn {
     background: transparent;
-    color: #C9A227;
+    color: var(--color-gold);
     padding: 10px 0;
     font-weight: 700;
     font-size: 14px;
