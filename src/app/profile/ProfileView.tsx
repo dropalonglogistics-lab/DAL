@@ -78,14 +78,15 @@ export default function ProfileClient() {
                         .select()
                         .maybeSingle();
                     
-                    if (createError) {
-                        console.error("[Profile] Auto-creation failed:", createError.message);
-                        // Fallback: use auth metadata for UI
+                    if (createError || !newProfile) {
+                        if (createError) console.error("[Profile] Auto-creation failed:", createError.message);
+                        // Fallback: use auth metadata for UI to prevent "Profile not found"
                         profileData = { 
                             id: user.id, 
                             email: user.email, 
                             full_name: user.user_metadata?.full_name || 'Member',
-                            is_admin: false 
+                            is_admin: false,
+                            points: 0
                         } as any;
                     } else {
                         profileData = newProfile;
@@ -295,7 +296,7 @@ export default function ProfileClient() {
                         <p className={styles.email}><Mail size={14} /> {profile.email}</p>
                         <div className={styles.badgeRow}>
                             {profile.is_admin && <span className={styles.adminBadge}><Shield size={12} /> Admin Oversight</span>}
-                            <span className={styles.pointsBadge}><Coins size={12} /> {profile.points_total || 0} Journey Points</span>
+                            <span className={styles.pointsBadge}><Coins size={12} /> {profile.points || 0} Journey Points</span>
                         </div>
                     </div>
                     <div className={styles.headerActions}>
@@ -362,7 +363,7 @@ export default function ProfileClient() {
                             <div className={styles.statRow}>
                                 <div className={styles.statIcon}><Award size={14} /></div>
                                 <div className={styles.statInfo}>
-                                    <span className={styles.statVal}>{profile.points_total || 0}</span>
+                                    <span className={styles.statVal}>{profile.points || 0}</span>
                                     <span className={styles.statLbl}>Contribution Pts</span>
                                 </div>
                             </div>
