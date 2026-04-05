@@ -42,11 +42,12 @@ export default function AdminOverviewPage() {
         );
     }
 
-    const { metrics, recentAlerts, pendingRoutes, activityLog } = data || {
-        metrics: { activeUsers: 0, pendingRoutes: 0, activeAlerts: 0, openDeliveries: 0 },
+    const { metrics, recentAlerts, pendingRoutes, activityLog, recentVisits } = data || {
+        metrics: { userCount: 0, pendingRoutes: 0, activeAlerts: 0, openDeliveries: 0 },
         recentAlerts: [],
         pendingRoutes: [],
-        activityLog: []
+        activityLog: [],
+        recentVisits: []
     };
 
     return (
@@ -67,14 +68,14 @@ export default function AdminOverviewPage() {
 
             {/* Metrics Row */}
             <div className={styles.metricsGrid}>
-                {/* Active Users */}
+                {/* Total Users */}
                 <div className={styles.metricCard}>
                     <div className={styles.metricHeader}>
                         <span className={styles.metricLabel}>Total Users</span>
                         <div className={styles.metricIconWrap}><Users size={18} /></div>
                     </div>
                     <div className={styles.metricBody}>
-                        <span className={styles.metricValue}>{metrics.activeUsers.toLocaleString()}</span>
+                        <span className={styles.metricValue}>{(metrics.userCount || 0).toLocaleString()}</span>
                         <span className={styles.metricStatus}>Synced</span>
                     </div>
                 </div>
@@ -86,7 +87,7 @@ export default function AdminOverviewPage() {
                         <div className={styles.metricIconWrap}><Package size={18} /></div>
                     </div>
                     <div className={styles.metricBody}>
-                        <span className={styles.metricValue}>{metrics.openDeliveries}</span>
+                        <span className={styles.metricValue}>{metrics.openDeliveries || 0}</span>
                         <span className={styles.metricStatus}>Real-time</span>
                     </div>
                 </div>
@@ -98,100 +99,18 @@ export default function AdminOverviewPage() {
                         <div className={styles.metricIconWrap}><AlertTriangle size={18} /></div>
                     </div>
                     <div className={styles.metricBody}>
-                        <span className={styles.metricValue}>{metrics.activeAlerts}</span>
-                        <span className={styles.metricStatus}>Unresolved</span>
+                        <span className={styles.metricValue}>{metrics.activeAlerts || 0}</span>
+                        <span className={styles.metricStatus}>Live Feed</span>
                     </div>
                 </div>
 
-                {/* Pending Approvals */}
-                <div className={`${styles.metricCard} ${metrics.pendingRoutes > 0 ? styles.metricAlert : ''}`}>
+                {/* Approved Routes */}
+                <div className={styles.metricCard}>
                     <div className={styles.metricHeader}>
-                        <span className={styles.metricLabel}>Pending Routes</span>
+                        <span className={styles.metricLabel}>Pending Approval</span>
                         <div className={styles.metricIconWrap}><CheckSquare size={18} /></div>
                     </div>
                     <div className={styles.metricBody}>
-                        <span className={styles.metricValue}>{metrics.pendingRoutes}</span>
-                        <span className={styles.metricStatus}>Requires Review</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Content Grid */}
-            <div className={styles.bentoGrid}>
-                {/* Left Column: Actions */}
-                <div className={styles.leftCol}>
-                    <div className={styles.actionCard}>
-                        <div className={styles.cardHeader}>
-                            <h3>Pending Route Submissions</h3>
-                            <a href="/admin/routes" className={styles.textBtn}>View All</a>
-                        </div>
-                        <div className={styles.listContainer}>
-                            {pendingRoutes.length === 0 ? (
-                                <p className={styles.emptyList}>No pending submissions.</p>
-                            ) : (
-                                pendingRoutes.map((route: any) => (
-                                    <div key={route.id} className={styles.listItem}>
-                                        <div className={styles.listInfo}>
-                                            <div className={styles.listIcon}><Navigation size={16} /></div>
-                                            <div>
-                                                <p className={styles.listTitle}>{route.origin} to {route.destination}</p>
-                                                <p className={styles.listSub}>By {route.profiles?.full_name || 'Anonymous'} • {route.upvote_count || 0} Upvotes</p>
-                                            </div>
-                                        </div>
-                                        <div className={styles.listActions}>
-                                            <a href={`/admin/routes?id=${route.id}`} className={styles.outlineBtn}><Eye size={14} /> Review</a>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
-                    <div className={styles.actionCard}>
-                        <div className={styles.cardHeader}>
-                            <h3>Points Activity</h3>
-                        </div>
-                        <div className={styles.activityList}>
-                            {activityLog.length === 0 ? (
-                                <p className={styles.emptyList}>No recent activity logged.</p>
-                            ) : (
-                                activityLog.map((log: any) => (
-                                    <div key={log.id} className={styles.activityItem}>
-                                        <div className={styles.activityAvatar}>
-                                            <Activity size={14} />
-                                        </div>
-                                        <div className={styles.activityContent}>
-                                            <p className={styles.activityTitle}>
-                                                <strong>{log.profiles?.full_name || 'System'}</strong> earned {log.points_change} pts
-                                            </p>
-                                            <p className={styles.activityDetail}>{log.action.replace('_', ' ')}</p>
-                                        </div>
-                                        <span className={styles.activityTime}>
-                                            {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
-                    <div className={styles.actionCard}>
-                        <div className={styles.cardHeader}>
-                            <h3>Recent Platform Visitors</h3>
-                        </div>
-                        <div className={styles.activityList}>
-                            {data.recentVisits?.length === 0 ? (
-                                <p className={styles.emptyList}>No visits tracked yet.</p>
-                            ) : (
-                                data.recentVisits?.map((visit: any) => (
-                                    <div key={visit.id} className={styles.activityItem}>
-                                        <div className={styles.activityAvatar}>
-                                            <Activity size={14} />
-                                        </div>
-                                        <div className={styles.activityContent}>
-                                            <p className={styles.activityTitle}>
-                                                <strong>{visit.full_name || 'Anonymous'}</strong> visited
-                                            </p>
                                             <p className={styles.activityDetail}>Live session active or just concluded.</p>
                                         </div>
                                         <span className={styles.activityTime}>

@@ -246,41 +246,40 @@ export async function getAdminDashboardData() {
     try {
         const supabase = await createClient()
 
-        // 1. Get Metrics
-        const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-        const { count: pendingRoutes } = await supabase.from('routes').select('*', { count: 'exact', head: true }).eq('status', 'pending');
-        const { count: activeAlerts } = await supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('status', 'active');
-        const { count: openDeliveries } = await supabase.from('orders').select('*', { count: 'exact', head: true }).neq('status', 'completed');
+        // 1. Parallelize ALL data fetching (Metrics, Feeds, Logs)
+        // This reduces 8 sequential round-trips to a single parallel batch.
+        const [
+            { count: userCount },
+            { count: pendingRoutesCount },
+            { count: activeAlertsCount },
+            { count: openDeliveriesCount },
+            { data: recentAlerts },
+            { data: pendingRouteList },
+            { data: activityLog },
+            { data: recentVisits }
+        ] = await Promise.all([
+            supabase.from('profiles').select('*', { count: 'exact', head: true }),
+            supabase.from('routes').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+            supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+            supabase.from('orders').select('*', { count: 'exact', head: true }).neq('status', 'completed'),
+            supabase.from('alerts').select('*').order('created_at', { ascending: false }).limit(5),
+            supabase.from('routes').select('*, profiles(full_name)').eq('status', 'pending').order('created_at', { ascending: false }).limit(3),
+            supabase.from('points_history').select('*, profiles(full_name)').order('created_at', { ascending: false }).limit(5),
+            supabase.from('profiles').select('id, full_name, last_visited_at').not('last_visited_at', 'is', null).order('last_visited_at', { ascending: false }).limit(5)
+        ]);
 
-        // 2. Get Recent Alerts
-        const { data: recentAlerts } = await supabase
-            .from('alerts')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(5)
-
-        // 3. Get Recent Routes
-        const { data: pendingRouteList } = await supabase
-            .from('routes')
-            .select('*, profiles(full_name)')
-            .eq('status', 'pending')
-            .order('created_at', { ascending: false })
-            .limit(3)
-
-        // 4. Get Activity Log (using alerts and points_history as a proxy)
-        const { data: activityLog } = await supabase
-            .from('points_history')
-            .select('*, profiles(full_name)')
-            .order('created_at', { ascending: false })
-            .limit(5)
-
-        // 5. Get Recent Visits (Analytics)
-        const { data: recentVisits } = await supabase
-            .from('profiles')
-            .select('id, full_name, last_visited_at')
-            .not('last_visited_at', 'is', null)
-            .order('last_visited_at', { ascending: false })
-            .limit(5)
+        return {
+            metrics: {
+                userCount: userCount || 0,
+                pendingRoutes: pendingRoutesCount || 0,
+                activeAlerts: activeAlertsCount || 0,
+                openDeliveries: openDeliveriesCount || 0
+            },
+            recentAlerts: recentAlerts || [],
+            pendingRoutes: pendingRouteList || [],
+            activityLog: activityLog || [],
+            recentVisits: recentVisits || []
+        }
 
         return {
             metrics: {
