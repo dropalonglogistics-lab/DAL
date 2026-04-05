@@ -93,7 +93,7 @@ export default function DashboardOverview({
     }, [supabase, profile?.id]);
 
     const stats = [
-        { icon: Star, label: 'Points Balance', value: (profile?.points_balance ?? 0).toLocaleString(), sub: 'DAL Points' },
+        { icon: Star, label: 'Points Balance', value: (profile?.points ?? 0).toLocaleString(), sub: 'DAL Points' },
         { icon: Package, label: 'Recent Orders', value: String(orders.length), sub: 'Live status' },
         { icon: Map, label: 'Your Routes', value: String(routes.length), sub: 'Contributions' },
         {
