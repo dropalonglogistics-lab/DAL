@@ -23,31 +23,35 @@ export async function GET(request: NextRequest) {
             if (user) {
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('role')
+                    .select('id')
                     .eq('id', user.id)
-                    .single()
+                    .maybeSingle()
 
                 if (!profile) {
-                    await supabase.from('profiles').insert({
+                    await supabase.from('profiles').upsert({
                         id: user.id,
-                        full_name: user.user_metadata?.full_name || '',
+                        full_name: user.user_metadata?.full_name || 'Member',
                         email: user.email,
                         role: requestedRole,
-                        avatar_url: user.user_metadata?.avatar_url || ''
+                        avatar_url: user.user_metadata?.avatar_url || '',
+                        onboarding_completed: false
                     })
                     
                     if (user.email) {
-                        fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/notifications/email`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ to: user.email, template: 'welcome', userId: user.id, data: { name: user.user_metadata?.full_name || 'User' } })
-                        }).catch(console.error);
+                        try {
+                            fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/notifications/email`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ to: user.email, template: 'welcome', userId: user.id, data: { name: user.user_metadata?.full_name || 'Member' } })
+                            }).catch(console.error);
+                        } catch (e) {
+                            console.error("Failed to trigger welcome email:", e);
+                        }
                     }
-                    
-                    return NextResponse.redirect(`${origin}/dashboard`)
                 }
 
                 return NextResponse.redirect(`${origin}/dashboard`)
+
             }
         }
     }

@@ -58,13 +58,41 @@ export default function ProfileClient() {
 
                 // 2. Fetch Profile FAST (Core Information)
                 console.log("[Profile] Fetching core profile...");
-                const { data: profileData, error: profileError } = await supabase
+                let { data: profileData, error: profileError } = await supabase
                     .from('profiles')
                     .select('*')
                     .eq('id', user.id)
-                    .maybeSingle(); // Step 3: Use maybeSingle()
+                    .maybeSingle();
 
-                console.log(`[Profile] Core data loaded: ${Math.round(performance.now() - startTime)}ms`);
+                // 2.5 Auto-create profile if missing (Consistent with Dashboard)
+                if (!profileData && !profileError) {
+                    console.log("[Profile] Profile missing for user, auto-creating...", user.id);
+                    const { data: newProfile, error: createError } = await supabase
+                        .from('profiles')
+                        .upsert({
+                            id: user.id,
+                            email: user.email,
+                            full_name: user.user_metadata?.full_name || 'Member',
+                            onboarding_completed: false
+                        })
+                        .select()
+                        .maybeSingle();
+                    
+                    if (createError) {
+                        console.error("[Profile] Auto-creation failed:", createError.message);
+                        // Fallback: use auth metadata for UI
+                        profileData = { 
+                            id: user.id, 
+                            email: user.email, 
+                            full_name: user.user_metadata?.full_name || 'Member',
+                            is_admin: false 
+                        } as any;
+                    } else {
+                        profileData = newProfile;
+                    }
+                }
+
+                console.log(`[Profile] Core data settled: ${Math.round(performance.now() - startTime)}ms`);
 
                 if (!isMounted) return;
 
@@ -78,6 +106,7 @@ export default function ProfileClient() {
                 if (profileError) {
                     throw profileError;
                 }
+
 
                 // 4. Fetch Secondary Stats in BACKGROUND (Deferred)
                 console.log("[Profile] Background fetch for stats started...");
