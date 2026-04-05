@@ -104,57 +104,121 @@ export default function AdminOverviewPage() {
                     </div>
                 </div>
 
-                {/* Approved Routes */}
+                {/* Pending Approvals */}
                 <div className={styles.metricCard}>
                     <div className={styles.metricHeader}>
                         <span className={styles.metricLabel}>Pending Approval</span>
                         <div className={styles.metricIconWrap}><CheckSquare size={18} /></div>
                     </div>
                     <div className={styles.metricBody}>
-                                            <p className={styles.activityDetail}>Live session active or just concluded.</p>
-                                        </div>
-                                        <span className={styles.activityTime}>
-                                            {new Date(visit.last_visited_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
+                        <span className={styles.metricValue}>{metrics.pendingRoutes || 0}</span>
+                        <span className={styles.metricStatus}>Awaiting Review</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className={styles.dashboardGrid}>
+                {/* Recent Alerts Feed */}
+                <div className={styles.feedCard}>
+                    <div className={styles.cardHeader}>
+                        <div className={styles.headerIcon}><ShieldAlert size={16} /></div>
+                        <h3>Recent Intelligence Alerts</h3>
+                        <a href="/admin/alerts" className={styles.viewAll}>View History</a>
+                    </div>
+                    <div className={styles.activityList}>
+                        {recentAlerts?.length === 0 ? (
+                            <p className={styles.emptyList}>No active alerts found.</p>
+                        ) : (
+                            recentAlerts?.map((alert: any) => (
+                                <div key={alert.id} className={styles.activityItem}>
+                                    <div className={`${styles.statusDot} ${styles[alert.severity]}`} />
+                                    <div className={styles.activityInfo}>
+                                        <p className={styles.activityTitle}>{alert.title || alert.type}</p>
+                                        <p className={styles.activityMeta}>
+                                            Reported {new Date(alert.created_at).toLocaleTimeString()} · {alert.area || 'Unknown Area'}
+                                        </p>
                                     </div>
-                                ))
-                            )}
-                        </div>
+                                    <span className={`${styles.badge} ${styles[alert.status]}`}>{alert.status}</span>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 
-                {/* Right Column: Feeds */}
-                <div className={styles.rightCol}>
-                    <div className={styles.feedCard}>
-                        <div className={styles.cardHeader}>
-                            <h3>Recent Road Alerts</h3>
-                            <a href="/admin/alerts" className={styles.textBtn}>Manage</a>
-                        </div>
-                        <div className={styles.feedList}>
-                            {recentAlerts.length === 0 ? (
-                                <p className={styles.emptyList}>No active road alerts.</p>
-                            ) : (
-                                recentAlerts.map((alert: any) => (
-                                    <div key={alert.id} className={styles.feedItem}>
-                                        <div className={styles.feedType}>
-                                            <ShieldAlert size={14} />
-                                            <span>{alert.type.toUpperCase()}</span>
-                                        </div>
-                                        <div className={styles.feedContent}>
-                                            <p className={styles.feedMain}>{alert.location || 'Unknown Location'}</p>
-                                            <div className={styles.feedMeta}>
-                                                <span>{alert.upvote_count || 0} Confirmations</span>
-                                                <span>•</span>
-                                                <span>{new Date(alert.created_at).toLocaleDateString()}</span>
-                                            </div>
-                                        </div>
-                                        <span className={`${styles.statusBadge} ${styles[alert.status]}`}>
-                                            {alert.status}
-                                        </span>
+                {/* Pending Routes Feed */}
+                <div className={styles.feedCard}>
+                    <div className={styles.cardHeader}>
+                        <div className={styles.headerIcon}><Navigation size={16} /></div>
+                        <h3>Route Approvals Required</h3>
+                        <a href="/admin/routes" className={styles.viewAll}>Manage All</a>
+                    </div>
+                    <div className={styles.activityList}>
+                        {pendingRoutes?.length === 0 ? (
+                            <p className={styles.emptyList}>No pending routes to review.</p>
+                        ) : (
+                            pendingRoutes?.map((route: any) => (
+                                <div key={route.id} className={styles.activityItem}>
+                                    <div className={styles.avatarMini}>{route.profiles?.full_name?.charAt(0) || 'U'}</div>
+                                    <div className={styles.activityInfo}>
+                                        <p className={styles.activityTitle}>{route.name}</p>
+                                        <p className={styles.activityMeta}>
+                                            by {route.profiles?.full_name || 'Anonymous'} · {route.origin} to {route.destination}
+                                        </p>
                                     </div>
-                                ))
-                            )}
-                        </div>
+                                    <button className={styles.miniActionBtn}><Eye size={14} /></button>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Activity Log Feed */}
+                <div className={styles.feedCard}>
+                    <div className={styles.cardHeader}>
+                        <div className={styles.headerIcon}><Activity size={16} /></div>
+                        <h3>Global Activity Log</h3>
+                    </div>
+                    <div className={styles.activityList}>
+                        {activityLog?.length === 0 ? (
+                            <p className={styles.emptyList}>No recent activity logged.</p>
+                        ) : (
+                            activityLog?.map((action: any) => (
+                                <div key={action.id} className={styles.activityItem}>
+                                    <div className={styles.activityInfo}>
+                                        <p className={styles.activityTitle}>
+                                            <strong>{action.profiles?.full_name || 'User'}</strong> earned {action.points_change} points
+                                        </p>
+                                        <p className={styles.activityMeta}>
+                                            Action: {action.action.replace('_', ' ')} · {new Date(action.created_at).toLocaleTimeString()}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Recent Visitors Feed */}
+                <div className={styles.actionCard}>
+                    <div className={styles.cardHeader}>
+                        <h3>Recent Platform Visitors</h3>
+                    </div>
+                    <div className={styles.activityList}>
+                        {recentVisits?.length === 0 ? (
+                            <p className={styles.emptyList}>No visits tracked yet.</p>
+                        ) : (
+                            recentVisits?.map((visit: any) => (
+                                <div key={visit.id} className={styles.activityItem}>
+                                    <div className={styles.activityInfo}>
+                                        <p className={styles.activityTitle}>{visit.full_name || 'Anonymous Member'}</p>
+                                        <p className={styles.activityMeta}>
+                                            Last seen {new Date(visit.last_visited_at).toLocaleTimeString()}
+                                        </p>
+                                    </div>
+                                    <div className={styles.onlineStatus} />
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
