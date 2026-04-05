@@ -4,8 +4,7 @@ import PublicLayout from '@/components/layout/PublicLayout';
 import OneSignalInit from '@/components/OneSignalInit';
 import PostHogProvider from '@/components/Providers/PostHogProvider';
 import CookieBanner from '@/components/legal/CookieBanner';
-
-
+import AnalyticsTracker from '@/components/analytics/AnalyticsTracker';
 
 export const metadata: Metadata = {
     title: 'Drop Along Logistics (DAL)',
