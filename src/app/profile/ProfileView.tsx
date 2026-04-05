@@ -76,11 +76,6 @@ export default function ProfileClient() {
 
                 // 3. Handle Profile Missing or Aborted
                 if (profileError) {
-                    if (profileError.message?.includes('aborted')) {
-                        console.warn("[Profile] Fetch aborted, waiting for next render...");
-                        return; // Keep loading=true and let the next effect call handle it
-                    }
-
                     if (profileError.code === 'PGRST116') {
                         console.log("[Profile] Record not found, creating...");
                         const { data: neu, error: insErr } = await supabase.from('profiles').insert([{
@@ -107,200 +102,145 @@ export default function ProfileClient() {
                     setProfile(profileData)
                     setPreviewUrl(profileData.avatar_url)
                     
-                    const [rRes, aRes] = contributionRes as any;
-                    setCounts({ 
-                        routes: rRes?.count || 0, 
-                        reports: aRes?.count || 0 
+                    const [routeRes, alertRes] = contributionRes as any;
+                    setCounts({
+                        routes: routeRes.count || 0,
+                        reports: alertRes.count || 0
                     })
-
-                    // Onboarding check
-                    if (profileData.onboarding_completed === false) {
-                        router.push('/welcome');
-                    }
-
-                    // 5. Defer Admin Stats - fire and forget, then update later
-                    if (profileData.is_admin) {
-                        console.log("[Profile] User is admin, loading stats in background...");
-                        fetchAdminStats().then(stats => {
-                            if (isMounted && stats) setAdminStats(stats)
-                        }).catch(() => null);
-                    }
                 }
 
-            } catch (err: any) {
-                if (isMounted && !err.message?.includes('aborted')) {
-                    console.error("[Profile] Critical error:", err)
-                    setMessage({ type: 'error', text: err.message || 'An unexpected error occurred' })
+                // 5. DEFER Admin Stats to speed up rendering
+                if (isMounted && profileData?.is_admin) {
+                   fetchAdminStats().then(stats => {
+                      if (isMounted) setAdminStats(stats);
+                   }).catch(() => null);
                 }
+
+            } catch (error: any) {
+                console.error('[Profile] Loading Error:', error.message)
+                if (isMounted) setMessage({ type: 'error', text: 'Connection failed. Please retry.' })
             } finally {
-                // IMPORTANT: Only clear loading if we aren't aborted
                 if (isMounted) setLoading(false)
             }
         }
 
         loadProfile()
-        return () => { isMounted = false }
-    }, [router, supabase])
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (file) {
-            const url = URL.createObjectURL(file)
-            setPreviewUrl(url)
+        // Sync with layout state
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT' && isMounted) {
+                router.push('/login')
+            }
+        })
+
+        return () => {
+            isMounted = false
+            clearTimeout(timer)
+            subscription.unsubscribe()
         }
-    }
+    }, [supabase, router])
 
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setSaving(true)
         setMessage(null)
-        setUploadProgress(10)
+
+        const formData = new FormData(e.currentTarget)
+        const result = await updateProfile(formData)
+
+        if (result.success) {
+            setMessage({ type: 'success', text: 'Profile updated successfully!' })
+            setProfile({ ...profile, full_name: formData.get('full_name'), bio: formData.get('bio') })
+        } else {
+            setMessage({ type: 'error', text: result.error || 'Failed to update profile' })
+        }
+        setSaving(false)
+    }
+
+    const handleUploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
 
         try {
-            const formData = new FormData(e.currentTarget)
-            const file = formData.get('avatarFile') as File
-            let avatarUrl = profile?.avatar_url
+            setSaving(true)
+            const reader = new FileReader()
+            reader.onload = (e) => setPreviewUrl(e.target?.result as string)
+            reader.readAsDataURL(file)
 
-            // 1. Handle File Upload if a new file is selected
-            if (file && file.size > 0) {
-                const { data: authData } = await supabase.auth.getUser()
-                const user = authData?.user
-                if (!user) throw new Error('Not authenticated')
+            const fileExt = file.name.split('.').pop()
+            const fileName = `${profile.id}-${Math.random()}.${fileExt}`
+            const filePath = `avatars/${fileName}`
 
-                const fileExt = file.name.split('.').pop()
-                const fileName = `${user.id}/${Math.random()}.${fileExt}`
-                const filePath = fileName
+            const { error: uploadError } = await supabase.storage
+                .from('profiles')
+                .upload(filePath, file)
 
-                setUploadProgress(30)
-                const { error: uploadError, data } = await supabase.storage
-                    .from('avatars')
-                    .upload(filePath, file, { upsert: true })
+            if (uploadError) throw uploadError
 
-                if (uploadError) throw uploadError
+            const { data: { publicUrl } } = supabase.storage
+                .from('profiles')
+                .getPublicUrl(filePath)
 
-                setUploadProgress(60)
-                const { data: { publicUrl } } = supabase.storage
-                    .from('avatars')
-                    .getPublicUrl(filePath)
-
-                avatarUrl = publicUrl
-                formData.set('avatarUrl', avatarUrl)
-            }
-
-            setUploadProgress(80)
-            // 2. Update Database Profile
-            const result = await updateProfile(formData)
-
-            if (result?.error) {
-                setMessage({ type: 'error', text: result.error })
-            } else {
-                setMessage({ type: 'success', text: 'Profile updated successfully!' })
-                setProfile({ ...profile, avatar_url: avatarUrl })
-            }
-        } catch (err: any) {
-            setMessage({ type: 'error', text: err.message || 'An unexpected error occurred' })
+            const formData = new FormData()
+            formData.append('avatar_url', publicUrl)
+            await updateProfile(formData)
+            
+            setProfile({ ...profile, avatar_url: publicUrl })
+            setMessage({ type: 'success', text: 'Avatar updated!' })
+        } catch (error: any) {
+            setMessage({ type: 'error', text: error.message })
         } finally {
             setSaving(false)
-            setUploadProgress(0)
-        }
-    }
-
-    async function handleSync() {
-        console.log("[Profile] 🔄 MANUALLY TRIGGERED RE-SYNC")
-        setLoading(true)
-        setMessage(null)
-        try {
-            const { data, error } = await supabase.auth.refreshSession()
-            console.log("[Profile] 🔄 Session Refresh Result:", { success: !!data.session, error })
-            // Re-run the mounting effect logic
-            window.location.reload()
-        } catch (err) {
-            console.error("[Profile] ❌ Sync failed:", err)
-            setLoading(false)
-        }
-    }
-
-    const handleEmergencySignOut = async () => {
-        try {
-            // 1. Client-side sign out
-            await supabase.auth.signOut()
-            // 2. Clear local storage
-            localStorage.clear()
-            sessionStorage.clear()
-            setTimeout(() => {
-                window.location.href = '/auth/login'
-            }, 1000)
-        } catch (e: any) {
-            window.location.href = '/' // Force move
         }
     }
 
     if (loading) {
         return (
-            <div className={styles.container} style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-                <Spinner size="lg" />
-                <p style={{ color: 'var(--text-secondary)', fontWeight: 500, margin: 0 }}>Loading your dashboard...</p>
-            </div>
-        )
-    }
-
-    // Special Error View for Missing Database Column
-    if (message?.text.includes('PGRST204') || message?.text.includes('is_admin') || message?.text.includes('DB Error')) {
-        return (
             <div className={styles.container}>
-                <div className={styles.card} style={{ border: '2px solid var(--color-warning)', background: 'rgba(245, 158, 11, 0.05)' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-                        <AlertCircle size={32} color="var(--color-warning)" />
-                        <div>
-                            <h2 style={{ marginTop: 0 }}>⚠️ Connection or Database Issue</h2>
-                            <p>{message.text}</p>
-                            <p><strong>Common Fix:</strong> Run the 'Sync Data' command or verify your database schema.</p>
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                                <button onClick={handleSync} className={styles.saveBtn}>Force Re-sync Session</button>
-                                <button onClick={() => window.location.reload()} className={styles.signOutBtn}>Reload Page</button>
-                            </div>
+                <div style={{ textAlign: 'center', padding: '100px 20px' }}>
+                    <Spinner size="large" />
+                    <p style={{ marginTop: '20px', color: 'var(--text-secondary)' }}>Initializing secure connection...</p>
+                    {isStuck && (
+                        <div style={{ marginTop: '30px', padding: '20px', backgroundColor: 'var(--card-hover)', borderRadius: '12px' }}>
+                            <AlertCircle size={24} color="var(--warning)" style={{ marginBottom: '10px' }} />
+                            <p style={{ fontSize: '0.9rem' }}>Taking longer than usual. This might be due to a slow connection or RLS session sync.</p>
+                            <button 
+                                onClick={() => {
+                                    localStorage.clear();
+                                    window.location.reload();
+                                }} 
+                                style={{ 
+                                    marginTop: '15px', 
+                                    padding: '8px 16px', 
+                                    backgroundColor: 'var(--primary)', 
+                                    color: 'white', 
+                                    border: 'none', 
+                                    borderRadius: '6px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Force Reset Session
+                            </button>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         )
     }
 
-    if (!profile && !loading) {
+    if (!profile) {
         return (
             <div className={styles.container}>
                 <div className={styles.card} style={{ textAlign: 'center', padding: '60px 20px' }}>
-                    <div className={styles.staggerEntry}>
-                        <User size={48} color="var(--text-secondary)" style={{ marginBottom: '20px', opacity: 0.3 }} />
-                        <h2>Profile Data Not Found</h2>
-                        <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                            We found your account, but your profile details are taking too long to load or are currently hidden.
-                        </p>
-
-                        {message && (
-                            <div style={{
-                                margin: '0 auto 24px auto',
-                                padding: '12px',
-                                background: 'rgba(239, 68, 68, 0.05)',
-                                border: '1px solid rgba(239, 68, 68, 0.2)',
-                                borderRadius: '8px',
-                                color: 'var(--color-error)',
-                                fontSize: '0.85rem',
-                                maxWidth: '400px'
-                            }}>
-                                <strong>Technical Detail:</strong> {message.text}
-                            </div>
-                        )}
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '300px', margin: '0 auto' }}>
-                            <button onClick={handleSync} className={styles.saveBtn}>
-                                Force Re-sync Data
-                            </button>
-                            <button onClick={() => window.location.reload()} className={styles.signOutBtn}>
-                                Refresh Browser
-                            </button>
-                        </div>
-                    </div>
+                    <AlertCircle size={48} color="var(--error)" style={{ marginBottom: '20px' }} />
+                    <h2>Connection Interrupt</h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>We found your account, but your profile details are currently hidden or taking too long to load.</p>
+                    <button 
+                        onClick={() => window.location.reload()} 
+                        style={{ padding: '12px 24px', backgroundColor: 'var(--primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                    >
+                        Retry Connection
+                    </button>
                 </div>
             </div>
         )
@@ -308,235 +248,104 @@ export default function ProfileClient() {
 
     return (
         <div className={styles.container}>
-            <div className={`${styles.header} ${styles.staggerEntry} ${styles.delay_1}`}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-                    <div>
-                        <h1 className={styles.title}>{viewMode === 'admin' ? 'Admin Dashboard' : 'Your Profile'}</h1>
-                        <p className={styles.subtitle}>{viewMode === 'admin' ? 'System overview and statistics.' : 'Manage your personal information.'}</p>
+            {/* Header / Banner */}
+            <div className={styles.header}>
+                <div className={styles.headerContent}>
+                    <div className={styles.avatarWrapper}>
+                        {previewUrl ? (
+                            <img src={previewUrl} alt="Avatar" className={styles.avatar} />
+                        ) : (
+                            <div className={styles.avatarPlaceholder}><User size={40} /></div>
+                        )}
+                        <label className={styles.cameraBtn}>
+                            <Camera size={14} />
+                            <input type="file" hidden accept="image/*" onChange={handleUploadAvatar} disabled={saving} />
+                        </label>
                     </div>
-
-                    {profile?.is_admin && (
-                        <div className={styles.toggleContainer}>
-                            <button
-                                type="button"
-                                className={`${styles.toggleBtn} ${viewMode === 'profile' ? styles.active : ''}`}
-                                onClick={() => setViewMode('profile')}
-                            >
-                                <User size={18} /> Profile
-                            </button>
-                            <button
-                                type="button"
-                                className={`${styles.toggleBtn} ${viewMode === 'admin' ? styles.active : ''}`}
-                                onClick={() => setViewMode('admin')}
-                            >
-                                <Shield size={18} /> Admin
-                            </button>
+                    <div className={styles.infoGroup}>
+                        <h1 className={styles.name}>{profile.full_name || 'Anonymous'}</h1>
+                        <p className={styles.email}><Mail size={14} /> {profile.email}</p>
+                        <div className={styles.badgeRow}>
+                            {profile.is_admin && <span className={styles.adminBadge}><Shield size={12} /> Admin Oversight</span>}
+                            <span className={styles.pointsBadge}><Coins size={12} /> {profile.points_total || 0} Journey Points</span>
                         </div>
-                    )}
+                    </div>
+                    <div className={styles.headerActions}>
+                        <button onClick={() => setViewMode(viewMode === 'profile' ? 'admin' : 'profile')} className={styles.secondaryBtn}>
+                            {viewMode === 'profile' ? (
+                                <><LayoutDashboard size={14} /> Stats</>
+                            ) : (
+                                <><User size={14} /> Edit</>
+                            )}
+                        </button>
+                        <button onClick={() => signOut()} className={styles.logoutBtn}><LogOut size={14} /> Sign Out</button>
+                    </div>
                 </div>
             </div>
 
-            <div className={`${styles.card} ${styles.staggerEntry} ${styles.delay_2}`}>
-                {message && (
-                    <div className={`${styles.message} ${styles[message.type]} animate-fade-in`}>
-                        {message.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
-                        {message.text}
-                    </div>
-                )}
-
-                {viewMode === 'admin' && adminStats ? (
-                    <div className="animate-fade-in">
-                        <div style={{ marginBottom: '32px' }}>
-                            <AdminStats
-                                userCount={adminStats.userCount}
-                                alertCount={adminStats.alertCount}
-                                routeCount={adminStats.routeCount}
-                                verifiedCount={adminStats.verifiedCount}
-                            />
-                        </div>
-
-                        <div className={styles.adminSection}>
-                            <div className={styles.sectionTitle}>
-                                <Shield size={20} color="var(--color-warning)" /> Quick Actions
+            {viewMode === 'profile' ? (
+                <div className={styles.contentGrid}>
+                    <div className={styles.mainCol}>
+                        <div className={styles.card}>
+                            <div className={styles.cardHeader}>
+                                <h2>Profile Details</h2>
                             </div>
-                            <div className={styles.adminGrid}>
-                                <a href="/admin" className={styles.adminCard}>
-                                    <div className={styles.adminCardIcon}>
-                                        <LayoutDashboard size={20} />
+                            <form onSubmit={handleUpdateProfile} className={styles.formGrid}>
+                                <div className={styles.formGroup}>
+                                    <label>Full Name</label>
+                                    <input name="full_name" defaultValue={profile.full_name} placeholder="Your name" />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>Bio</label>
+                                    <textarea name="bio" defaultValue={profile.bio} placeholder="Tell us about yourself..." />
+                                </div>
+                                <div className={styles.formActions}>
+                                    <button type="submit" disabled={saving} className={styles.primaryBtn}>
+                                        {saving ? <Spinner size="small" /> : 'Save Changes'}
+                                    </button>
+                                </div>
+                                {message && (
+                                    <div className={`${styles.statusMsg} ${styles[message.type]}`}>
+                                        {message.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+                                        {message.text}
                                     </div>
-                                    <div className={styles.adminCardContent}>
-                                        <h4>Full Dashboard</h4>
-                                        <p>Go to main admin portal</p>
-                                    </div>
-                                </a>
-                                <a href="/admin/users" className={styles.adminCard}>
-                                    <div className={styles.adminCardIcon}>
-                                        <UsersIcon size={20} />
-                                    </div>
-                                    <div className={styles.adminCardContent}>
-                                        <h4>User Management</h4>
-                                        <p>Manage roles and permissions</p>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <form onSubmit={handleSubmit}>
-                        {/* Avatar Section */}
-                        <div className={`${styles.avatarSection} ${styles.staggerEntry} ${styles.delay_3}`}>
-                            <div className={styles.avatarDisplay}>
-                                {previewUrl ? (
-                                    <img src={previewUrl} alt="Preview" className={styles.avatarImage} />
-                                ) : (
-                                    profile?.full_name?.charAt(0).toUpperCase() || profile?.email?.charAt(0).toUpperCase()
                                 )}
-                                <label className={styles.avatarOverlay}>
-                                    <Camera size={24} />
-                                    <input
-                                        type="file"
-                                        name="avatarFile"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                        className={styles.fileInput}
-                                    />
-                                </label>
-                            </div>
-                            <div className={styles.avatarInfo}>
-                                <h3 style={{ margin: 0 }}>{profile?.full_name || 'User'}</h3>
-                                <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>{profile?.email}</p>
-                                    <div className={styles.profileStatRow}>
-                                        <div className={styles.pointsDisplay}>
-                                            <Award size={16} />
-                                            <span>{profile?.points || 0} Points</span>
-                                        </div>
-                                        {profile?.points >= 500 ? (
-                                            <div className={`${styles.rankBadge} ${styles.rankMaster}`}>
-                                                <Shield size={14} />
-                                                <span>Master Scout</span>
-                                            </div>
-                                        ) : profile?.points >= 200 ? (
-                                            <div className={`${styles.rankBadge} ${styles.rankElite}`}>
-                                                <Award size={14} />
-                                                <span>Elite Scout</span>
-                                            </div>
-                                        ) : profile?.points >= 50 ? (
-                                            <div className={`${styles.rankBadge} ${styles.rankScout}`}>
-                                                <Navigation size={14} />
-                                                <span>Scout</span>
-                                            </div>
-                                        ) : (
-                                            <div className={`${styles.rankBadge} ${styles.rankRookie}`}>
-                                                <Activity size={14} />
-                                                <span>Rookie</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                {profile?.is_admin && <span className={styles.adminBadge}>Administrator</span>}
-                                <p className={styles.uploadHint}>Click the icon to change your photo</p>
-                            </div>
+                            </form>
                         </div>
-
-                        {/* Profile Stats / Badges Section */}
-                        <div className={`${styles.statsGrid} ${styles.staggerEntry} ${styles.delay_4}`}>
-                            <div className={styles.statCard}>
-                                <div className={styles.statIconWrapper} style={{ background: 'rgba(67, 97, 238, 0.1)' }}>
-                                    <MapPin size={24} color="var(--color-primary)" />
-                                </div>
-                                <div className={styles.statInfo}>
-                                    <h4 className={styles.statNumber}>{counts.routes}</h4>
-                                    <p className={styles.statLabel}>Routes Suggested</p>
-                                </div>
-                            </div>
-                            <div className={styles.statCard}>
-                                <div className={styles.statIconWrapper} style={{ background: 'rgba(245, 158, 11, 0.1)' }}>
-                                    <AlertCircle size={24} color="var(--color-warning)" />
-                                </div>
-                                <div className={styles.statInfo}>
-                                    <h4 className={styles.statNumber}>{counts.reports}</h4>
-                                    <p className={styles.statLabel}>Incidents Reported</p>
-                                </div>
-                            </div>
-                            <div className={styles.statCard}>
-                                <div className={styles.statIconWrapper} style={{ background: 'rgba(212, 175, 55, 0.1)' }}>
-                                    <Award size={24} color="var(--color-gold)" />
-                                </div>
-                                <div className={styles.statInfo}>
-                                    <h4 className={styles.statNumber}>{profile?.points || 0}</h4>
-                                    <p className={styles.statLabel}>Total Points</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Personal Details Form */}
-                        <div className={`${styles.section} ${styles.staggerEntry} ${styles.delay_5}`}>
-                            <div className={styles.sectionTitle}>
-                                <User size={20} /> Personal Details
-                            </div>
-                            <div className={styles.grid}>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.label}>Full Name</label>
-                                    <input
-                                        type="text"
-                                        name="fullName"
-                                        defaultValue={profile?.full_name || ''}
-                                        className={styles.input}
-                                        required
-                                        placeholder="e.g. John Doe"
-                                    />
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.label}>Date of Birth</label>
-                                    <input
-                                        type="date"
-                                        name="dob"
-                                        defaultValue={profile?.date_of_birth || ''}
-                                        className={styles.input}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={`${styles.section} ${styles.staggerEntry} ${styles.delay_6}`}>
-                            <div className={styles.sectionTitle}>
-                                <MapPin size={20} /> Location Information
-                            </div>
-                            <div className={styles.grid}>
-                                <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                                    <label className={styles.label}>Home Address</label>
-                                    <input
-                                        type="text"
-                                        name="address"
-                                        defaultValue={profile?.address || ''}
-                                        className={styles.input}
-                                        placeholder="Street, City, Country"
-                                    />
-                                </div>
-                                <input type="hidden" name="avatarUrl" defaultValue={profile?.avatar_url || ''} />
-                            </div>
-                        </div>
-
-                        <div className={styles.actions}>
-                            <button type="button" onClick={() => signOut()} className={styles.signOutBtn}>
-                                <LogOut size={18} /> Sign Out
-                            </button>
-                            <button type="submit" disabled={saving} className={styles.saveBtn}>
-                                {saving ? (
-                                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <div className="spinner-small"></div> Saving...
-                                    </span>
-                                ) : 'Save Changes'}
-                            </button>
-                        </div>
-                    </form>
-                )}
-
-                {saving && uploadProgress > 0 && (
-                    <div className={styles.progressBar}>
-                        <div className={styles.progressFill} style={{ width: `${uploadProgress}%` }}></div>
                     </div>
-                )}
-            </div>
+
+                    <div className={styles.sideCol}>
+                        <div className={styles.statsCard}>
+                            <h3>Your Influence</h3>
+                            <div className={styles.statRow}>
+                                <div className={styles.statIcon}><Navigation size={14} /></div>
+                                <div className={styles.statInfo}>
+                                    <span className={styles.statVal}>{counts.routes}</span>
+                                    <span className={styles.statLbl}>Paths Suggested</span>
+                                </div>
+                            </div>
+                            <div className={styles.statRow}>
+                                <div className={styles.statIcon}><Activity size={14} /></div>
+                                <div className={styles.statInfo}>
+                                    <span className={styles.statVal}>{counts.reports}</span>
+                                    <span className={styles.statLbl}>Road Alerts</span>
+                                </div>
+                            </div>
+                            <div className={styles.statRow}>
+                                <div className={styles.statIcon}><Award size={14} /></div>
+                                <div className={styles.statInfo}>
+                                    <span className={styles.statVal}>{profile.points_total || 0}</span>
+                                    <span className={styles.statLbl}>Contribution Pts</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className={styles.adminView}>
+                    <AdminStats stats={adminStats} />
+                </div>
+            )}
         </div>
     )
 }
