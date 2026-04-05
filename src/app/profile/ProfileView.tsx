@@ -34,20 +34,27 @@ export default function ProfileClient() {
             setMessage(null)
 
             try {
-                // 1. Get Session / User
-                const { data: { user: authUser }, error: userError } = await supabase.auth.getUser()
-                if (userError || !authUser) {
+                // 1. Get Session FAST
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+                
+                // If session is missing, try a more thorough check
+                let user = session?.user;
+                if (!user) {
+                    const { data: { user: authUser } } = await supabase.auth.getUser()
+                    user = authUser;
+                }
+
+                if (!user) {
                     if (isMounted) router.push('/auth/login')
                     return
                 }
 
-                const user = authUser
+                console.log("[Profile] Authenticated:", user.id);
 
-                // 2. Parallelize ALL remaining requests
-                // We fire Profile, Admin Stats, and Counts at the same time.
-                const [profileRes, statsRes, contributionRes] = await Promise.all([
+                // 2. Parallelize Core Profile and Contributions ONLY
+                // We DEFER Admin Stats to speed up the initial load!
+                const [profileRes, contributionRes] = await Promise.all([
                     supabase.from('profiles').select('*').eq('id', user.id).single(),
-                    fetchAdminStats().catch(() => null), // Gracefully handle if not admin
                     Promise.all([
                         supabase.from('routes').select('*', { count: 'exact', head: true }).eq('submitted_by', user.id),
                         supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('reported_by', user.id)
@@ -59,38 +66,39 @@ export default function ProfileClient() {
                 let profileData = profileRes.data;
                 let profileError = profileRes.error;
 
-                // 3. Handle Missing Profile (Auto-Create only if row not found)
-                if ((profileError && profileError.code === 'PGRST116') || (!profileData && !profileError)) {
-                    const { data: neu, error: insErr } = await supabase.from('profiles').insert([{
-                        id: user.id,
-                        email: user.email,
-                        full_name: user.user_metadata?.full_name || 'Member',
-                        is_admin: false
-                    }]).select().single()
-
-                    if (insErr) {
-                        // Check if it already exists due to race condition
-                        const { data: retryData } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-                        profileData = retryData
-                    } else {
-                        profileData = neu
+                // 3. Handle Profile Missing or Aborted
+                if (profileError) {
+                    if (profileError.message?.includes('aborted')) {
+                        console.warn("[Profile] Fetch aborted, waiting for next render...");
+                        return; // Keep loading=true and let the next effect call handle it
                     }
-                } else if (profileError) {
-                    // Ignore planned aborts, but throw real errors
-                    if (!profileError.message?.includes('aborted')) {
+
+                    if (profileError.code === 'PGRST116') {
+                        console.log("[Profile] Record not found, creating...");
+                        const { data: neu, error: insErr } = await supabase.from('profiles').insert([{
+                            id: user.id,
+                            email: user.email,
+                            full_name: user.user_metadata?.full_name || 'Member',
+                            is_admin: false
+                        }]).select().single()
+
+                        if (insErr) {
+                            const { data: retryData } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+                            profileData = retryData
+                        } else {
+                            profileData = neu
+                        }
+                    } else {
                         throw profileError;
                     }
                 }
 
-                // 4. Update State
+                // 4. Update core state immediately
                 if (isMounted && profileData) {
+                    console.log("[Profile] Core data loaded.");
                     setProfile(profileData)
                     setPreviewUrl(profileData.avatar_url)
                     
-                    if (profileData.is_admin && statsRes) {
-                        setAdminStats(statsRes)
-                    }
-
                     const [rRes, aRes] = contributionRes as any;
                     setCounts({ 
                         routes: rRes?.count || 0, 
@@ -101,15 +109,23 @@ export default function ProfileClient() {
                     if (profileData.onboarding_completed === false) {
                         router.push('/welcome');
                     }
+
+                    // 5. Defer Admin Stats - fire and forget, then update later
+                    if (profileData.is_admin) {
+                        console.log("[Profile] User is admin, loading stats in background...");
+                        fetchAdminStats().then(stats => {
+                            if (isMounted && stats) setAdminStats(stats)
+                        }).catch(() => null);
+                    }
                 }
 
             } catch (err: any) {
-                // Completely ignore "aborted" errors from the UI
                 if (isMounted && !err.message?.includes('aborted')) {
-                    console.error("[Profile] Fatal error:", err)
+                    console.error("[Profile] Critical error:", err)
                     setMessage({ type: 'error', text: err.message || 'An unexpected error occurred' })
                 }
             } finally {
+                // IMPORTANT: Only clear loading if we aren't aborted
                 if (isMounted) setLoading(false)
             }
         }
