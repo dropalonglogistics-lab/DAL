@@ -19,6 +19,7 @@ interface Business {
     created_at: string;
     email: string;
     phone: string;
+    whatsapp?: string;
     owner_id: string;
     profiles?: { full_name: string };
     delivery_zones: string[];
