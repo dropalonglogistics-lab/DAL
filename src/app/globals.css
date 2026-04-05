@@ -283,7 +283,7 @@ body.dark-mode .btn-ghost:hover {
 }
 
 .container-center {
-  @apply max-width-[1280px] mx-auto;
+  @apply max-w-[1280px] mx-auto;
 }
 
 .hover-lift { transition: transform var(--transition-fast), box-shadow var(--transition-fast); }
