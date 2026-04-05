@@ -127,7 +127,7 @@ export default function ProfileClient() {
         loadProfile()
 
         // Sync with layout state
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
             if (event === 'SIGNED_OUT' && isMounted) {
                 router.push('/login')
             }
