@@ -68,9 +68,18 @@ export default function CommunityClient({
                         </button>
                         {howToOpen && (
                             <div className={styles.earnList}>
-                                <div>• Suggest a route (approved) → +10 pts</div>
-                                <div>• Report a road alert → +5 pts</div>
-                                <div>• Successful order (F2) → +20 pts</div>
+                                <div className={styles.earnItem}>
+                                    <span>Suggest a route (verified)</span>
+                                    <span className={styles.earnPoints}>+50 pts</span>
+                                </div>
+                                <div className={styles.earnItem}>
+                                    <span>Report a road alert</span>
+                                    <span className={styles.earnPoints}>+20 pts</span>
+                                </div>
+                                <div className={styles.earnItem}>
+                                    <span>Successful order (F2)</span>
+                                    <span className={styles.earnPoints}>+10 pts</span>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -79,9 +88,11 @@ export default function CommunityClient({
 
             {/* LEADERBOARD */}
             <section className={styles.section}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                    <TrendingUp size={18} color="#C9A227" />
-                    <h2 className={styles.sectionTitle}>Top Contributors</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+                    <div className={styles.rankBadge} style={{ background: 'var(--color-gold)', color: '#000' }}>
+                        <TrendingUp size={14} />
+                    </div>
+                    <h2 className={styles.sectionTitle}>Elite Contributors</h2>
                 </div>
 
                 <div className={styles.leaderboardCard}>
@@ -89,18 +100,30 @@ export default function CommunityClient({
                         <thead>
                             <tr>
                                 <th align="left">Rank</th>
-                                <th align="left">Player</th>
+                                <th align="left">Contributor</th>
                                 <th align="right">Points</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {leaderboard.map((row) => (
-                                <tr key={row.id} className={row.id === 'me' ? styles.myRow : ''}>
-                                    <td>#{row.rank}</td>
-                                    <td>{row.name}</td>
-                                    <td align="right">{row.points.toLocaleString()}</td>
-                                </tr>
-                            ))}
+                            {leaderboard.map((row) => {
+                                const isTop3 = row.rank <= 3;
+                                const topClass = isTop3 ? styles[`top${row.rank}`] : '';
+                                
+                                return (
+                                    <tr key={row.id} className={`${topClass} ${row.id === 'me' ? styles.myRow : ''}`}>
+                                        <td>
+                                            <span className={styles.rankBadge}>#{row.rank}</span>
+                                        </td>
+                                        <td>
+                                            <div style={{ fontWeight: 600 }}>{row.name}</div>
+                                            <div style={{ fontSize: '11px', color: '#555', marginTop: '2px' }}>{row.location}</div>
+                                        </td>
+                                        <td align="right">
+                                            <span className={styles.pointsValue}>{row.points.toLocaleString()}</span>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

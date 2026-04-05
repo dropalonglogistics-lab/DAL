@@ -28,10 +28,11 @@ export default function CreateAlertButton() {
             const userId = user?.id || null;
 
             const { error } = await supabase.from('alerts').insert({
-                user_id: userId,
+                reported_by: userId,
                 type,
                 description,
-                latitude: 9.0765, // Hardcoded for MVP (Abuja)
+                area: 'Abuja', // Mock area for simulation
+                latitude: 9.0765,
                 longitude: 7.3986,
             });
 

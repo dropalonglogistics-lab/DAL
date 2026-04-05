@@ -47,10 +47,19 @@ export async function POST(req: Request) {
         description,
         area: area || null,
         severity: severity || 'info',
-        user_id: user.id,
+        reported_by: user.id,
     }).select('id, area').single()
-
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Award Points
+    await supabase.from('points_history').insert({
+        user_id: user.id,
+        action: 'alert_submission',
+        points_change: 20,
+        balance_after: 0, // Profile sync trigger handles the truth
+        reference_id: data.id,
+        description: `Alert: ${type} at ${area || 'Unknown Area'}`,
+    });
 
     // Trigger push notifications to premium users with matching saved routes
     if (data.area) {

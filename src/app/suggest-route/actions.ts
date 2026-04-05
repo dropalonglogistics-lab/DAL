@@ -24,27 +24,22 @@ export async function suggestRoute(formData: FormData) {
         const { error } = await supabase
             .from('alerts')
             .insert([{
-                user_id: userId,
+                reported_by: userId,
                 type: incidentData.type,
                 description: `${incidentData.location_text}: ${incidentData.description}`,
             }])
 
         if (error) return { error: error.message }
 
-        // Award Point (Incident)
+        // Award Points (Incident/Alert)
         if (user && user.id) {
-            try {
-                const { data: profile } = await supabase.from('profiles').select('points, full_name').eq('id', user.id).single()
-                const { error: upsertError } = await supabase.from('profiles').upsert({
-                    id: user.id,
-                    email: user.email || '',
-                    points: (profile?.points || 0) + 1,
-                    full_name: profile?.full_name || (user.user_metadata?.full_name as string) || 'Community Member'
-                })
-                if (upsertError) console.error('Point Award Error (Incident):', upsertError)
-            } catch (err) {
-                console.error('Point error (Incident):', err)
-            }
+            await supabase.from('points_history').insert({
+                user_id: user.id,
+                action: 'alert_submission',
+                points_change: 20,
+                balance_after: 0,
+                description: `Incident Report: ${incidentData.type} at ${incidentData.location_text}`,
+            });
         }
 
         // Conceptual AI Learning
@@ -120,7 +115,18 @@ export async function suggestRoute(formData: FormData) {
         return { error: error.message }
     }
 
-    // Points are awarded by admin on approval (+50 pts)
+    // Award Points (Route Suggestion)
+    if (userId) {
+        await supabase.from('points_history').insert({
+            user_id: userId,
+            action: 'route_suggestion',
+            points_change: 50,
+            balance_after: 0,
+            description: `Route Suggestion: ${routeData.start_location} to ${routeData.destination}`,
+        });
+    }
+
+    // Points are awarded by admin on approval (+50 pts) - Wait, I'll award them on suggest too per plan
 
     // Conceptual AI Learning
     await learnNewRoutePattern(routeData.start_location, routeData.destination, routeData.vehicle_type_used, routeData.stops_along_the_way || [])

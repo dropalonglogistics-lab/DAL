@@ -102,23 +102,42 @@
     margin-bottom: 12px;
 }
 
+.ghostBtn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #FFFFFF;
+}
+
 .earnList {
-    font-size: 12px;
-    color: #666666;
+    font-size: 13px;
+    color: #AAAAAA;
     background-color: #0A0A0A;
+    border: 1px solid #1A1A1A;
     border-radius: 8px;
-    padding: 12px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.earnItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.earnPoints {
+    color: #C9A227;
+    font-weight: 700;
 }
 
 /* LEADERBOARD */
 .leaderboardCard {
-    background-color: #111111;
-    border: 0.5px solid #1E1E1E;
-    border-radius: 12px;
+    background: linear-gradient(180deg, #111111 0%, #0A0A0A 100%);
+    border: 1px solid #1E1E1E;
+    border-radius: 16px;
     overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
 }
 
 .table {
@@ -127,26 +146,54 @@
 }
 
 .table th {
-    font-size: 10px;
-    color: #555555;
+    font-size: 11px;
+    color: #888888;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 14px 20px;
+    letter-spacing: 1.5px;
+    padding: 18px 24px;
     background-color: #161616;
+    border-bottom: 1px solid #1E1E1E;
 }
 
 .table td {
-    padding: 14px 20px;
-    font-size: 13px;
-    border-bottom: 0.5px solid #1E1E1E;
+    padding: 20px 24px;
+    font-size: 14px;
+    border-bottom: 1px solid #1E1E1E;
+    transition: background-color 0.2s;
+}
+
+.table tr:hover td {
+    background-color: rgba(201, 162, 39, 0.03);
 }
 
 .table tr:last-child td {
     border-bottom: none;
 }
 
+.rankBadge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 12px;
+    background-color: #1A1A1A;
+    color: #FFFFFF;
+}
+
+.top1 .rankBadge { background: linear-gradient(135deg, #FFD700 0%, #C9A227 100%); color: #000; }
+.top2 .rankBadge { background: linear-gradient(135deg, #C0C0C0 0%, #8E8E8E 100%); color: #000; }
+.top3 .rankBadge { background: linear-gradient(135deg, #CD7F32 0%, #A0522D 100%); color: #000; }
+
+.pointsValue {
+    font-family: var(--font-display), sans-serif;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
 .myRow {
-    background-color: rgba(201, 162, 39, 0.05);
+    background-color: rgba(201, 162, 39, 0.08);
+}
+.myRow td {
+    border-left: 2px solid #C9A227 !important;
 }
 
 /* STANDING CARD */
