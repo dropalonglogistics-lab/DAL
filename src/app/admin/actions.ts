@@ -362,6 +362,12 @@ export async function updateUserStatus(formData: FormData) {
             .eq('id', userId)
 
         if (error) throw error
+
+        // Sync admin_roles if status is suspended
+        if (status === 'suspended') {
+            await supabase.from('admin_roles').delete().eq('user_id', userId)
+        }
+
         revalidatePath('/admin/users')
         return { success: true }
     } catch (err: any) {
