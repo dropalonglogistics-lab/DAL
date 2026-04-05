@@ -174,6 +174,34 @@ export default function AdminOverviewPage() {
                             )}
                         </div>
                     </div>
+
+                    <div className={styles.actionCard}>
+                        <div className={styles.cardHeader}>
+                            <h3>Recent Platform Visitors</h3>
+                        </div>
+                        <div className={styles.activityList}>
+                            {data.recentVisits?.length === 0 ? (
+                                <p className={styles.emptyList}>No visits tracked yet.</p>
+                            ) : (
+                                data.recentVisits?.map((visit: any) => (
+                                    <div key={visit.id} className={styles.activityItem}>
+                                        <div className={styles.activityAvatar}>
+                                            <Activity size={14} />
+                                        </div>
+                                        <div className={styles.activityContent}>
+                                            <p className={styles.activityTitle}>
+                                                <strong>{visit.full_name || 'Anonymous'}</strong> visited
+                                            </p>
+                                            <p className={styles.activityDetail}>Live session active or just concluded.</p>
+                                        </div>
+                                        <span className={styles.activityTime}>
+                                            {new Date(visit.last_visited_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Right Column: Feeds */}

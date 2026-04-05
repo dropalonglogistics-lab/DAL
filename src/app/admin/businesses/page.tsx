@@ -1,65 +1,95 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, Store, CheckCircle, XCircle, FileText, MapPin, Package, Eye, X, Star } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
+import { getAdminBusinesses } from '../actions';
 import styles from './AdminBusinesses.module.css';
 
-// Mock Data
-const MOCK_BUSINESSES = [
-    {
-        id: 'BIZ-092', name: 'Kilimanjaro GRA', owner: 'Amaka P.',
-        category: 'Food', type: 'Products', status: 'active', tier: 'premium',
-        rating: 4.8, orders: 1250, location: 'GRA Phase 2'
-    },
-    {
-        id: 'BIZ-090', name: 'Port Harcourt Auto Repairs', owner: 'Victor S.',
-        category: 'Auto', type: 'Services', status: 'active', tier: 'free',
-        rating: 4.2, orders: 85, location: 'Trans-Amadi'
-    }
-];
-
-const MOCK_APPS = [
-    {
-        id: 'APP-105', name: 'Spice Route Express', owner: 'Chinedu O.',
-        category: 'Food', type: 'Products', date: '2026-03-16', status: 'pending',
-        phone: '+234 800 123 4567', whatsapp: '+234 800 123 4567', email: 'chinedu@spiceroute.com',
-        address: '15 Aba Road, Port Harcourt',
-        zones: ['GRA', 'D-Line', 'Diobu'],
-        hours: { open: '08:00', close: '22:00' },
-        docs: ['brand_logo.jpg', 'kitchen_interior.jpg', 'menu_sample.pdf']
-    },
-    {
-        id: 'APP-104', name: 'Glow Up Beauty Hub', owner: 'Boma I.',
-        category: 'Health & Beauty', type: 'Services', date: '2026-03-15', status: 'pending',
-        phone: '+234 901 987 6543', whatsapp: '', email: 'hello@glowup.ng',
-        address: 'Peter Odili Road',
-        zones: ['Trans-Amadi', 'Woji'],
-        hours: { open: '09:00', close: '18:00' },
-        docs: ['logo.png', 'salon_front.jpg']
-    }
-];
+interface Business {
+    id: string;
+    name: string;
+    category: string;
+    type: string;
+    status: string;
+    subscription_tier: string;
+    address: string;
+    rating_average: number;
+    total_orders: number;
+    created_at: string;
+    email: string;
+    phone: string;
+    owner_id: string;
+    profiles?: { full_name: string };
+    delivery_zones: string[];
+    operating_hours: any;
+    gallery_urls: string[];
+}
 
 export default function AdminBusinessesPage() {
-    const [activeTab, setActiveTab] = useState('active'); // 'active' | 'queue'
+    const [businesses, setBusinesses] = useState<Business[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('active'); // 'active' | 'pending'
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedApp, setSelectedApp] = useState<any>(null);
+    const [selectedApp, setSelectedApp] = useState<Business | null>(null);
 
-    const filteredActive = MOCK_BUSINESSES.filter(b =>
-        b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.owner.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const supabase = createClient();
 
-    const filteredApps = MOCK_APPS.filter(a =>
-        a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        a.owner.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const fetchBusinesses = useCallback(async () => {
+        setLoading(true);
+        const result = await getAdminBusinesses();
+        if (result.success) {
+            setBusinesses(result.data || []);
+        }
+        setLoading(false);
+    }, []);
+
+    useEffect(() => {
+        fetchBusinesses();
+
+        const channel = supabase
+            .channel('admin_businesses_all')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'businesses' }, () => {
+                fetchBusinesses();
+            })
+            .subscribe();
+
+        return () => { supabase.removeChannel(channel); };
+    }, [supabase, fetchBusinesses]);
+
+    const handleDecision = async (bizId: string, status: string) => {
+        if (!confirm(`Are you sure you want to set this business to ${status}?`)) return;
+        
+        // We'll assume updateBusinessStatus exists in actions.ts
+        const { updateBusinessStatus } = await import('../actions');
+        const formData = new FormData();
+        formData.append('businessId', bizId);
+        formData.append('status', status);
+        
+        const result = await updateBusinessStatus(formData);
+        if (result.success) {
+            setSelectedApp(null);
+            fetchBusinesses();
+        } else {
+            alert(result.error);
+        }
+    };
+
+    const filtered = businesses.filter(b => {
+        const matchesStatus = activeTab === 'active' ? b.status === 'active' : b.status === 'pending';
+        const matchesSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (b.profiles?.full_name || '').toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesStatus && matchesSearch;
+    });
+
+    const pendingCount = businesses.filter(b => b.status === 'pending').length;
 
     return (
         <div className={styles.container}>
             <div className={styles.header}>
                 <div className={styles.headerLeft}>
                     <h1 className={styles.title}>Business Partner Management</h1>
-                    <p className={styles.subtitle}>Review new seller applications and manage active storefronts.</p>
+                    <p className={styles.subtitle}>Review new seller applications and manage active storefronts in real-time.</p>
                 </div>
             </div>
 
@@ -72,10 +102,10 @@ export default function AdminBusinessesPage() {
                         Active Businesses
                     </button>
                     <button
-                        className={`${styles.tabBtn} ${activeTab === 'queue' ? styles.tabActive : ''}`}
-                        onClick={() => setActiveTab('queue')}
+                        className={`${styles.tabBtn} ${activeTab === 'pending' ? styles.tabActive : ''}`}
+                        onClick={() => setActiveTab('pending')}
                     >
-                        Application Queue <span className={styles.tabBadge}>{MOCK_APPS.length}</span>
+                        Application Queue <span className={styles.tabBadge}>{pendingCount}</span>
                     </button>
                 </div>
 
@@ -92,101 +122,101 @@ export default function AdminBusinessesPage() {
             </div>
 
             <div className={styles.tableWrap}>
-                {activeTab === 'active' ? (
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>Business Name</th>
-                                <th>Category & Type</th>
-                                <th>Owner</th>
-                                <th>Metrics</th>
-                                <th>Tier</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredActive.length > 0 ? filteredActive.map(biz => (
-                                <tr key={biz.id} className={styles.trHover}>
-                                    <td className={styles.cellMain}>
-                                        <div className={styles.bizHeader}>
-                                            <div className={styles.bizIcon}><Store size={16} /></div>
-                                            <div>
-                                                <div className={styles.bizName}>{biz.name}</div>
-                                                <div className={styles.bizLoc}><MapPin size={12} /> {biz.location}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className={styles.catWrap}>
-                                            <span className={styles.typeBadge}>{biz.type}</span>
-                                            <span className={styles.catText}>{biz.category}</span>
-                                        </div>
-                                    </td>
-                                    <td>{biz.owner}</td>
-                                    <td>
-                                        <div className={styles.metricsCol}>
-                                            <span className={styles.ratingText}><Star size={12} fill="currentColor" /> {biz.rating}</span>
-                                            <span className={styles.orderText}><Package size={12} /> {biz.orders}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span className={`${styles.tierBadge} ${biz.tier === 'premium' ? styles.tierPremium : styles.tierFree}`}>
-                                            {biz.tier}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button className={styles.actionBtn}>Manage</button>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan={6} className={styles.emptyTable}>No active businesses found.</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                {loading ? (
+                    <div style={{ padding: '40px', textAlign: 'center' }}>
+                        <div className={styles.spinner} />
+                        <p>Syncing partner registry...</p>
+                    </div>
                 ) : (
                     <table className={styles.table}>
                         <thead>
-                            <tr>
-                                <th>Application Info</th>
-                                <th>Business Type</th>
-                                <th>Owner & Contact</th>
-                                <th>Date Submitted</th>
-                                <th>Actions</th>
-                            </tr>
+                            {activeTab === 'active' ? (
+                                <tr>
+                                    <th>Business Name</th>
+                                    <th>Category & Type</th>
+                                    <th>Owner</th>
+                                    <th>Metrics</th>
+                                    <th>Tier</th>
+                                    <th>Actions</th>
+                                </tr>
+                            ) : (
+                                <tr>
+                                    <th>Application Info</th>
+                                    <th>Business Type</th>
+                                    <th>Owner & Contact</th>
+                                    <th>Date Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            )}
                         </thead>
                         <tbody>
-                            {filteredApps.length > 0 ? filteredApps.map(app => (
-                                <tr key={app.id} className={styles.trHover}>
-                                    <td className={styles.cellMain}>
-                                        <div className={styles.bizName}>{app.name}</div>
-                                        <div className={styles.appId}>{app.id}</div>
-                                    </td>
-                                    <td>
-                                        <div className={styles.catWrap}>
-                                            <span className={styles.typeBadge}>{app.type}</span>
-                                            <span className={styles.catText}>{app.category}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className={styles.ownerCol}>
-                                            <span className={styles.ownerTitle}>{app.owner}</span>
-                                            <span className={styles.ownerSub}>{app.email}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span className={styles.dateText}>{app.date}</span>
-                                    </td>
-                                    <td>
-                                        <button className={styles.reviewBtn} onClick={() => setSelectedApp(app)}>
-                                            <Eye size={16} /> Review
-                                        </button>
-                                    </td>
+                            {filtered.length > 0 ? filtered.map(biz => (
+                                <tr key={biz.id} className={styles.trHover}>
+                                    {activeTab === 'active' ? (
+                                        <>
+                                            <td className={styles.cellMain}>
+                                                <div className={styles.bizHeader}>
+                                                    <div className={styles.bizIcon}><Store size={16} /></div>
+                                                    <div>
+                                                        <div className={styles.bizName}>{biz.name}</div>
+                                                        <div className={styles.bizLoc}><MapPin size={12} /> {biz.address || 'Global'}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className={styles.catWrap}>
+                                                    <span className={styles.typeBadge}>{biz.type}</span>
+                                                    <span className={styles.catText}>{biz.category}</span>
+                                                </div>
+                                            </td>
+                                            <td>{biz.profiles?.full_name || 'Individual'}</td>
+                                            <td>
+                                                <div className={styles.metricsCol}>
+                                                    <span className={styles.ratingText}><Star size={12} fill="currentColor" /> {biz.rating_average || 0}</span>
+                                                    <span className={styles.orderText}><Package size={12} /> {biz.total_orders || 0}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span className={`${styles.tierBadge} ${biz.subscription_tier === 'premium' ? styles.tierPremium : styles.tierFree}`}>
+                                                    {biz.subscription_tier || 'free'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button className={styles.actionBtn} onClick={() => setSelectedApp(biz)}>Details</button>
+                                            </td>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <td className={styles.cellMain}>
+                                                <div className={styles.bizName}>{biz.name}</div>
+                                                <div className={styles.appId}>{biz.id.slice(0, 8)}...</div>
+                                            </td>
+                                            <td>
+                                                <div className={styles.catWrap}>
+                                                    <span className={styles.typeBadge}>{biz.type}</span>
+                                                    <span className={styles.catText}>{biz.category}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className={styles.ownerCol}>
+                                                    <span className={styles.ownerTitle}>{biz.profiles?.full_name || 'Applicant'}</span>
+                                                    <span className={styles.ownerSub}>{biz.email}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span className={styles.dateText}>{new Date(biz.created_at).toLocaleDateString()}</span>
+                                            </td>
+                                            <td>
+                                                <button className={styles.reviewBtn} onClick={() => setSelectedApp(biz)}>
+                                                    <Eye size={16} /> Review
+                                                </button>
+                                            </td>
+                                        </>
+                                    )}
                                 </tr>
                             )) : (
                                 <tr>
-                                    <td colSpan={5} className={styles.emptyTable}>No pending applications.</td>
+                                    <td colSpan={6} className={styles.emptyTable}>No records found in this queue.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -199,7 +229,7 @@ export default function AdminBusinessesPage() {
                 <div className={styles.modalOverlay}>
                     <div className={styles.modalContent}>
                         <div className={styles.modalHeader}>
-                            <h2>Review Application: {selectedApp.name}</h2>
+                            <h2>{selectedApp.status === 'pending' ? 'Review Application' : 'Partner Profile'}: {selectedApp.name}</h2>
                             <button className={styles.closeBtn} onClick={() => setSelectedApp(null)}>
                                 <X size={24} />
                             </button>
@@ -212,61 +242,46 @@ export default function AdminBusinessesPage() {
                                     <div className={styles.dataRow}><span>Name:</span> <strong>{selectedApp.name}</strong></div>
                                     <div className={styles.dataRow}><span>Category:</span> <strong>{selectedApp.category} ({selectedApp.type})</strong></div>
                                     <div className={styles.dataRow}><span>Address:</span> <strong>{selectedApp.address}</strong></div>
-                                    <div className={styles.dataRow}><span>Operating Hrs:</span> <strong>{selectedApp.hours.open} - {selectedApp.hours.close}</strong></div>
                                     <div className={styles.dataRow}>
                                         <span>Delivery Zones:</span>
                                         <div className={styles.tagWrap}>
-                                            {selectedApp.zones.map((zone: string) => (
+                                            {selectedApp.delivery_zones?.map((zone: string) => (
                                                 <span key={zone} className={styles.zoneTag}>{zone}</span>
-                                            ))}
+                                            )) || 'Not specified'}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className={styles.infoCard}>
-                                    <h3>Owner Details</h3>
-                                    <div className={styles.dataRow}><span>Name:</span> <strong>{selectedApp.owner}</strong></div>
+                                    <h3>Owner & Contact</h3>
+                                    <div className={styles.dataRow}><span>Owner:</span> <strong>{selectedApp.profiles?.full_name || 'Individual'}</strong></div>
                                     <div className={styles.dataRow}><span>Email:</span> <strong>{selectedApp.email}</strong></div>
                                     <div className={styles.dataRow}><span>Phone:</span> <strong>{selectedApp.phone}</strong></div>
-                                    {selectedApp.whatsapp && <div className={styles.dataRow}><span>WhatsApp:</span> <strong>{selectedApp.whatsapp}</strong></div>}
-                                </div>
-                            </div>
-
-                            <div className={styles.docsSection}>
-                                <h3>Uploaded Documents</h3>
-                                <div className={styles.docGrid}>
-                                    {selectedApp.docs.map((doc: string) => (
-                                        <div key={doc} className={styles.docItem}>
-                                            <FileText size={24} className={styles.docIcon} />
-                                            <span>{doc}</span>
-                                            <button className={styles.textBtn}>View</button>
-                                        </div>
-                                    ))}
+                                    <div className={styles.dataRow}><span>WhatsApp:</span> <strong>{selectedApp.whatsapp || 'N/A'}</strong></div>
                                 </div>
                             </div>
 
                             <div className={styles.decisionPanel}>
                                 <div className={styles.decisionTop}>
-                                    <h3>Moderation Decision</h3>
-                                    <p>Approving will create the storefront and notify the owner.</p>
-                                </div>
-
-                                <div className={styles.tierSelectWrap}>
-                                    <label>Set Approved Tier:</label>
-                                    <select className={styles.tierSelect}>
-                                        <option value="free">Free Tier (Standard features)</option>
-                                        <option value="premium">Premium Trial (3 Months Free)</option>
-                                        <option value="pro">Pro (Commission Based)</option>
-                                    </select>
+                                    <h3>Administrative Actions</h3>
+                                    <p>Current Status: <strong style={{ textTransform: 'uppercase' }}>{selectedApp.status}</strong></p>
                                 </div>
 
                                 <div className={styles.actionRow}>
-                                    <button className={styles.btnApprove}>
-                                        <CheckCircle size={18} /> Approve Application
-                                    </button>
-                                    <button className={styles.btnReject}>
-                                        <XCircle size={18} /> Reject (Reason Required)
-                                    </button>
+                                    {selectedApp.status === 'pending' ? (
+                                        <>
+                                            <button className={styles.btnApprove} onClick={() => handleDecision(selectedApp.id, 'active')}>
+                                                <CheckCircle size={18} /> Approve Application
+                                            </button>
+                                            <button className={styles.btnReject} onClick={() => handleDecision(selectedApp.id, 'suspended')}>
+                                                <XCircle size={18} /> Reject
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button className={styles.btnReject} onClick={() => handleDecision(selectedApp.id, selectedApp.status === 'active' ? 'suspended' : 'active')}>
+                                            {selectedApp.status === 'active' ? 'Suspend Business' : 'Reactivate Business'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>

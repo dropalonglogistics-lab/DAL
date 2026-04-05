@@ -47,6 +47,7 @@ export default function RootLayout({
             <body className="antialiased">
                 <PostHogProvider />
                 <OneSignalInit />
+                <AnalyticsTracker />
                 <PublicLayout>
                     {children}
                 </PublicLayout>

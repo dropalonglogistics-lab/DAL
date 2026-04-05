@@ -75,35 +75,25 @@ export async function suggestRoute(formData: FormData) {
         isAdmin = !!profile?.is_admin;
     }
 
-    const targetTable = isAdmin ? 'routes' : 'route_suggestions';
+    const targetTable = 'routes'; // Unified table
     const status = isAdmin ? 'approved' : 'pending';
 
     const routeData: any = {
-        route_title: formData.get('routeTitle') as string,
-        start_location: formData.get('start_location') as string,
+        name: formData.get('routeTitle') as string,
+        origin: formData.get('start_location') as string,
         destination: formData.get('destination') as string,
         vehicle_type_used: (formData.get('vehicle_type_used') as string) || Array.from(vehicleTypes).join(', ') || 'Various',
-        fare_price_range_min: parseFloat(formData.get('fareMin') as string) || null,
-        fare_price_range_max: parseFloat(formData.get('fareMax') as string) || null,
-        estimated_travel_time_min: parseInt(formData.get('timeMin') as string) || null,
-        estimated_travel_time_max: parseInt(formData.get('timeMax') as string) || null,
-        stops_along_the_way: stops_along_the_way,
-        difficulty_level: formData.get('difficulty') as string || 'Moderate',
-        road_condition: formData.get('roadCondition') as string || 'Good',
-        detailed_directions: formData.get('detailedDirections') as string || '',
-        tips_and_warnings: formData.get('tipsAndWarnings') as string || '',
+        fare_min: parseFloat(formData.get('fareMin') as string) || null,
+        fare_max: parseFloat(formData.get('fareMax') as string) || null,
+        duration_minutes: parseInt(formData.get('timeMin') as string) || null,
+        legs: stops_along_the_way,
         description: formData.get('description') as string || '',
-        status: status
+        status: status,
+        submitted_by: userId,
+        upvote_count: 0
     }
 
-    if (targetTable === 'route_suggestions') {
-        routeData.submitted_by = userId;
-        routeData.from_location = routeData.start_location;
-        routeData.to_location = routeData.destination;
-        routeData.expected_fare = routeData.fare_price_range_max?.toString() || '0';
-    }
-
-    if (!routeData.start_location || !routeData.destination) {
+    if (!routeData.origin || !routeData.destination) {
         return { error: 'Start location and destination are required.' }
     }
 
@@ -112,6 +102,7 @@ export async function suggestRoute(formData: FormData) {
         .insert([routeData])
 
     if (error) {
+        console.error('Insert error:', error);
         return { error: error.message }
     }
 
