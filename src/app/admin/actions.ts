@@ -3,32 +3,39 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+/**
+ * HELPER: Safe Admin Guard (Step 4)
+ * Uses maybeSingle() and checks both is_admin flag and role field.
+ * This is 100% non-recursive when the profiles RLS is set to auth.uid() = id.
+ */
+async function verifyAdminStatus() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { isAdmin: false, user: null }
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, is_admin, role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+    const isAdmin = !!(profile?.is_admin || profile?.role === 'admin')
+    return { isAdmin, user, profile }
+}
+
 export async function promoteToAdmin(formData: FormData) {
     try {
         const userId = formData.get('userId') as string
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized: Access denied.' }
+
         const supabase = await createClient()
-
-        // Security check: Only admins can promote others
-        const { data: authData } = await supabase.auth.getUser()
-        const user = authData?.user
-
-        const { data: actorProfile } = await supabase
-            .from('profiles')
-            .select('is_admin')
-            .eq('id', user?.id)
-            .single()
-
-        if (!actorProfile?.is_admin) {
-            return { error: 'Unauthorized: Only admins can promote users.' }
-        }
-
         const { error } = await supabase
             .from('profiles')
-            .update({ is_admin: true })
+            .update({ is_admin: true, role: 'admin' })
             .eq('id', userId)
 
         if (error) return { error: error.message }
-
         revalidatePath('/admin/users')
         return { success: true }
     } catch (err: any) {
@@ -39,29 +46,16 @@ export async function promoteToAdmin(formData: FormData) {
 export async function demoteToUser(formData: FormData) {
     try {
         const userId = formData.get('userId') as string
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized: Access denied.' }
+
         const supabase = await createClient()
-
-        // Security check: Only admins can demote others
-        const { data: authData } = await supabase.auth.getUser()
-        const user = authData?.user
-
-        const { data: actorProfile } = await supabase
-            .from('profiles')
-            .select('is_admin')
-            .eq('id', user?.id)
-            .single()
-
-        if (!actorProfile?.is_admin) {
-            return { error: 'Unauthorized: Only admins can demote users.' }
-        }
-
         const { error } = await supabase
             .from('profiles')
-            .update({ is_admin: false })
+            .update({ is_admin: false, role: 'user' })
             .eq('id', userId)
 
         if (error) return { error: error.message }
-
         revalidatePath('/admin/users')
         return { success: true }
     } catch (err: any) {
@@ -72,15 +66,10 @@ export async function demoteToUser(formData: FormData) {
 export async function approveRoute(formData: FormData) {
     try {
         const routeId = formData.get('routeId') as string
+        const { isAdmin, user } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized' }
+
         const supabase = await createClient()
-
-        const { data: authData } = await supabase.auth.getUser()
-        const user = authData?.user
-
-        const { data: actorProfile } = await supabase.from('profiles').select('is_admin').eq('id', user?.id).single()
-
-        if (!actorProfile?.is_admin) return { error: 'Unauthorized' }
-
         const { data: route } = await supabase.from('routes').select('submitted_by, name').eq('id', routeId).single()
         
         const { error } = await supabase.from('routes').update({ 
@@ -95,7 +84,7 @@ export async function approveRoute(formData: FormData) {
             await supabase.from('points_history').insert({
                 user_id: route.submitted_by,
                 action: 'route_approved',
-                points_change: 100, // Bonus for approval
+                points_change: 100,
                 balance_after: 0,
                 reference_id: routeId,
                 description: `Route Matched: Your suggestion "${route.name}" was approved by an admin!`,
@@ -122,15 +111,10 @@ export async function approveRoute(formData: FormData) {
 export async function rejectRoute(formData: FormData) {
     try {
         const routeId = formData.get('routeId') as string
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized' }
+
         const supabase = await createClient()
-
-        const { data: authData } = await supabase.auth.getUser()
-        const user = authData?.user
-
-        const { data: actorProfile } = await supabase.from('profiles').select('is_admin').eq('id', user?.id).single()
-
-        if (!actorProfile?.is_admin) return { error: 'Unauthorized' }
-
         const { error } = await supabase.from('routes').update({ status: 'rejected' }).eq('id', routeId)
         if (error) return { error: error.message }
 
@@ -141,20 +125,13 @@ export async function rejectRoute(formData: FormData) {
     }
 }
 
-// ---- NEW ACTIONS FOR ALL ROUTES MANAGEMENT ----
-
 export async function deleteRoute(formData: FormData) {
     try {
         const routeId = formData.get('routeId') as string
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized' }
+
         const supabase = await createClient()
-
-        const { data: authData } = await supabase.auth.getUser()
-        const user = authData?.user
-
-        const { data: actorProfile } = await supabase.from('profiles').select('is_admin').eq('id', user?.id).single()
-
-        if (!actorProfile?.is_admin) return { error: 'Unauthorized' }
-
         const { error } = await supabase.from('routes').delete().eq('id', routeId)
         if (error) return { error: error.message }
 
@@ -171,19 +148,14 @@ export async function updateRouteStatus(formData: FormData) {
     try {
         const routeId = formData.get('routeId') as string
         const newStatus = formData.get('status') as string
-        const supabase = await createClient()
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized' }
 
         if (!['pending', 'approved', 'rejected'].includes(newStatus)) {
             return { error: 'Invalid status' }
         }
 
-        const { data: authData } = await supabase.auth.getUser()
-        const user = authData?.user
-
-        const { data: actorProfile } = await supabase.from('profiles').select('is_admin').eq('id', user?.id).single()
-
-        if (!actorProfile?.is_admin) return { error: 'Unauthorized' }
-
+        const supabase = await createClient()
         const { error } = await supabase.from('routes').update({ status: newStatus }).eq('id', routeId)
         if (error) return { error: error.message }
 
@@ -206,6 +178,9 @@ export async function updateRouteDetails(formData: FormData) {
         const status = formData.get('status') as string
         const itineraryStr = formData.get('stopsJSON') as string
 
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized' }
+
         let legs = []
         if (itineraryStr) {
             try {
@@ -214,14 +189,6 @@ export async function updateRouteDetails(formData: FormData) {
         }
 
         const supabase = await createClient()
-
-        const { data: authData } = await supabase.auth.getUser()
-        const user = authData?.user
-
-        const { data: actorProfile } = await supabase.from('profiles').select('is_admin').eq('id', user?.id).single()
-
-        if (!actorProfile?.is_admin) return { error: 'Unauthorized' }
-
         const updates: any = {
             name,
             origin,
@@ -244,10 +211,10 @@ export async function updateRouteDetails(formData: FormData) {
 
 export async function getAdminDashboardData() {
     try {
-        const supabase = await createClient()
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return null
 
-        // 1. Parallelize ALL data fetching (Metrics, Feeds, Logs)
-        // This reduces 8 sequential round-trips to a single parallel batch.
+        const supabase = await createClient()
         const [
             { count: userCount },
             { count: pendingRoutesCount },
@@ -288,6 +255,9 @@ export async function getAdminDashboardData() {
 
 export async function getAdminUsers() {
     try {
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized' }
+
         const supabase = await createClient()
         const { data: profiles, error } = await supabase
             .from('profiles')
@@ -303,6 +273,9 @@ export async function getAdminUsers() {
 
 export async function getAdminAlerts() {
     try {
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized' }
+
         const supabase = await createClient()
         const { data: alerts, error } = await supabase
             .from('alerts')
@@ -318,6 +291,9 @@ export async function getAdminAlerts() {
 
 export async function getAdminBusinesses() {
     try {
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized' }
+
         const supabase = await createClient()
         const { data: businesses, error } = await supabase
             .from('businesses')
@@ -334,22 +310,17 @@ export async function getAdminBusinesses() {
 export async function updateUserStatus(formData: FormData) {
     try {
         const userId = formData.get('userId') as string
-        const status = formData.get('status') as string // 'active' | 'suspended'
+        const status = formData.get('status') as string
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized' }
+
         const supabase = await createClient()
-
-        const { data: authData } = await supabase.auth.getUser()
-        if (!(await supabase.from('profiles').select('is_admin').eq('id', authData.user?.id).single()).data?.is_admin) {
-            return { error: 'Unauthorized' }
-        }
-
         const { error } = await supabase
             .from('profiles')
             .update({ status })
             .eq('id', userId)
 
         if (error) throw error
-
-        // Sync admin_roles if status is suspended
         if (status === 'suspended') {
             await supabase.from('admin_roles').delete().eq('user_id', userId)
         }
@@ -367,8 +338,6 @@ export async function recordVisit() {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
-        // 1. Silent execution - we do NOT await this to prevent blocking
-        // 2. Added status check - only update if column exists
         const { error } = await supabase
             .from('profiles')
             .update({ 
@@ -379,22 +348,17 @@ export async function recordVisit() {
         if (error && !error.message.includes('column "last_visited_at" does not exist')) {
             console.error('[Analytics] Failed to record visit:', error.message)
         }
-    } catch (err) {
-        // Silent fail to ensure user experience isn't blocked
-    }
+    } catch (err) {}
 }
 
 export async function updateAlertStatus(formData: FormData) {
     try {
         const alertId = formData.get('alertId') as string
         const status = formData.get('status') as string
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized' }
+
         const supabase = await createClient()
-
-        const { data: authData } = await supabase.auth.getUser()
-        if (!(await supabase.from('profiles').select('is_admin').eq('id', authData.user?.id).single()).data?.is_admin) {
-            return { error: 'Unauthorized' }
-        }
-
         const { error } = await supabase
             .from('alerts')
             .update({ status })
@@ -412,13 +376,10 @@ export async function updateBusinessStatus(formData: FormData) {
     try {
         const businessId = formData.get('businessId') as string
         const status = formData.get('status') as string
+        const { isAdmin } = await verifyAdminStatus()
+        if (!isAdmin) return { error: 'Unauthorized' }
+
         const supabase = await createClient()
-
-        const { data: authData } = await supabase.auth.getUser()
-        if (!(await supabase.from('profiles').select('is_admin').eq('id', authData.user?.id).single()).data?.is_admin) {
-            return { error: 'Unauthorized' }
-        }
-
         const { error } = await supabase
             .from('businesses')
             .update({ status })

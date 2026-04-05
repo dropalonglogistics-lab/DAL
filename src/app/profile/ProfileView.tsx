@@ -62,7 +62,7 @@ export default function ProfileClient() {
                     .from('profiles')
                     .select('*')
                     .eq('id', user.id)
-                    .single();
+                    .maybeSingle(); // Step 3: Use maybeSingle()
 
                 console.log(`[Profile] Core data loaded: ${Math.round(performance.now() - startTime)}ms`);
 
@@ -220,14 +220,26 @@ export default function ProfileClient() {
             <div className={styles.container}>
                 <div className={styles.card} style={{ textAlign: 'center', padding: '60px 20px' }}>
                     <AlertCircle size={48} color="var(--error)" style={{ marginBottom: '20px' }} />
-                    <h2>Connection Interrupt</h2>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>We found your account, but your profile details are currently hidden or taking too long to load.</p>
-                    <button 
-                        onClick={() => window.location.reload()} 
-                        style={{ padding: '12px 24px', backgroundColor: 'var(--primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
-                    >
-                        Retry Connection
-                    </button>
+                    <h2 style={{ color: 'var(--text-primary)' }}>Profile not found</h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', maxWidth: '300px', margin: '0 auto 24px' }}>
+                        We couldn't retrieve your profile details. This might be a temporary connection issue.
+                    </p>
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                        <button 
+                            onClick={() => window.location.reload()} 
+                            className={styles.primaryBtn}
+                            style={{ padding: '10px 24px' }}
+                        >
+                            Retry Connection
+                        </button>
+                        <button 
+                            onClick={() => router.push('/')} 
+                            className={styles.outlineBtn}
+                            style={{ padding: '10px 24px' }}
+                        >
+                            Go Home
+                        </button>
+                    </div>
                 </div>
             </div>
         )
