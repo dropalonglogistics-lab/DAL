@@ -14,9 +14,14 @@ export default async function UserDashboardLayout({
         redirect('/auth/login?next=/dashboard');
     }
 
-    const { data: profile } = await supabase.from('profiles').select('onboarding_completed').eq('id', user.id).maybeSingle();
+    // Parallelize onboarding check and any other layout level fetches
+    const profile = (await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .maybeSingle())?.data;
     
-    // Fallback if column exists and is false
+    // Check if onboarding is completed if profile exists
     if (profile && profile.onboarding_completed === false) {
         redirect('/welcome');
     }
