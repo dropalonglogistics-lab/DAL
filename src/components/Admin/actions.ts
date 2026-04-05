@@ -7,7 +7,7 @@ export async function fetchAdminStats() {
 
     const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
     const { count: alertCount } = await supabase.from('alerts').select('*', { count: 'exact', head: true })
-    const { count: routeCount } = await supabase.from('community_routes').select('*', { count: 'exact', head: true })
+    const { count: routeCount } = await supabase.from('routes').select('*', { count: 'exact', head: true })
 
     return { userCount: userCount || 0, alertCount: alertCount || 0, routeCount: routeCount || 0 }
 }

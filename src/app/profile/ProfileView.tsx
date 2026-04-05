@@ -117,13 +117,13 @@ export default function ProfileClient() {
 
                 // 5. Fetch User Counts (Parallel)
                 try {
-                    const [{ count: rCount }, { count: repCount }] = await Promise.all([
-                        supabase.from('community_routes').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-                        supabase.from('route_reports').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+                const [{ count: rCount }, { count: repCount }] = await Promise.all([
+                        supabase.from('routes').select('*', { count: 'exact', head: true }).eq('submitted_by', user.id),
+                        supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('reported_by', user.id)
                     ])
                     if (isMounted) setCounts({ routes: rCount || 0, reports: repCount || 0 })
                 } catch (err) {
-                    // ignore
+                    console.error("[Profile] Error fetching contribution counts:", err)
                 }
 
                 if (isMounted) {
@@ -403,18 +403,33 @@ export default function ProfileClient() {
                             <div className={styles.avatarInfo}>
                                 <h3 style={{ margin: 0 }}>{profile?.full_name || 'User'}</h3>
                                 <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>{profile?.email}</p>
-                                <div className={styles.profileStatRow}>
-                                    <div className={styles.pointsDisplay}>
-                                        <Coins size={16} />
-                                        <span>{profile?.points || 0} Points Earned</span>
-                                    </div>
-                                    {profile?.points >= 10 && (
-                                        <div className={styles.rankBadge}>
-                                            <Award size={14} />
-                                            <span>Master Scout</span>
+                                    <div className={styles.profileStatRow}>
+                                        <div className={styles.pointsDisplay}>
+                                            <Award size={16} />
+                                            <span>{profile?.points || 0} Points</span>
                                         </div>
-                                    )}
-                                </div>
+                                        {profile?.points >= 500 ? (
+                                            <div className={`${styles.rankBadge} ${styles.rankMaster}`}>
+                                                <Shield size={14} />
+                                                <span>Master Scout</span>
+                                            </div>
+                                        ) : profile?.points >= 200 ? (
+                                            <div className={`${styles.rankBadge} ${styles.rankElite}`}>
+                                                <Award size={14} />
+                                                <span>Elite Scout</span>
+                                            </div>
+                                        ) : profile?.points >= 50 ? (
+                                            <div className={`${styles.rankBadge} ${styles.rankScout}`}>
+                                                <Navigation size={14} />
+                                                <span>Scout</span>
+                                            </div>
+                                        ) : (
+                                            <div className={`${styles.rankBadge} ${styles.rankRookie}`}>
+                                                <Activity size={14} />
+                                                <span>Rookie</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 {profile?.is_admin && <span className={styles.adminBadge}>Administrator</span>}
                                 <p className={styles.uploadHint}>Click the icon to change your photo</p>
                             </div>

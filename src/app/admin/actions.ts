@@ -81,7 +81,7 @@ export async function approveRoute(formData: FormData) {
 
         if (!actorProfile?.is_admin) return { error: 'Unauthorized' }
 
-        const { error } = await supabase.from('community_routes').update({ status: 'approved' }).eq('id', routeId)
+        const { error } = await supabase.from('routes').update({ status: 'approved' }).eq('id', routeId)
         if (error) return { error: error.message }
 
         revalidatePath('/admin/routes')
@@ -104,7 +104,7 @@ export async function rejectRoute(formData: FormData) {
 
         if (!actorProfile?.is_admin) return { error: 'Unauthorized' }
 
-        const { error } = await supabase.from('community_routes').update({ status: 'rejected' }).eq('id', routeId)
+        const { error } = await supabase.from('routes').update({ status: 'rejected' }).eq('id', routeId)
         if (error) return { error: error.message }
 
         revalidatePath('/admin/routes')
@@ -128,7 +128,7 @@ export async function deleteRoute(formData: FormData) {
 
         if (!actorProfile?.is_admin) return { error: 'Unauthorized' }
 
-        const { error } = await supabase.from('community_routes').delete().eq('id', routeId)
+        const { error } = await supabase.from('routes').delete().eq('id', routeId)
         if (error) return { error: error.message }
 
         revalidatePath('/admin/all-routes')
@@ -157,7 +157,7 @@ export async function updateRouteStatus(formData: FormData) {
 
         if (!actorProfile?.is_admin) return { error: 'Unauthorized' }
 
-        const { error } = await supabase.from('community_routes').update({ status: newStatus }).eq('id', routeId)
+        const { error } = await supabase.from('routes').update({ status: newStatus }).eq('id', routeId)
         if (error) return { error: error.message }
 
         revalidatePath('/admin/all-routes')
@@ -210,13 +210,66 @@ export async function updateRouteDetails(formData: FormData) {
             updates.fare_price_range_min = fare_price_range_min
         }
 
-        const { error } = await supabase.from('community_routes').update(updates).eq('id', routeId)
-
+        const { error } = await supabase.from('routes').update(updates).eq('id', routeId)
         if (error) return { error: error.message }
-
-        // We don't revalidate here, we'll let the client redirect
         return { success: true }
     } catch (err: any) {
         return { error: err.message }
+    }
+}
+
+export async function getAdminDashboardData() {
+    try {
+        const supabase = await createClient()
+
+        // 1. Get Metrics
+        const [
+            { count: userCount },
+            { count: pendingRoutes },
+            { count: activeAlerts },
+            { count: openDeliveries }
+        ] = await Promise.all([
+            supabase.from('profiles').select('*', { count: 'exact', head: true }),
+            supabase.from('routes').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+            supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+            supabase.from('orders').select('*', { count: 'exact', head: true }).neq('status', 'completed')
+        ])
+
+        // 2. Get Recent Alerts
+        const { data: recentAlerts } = await supabase
+            .from('alerts')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(5)
+
+        // 3. Get Recent Routes
+        const { data: pendingRouteList } = await supabase
+            .from('routes')
+            .select('*, profiles(full_name)')
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false })
+            .limit(3)
+
+        // 4. Get Activity Log (using alerts and points_history as a proxy)
+        const { data: activityLog } = await supabase
+            .from('points_history')
+            .select('*, profiles(full_name)')
+            .order('created_at', { ascending: false })
+            .limit(5)
+
+        return {
+            metrics: {
+                activeUsers: userCount || 0,
+                pendingRoutes: pendingRoutes || 0,
+                activeAlerts: activeAlerts || 0,
+                openDeliveries: openDeliveries || 0,
+            },
+            recentAlerts: recentAlerts || [],
+            pendingRoutes: pendingRouteList || [],
+            activityLog: activityLog || []
+        }
+    } catch (err: any) {
+        console.error('Error fetching admin dashboard data:', err)
+        return null
     }
 }

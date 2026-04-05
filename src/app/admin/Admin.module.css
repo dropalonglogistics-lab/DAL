@@ -47,6 +47,27 @@
     animation: pulse 2s infinite;
 }
 
+.refreshing {
+    background: var(--brand-gold) !important;
+}
+
+.refreshBtn {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin-left: 8px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.refreshBtn:hover {
+    opacity: 1;
+}
+
 @keyframes pulse {
     0% {
         box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4);
@@ -110,8 +131,14 @@
 
 .metricBody {
     display: flex;
-    align-items: baseline;
-    gap: 12px;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.metricStatus {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 600;
 }
 
 .metricValue {
@@ -212,6 +239,14 @@
     align-items: center;
     padding: 16px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.emptyList {
+    padding: 32px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.3);
+    font-style: italic;
+    font-size: 0.9rem;
 }
 
 .listItem:last-child {
@@ -341,6 +376,24 @@
     gap: 8px;
     font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.5);
+}
+
+.statusBadge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.active {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #F59E0B;
 }
 
 /* Activity Log */

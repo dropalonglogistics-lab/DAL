@@ -26,7 +26,51 @@
 
 .headerActions {
     display: flex;
-    gap: 12px;
+    align-items: center;
+    gap: 16px;
+}
+
+.liveBadge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(52, 211, 153, 0.1);
+    border: 1px solid rgba(52, 211, 153, 0.2);
+    padding: 6px 12px;
+    border-radius: 20px;
+    color: #34D399;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.refreshBtn {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.refreshBtn:hover {
+    opacity: 1;
+}
+
+.pulseDot {
+    width: 6px;
+    height: 6px;
+    background: #34D399;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
 }
 
 .dateFilter {
@@ -92,6 +136,8 @@
 .kpiTrend {
     font-size: 0.85rem;
     font-weight: 600;
+    color: var(--text-secondary);
+    opacity: 0.8;
 }
 
 .trendUp {
@@ -131,6 +177,18 @@
     padding-top: 20px;
     border-bottom: 1px solid var(--border-color);
     position: relative;
+}
+
+.emptyChart {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    border: 1px dashed var(--border-color);
 }
 
 .bar {
@@ -203,6 +261,25 @@
     border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
+}
+
+.emptyTable {
+    padding: 60px;
+    text-align: center;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.badgeDisputed {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
 }
 
 .tableContainer {
