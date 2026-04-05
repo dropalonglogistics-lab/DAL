@@ -1,48 +1,30 @@
--- 1. Create a dedicated table to house administrative role privileges.
--- Querying 'profiles.is_admin' inside 'profiles' RLS is recursive. 
--- Querying 'admin_roles' instead is instant and non-recursive.
+-- 1. Create the roles table without the strict foreign key for the migration phase
 CREATE TABLE IF NOT EXISTS public.admin_roles (
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-    role TEXT DEFAULT 'admin',
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    user_id UUID PRIMARY KEY,
+    role TEXT DEFAULT 'admin'
 );
 
--- 2. Migrate existing admins from the profiles table
+-- 2. Populate only VALID users who exist in BOTH profiles and auth.users
+-- This prevents the "23503: violates foreign key constraint" error caused by orphan profile records.
 INSERT INTO public.admin_roles (user_id)
-SELECT id FROM public.profiles WHERE is_admin = true
+SELECT p.id 
+FROM public.profiles p
+WHERE p.is_admin = true 
+AND EXISTS (SELECT 1 FROM auth.users WHERE id = p.id)
 ON CONFLICT (user_id) DO NOTHING;
 
--- 3. Scrub all problematic recursive policies
+-- 3. Now that data is safe, add the relationship for future integrity
+ALTER TABLE public.admin_roles 
+ADD CONSTRAINT admin_roles_user_id_fkey 
+FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+-- 4. Clean up old security loops
 DROP POLICY IF EXISTS "Profiles access policy" ON public.profiles;
-DROP POLICY IF EXISTS "Admin alert management" ON public.alerts;
-DROP POLICY IF EXISTS "Admin business management" ON public.businesses;
 DROP FUNCTION IF EXISTS public.check_is_admin();
 
--- 4. Re-implement high-performance secondary-table policies
--- PROFILES: Users see own row, admins see everything (via admin_roles)
+-- 5. Deploy High-Performance Policy
 CREATE POLICY "Profiles access policy" ON public.profiles
 FOR ALL USING (
     auth.uid() = id OR 
     EXISTS (SELECT 1 FROM public.admin_roles WHERE user_id = auth.uid())
 );
-
--- ALERTS: Admins manage all, users manage own
-CREATE POLICY "Admin alert management" ON public.alerts
-FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.admin_roles WHERE user_id = auth.uid()) OR 
-    auth.uid() = reported_by
-);
-
--- BUSINESSES: Admins manage all, owners manage own
-CREATE POLICY "Admin business management" ON public.businesses
-FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.admin_roles WHERE user_id = auth.uid()) OR 
-    auth.uid() = owner_id
-);
-
--- 5. Expose admin_roles table for internal management
-ALTER TABLE public.admin_roles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Admins can view roles" ON public.admin_roles 
-FOR SELECT USING (EXISTS (SELECT 1 FROM public.admin_roles WHERE user_id = auth.uid()));
-
-GRANT SELECT ON public.admin_roles TO authenticated;
