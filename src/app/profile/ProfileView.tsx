@@ -350,6 +350,7 @@ export default function ProfileClient() {
                                 userCount={adminStats.userCount}
                                 alertCount={adminStats.alertCount}
                                 routeCount={adminStats.routeCount}
+                                verifiedCount={adminStats.verifiedCount}
                             />
                         </div>
 
