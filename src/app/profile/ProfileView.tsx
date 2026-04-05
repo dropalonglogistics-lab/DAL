@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Mail, MapPin, Calendar, Camera, LogOut, CheckCircle, AlertCircle, Shield, LayoutDashboard, Users as UsersIcon, Coins, Award } from 'lucide-react'
+import { User, Mail, MapPin, Calendar, Camera, LogOut, CheckCircle, AlertCircle, Shield, LayoutDashboard, Users as UsersIcon, Coins, Award, Navigation, Activity } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { updateProfile } from './actions'
 import { signOut } from '../login/actions'
