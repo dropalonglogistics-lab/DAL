@@ -343,7 +343,12 @@ export default function ProfileClient() {
                 </div>
             ) : (
                 <div className={styles.adminView}>
-                    <AdminStats stats={adminStats} />
+                    <AdminStats 
+                        userCount={adminStats?.userCount || 0}
+                        alertCount={adminStats?.alertCount || 0}
+                        routeCount={adminStats?.routeCount || 0}
+                        verifiedCount={adminStats?.verifiedCount || 0}
+                    />
                 </div>
             )}
         </div>
