@@ -280,19 +280,6 @@ export async function getAdminDashboardData() {
             activityLog: activityLog || [],
             recentVisits: recentVisits || []
         }
-
-        return {
-            metrics: {
-                activeUsers: userCount || 0,
-                pendingRoutes: pendingRoutes || 0,
-                activeAlerts: activeAlerts || 0,
-                openDeliveries: openDeliveries || 0,
-            },
-            recentAlerts: recentAlerts || [],
-            pendingRoutes: pendingRouteList || [],
-            activityLog: activityLog || [],
-            recentVisits: recentVisits || []
-        }
     } catch (err: any) {
         console.error('Error fetching admin dashboard data:', err)
         return null
