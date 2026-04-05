@@ -1,10 +1,12 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
     Star, Package, Map, Zap, Crown, Navigation,
-    ArrowRight, TrendingUp, Users, AlertTriangle
+    ArrowRight, TrendingUp, Users, AlertTriangle, Clock
 } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
 import styles from './dashboard.module.css';
 
 const GREETINGS = ['Good morning', 'Good afternoon', 'Good evening'];
@@ -21,24 +23,12 @@ function formatDate() {
     });
 }
 
-// Mock recent orders (replace with real Supabase query when orders table exists)
-const MOCK_ORDERS = [
-    { id: 'ORD-2024-001', type: 'Route', status: 'delivered', route: 'GRA → Trans-Amadi', amount: '₦1,200', date: '8 Mar 2026' },
-    { id: 'ORD-2024-002', type: 'Errand', status: 'active', route: 'Mile 3 → New GRA', amount: '₦800', date: '7 Mar 2026' },
-    { id: 'ORD-2024-003', type: 'Route', status: 'pending', route: 'Rumuola → Eleme Jct', amount: '₦600', date: '6 Mar 2026' },
-];
-
-// Mock saved routes (replace with real query when saved_routes table exists)
-const MOCK_ROUTES = [
-    { id: 1, name: 'Home → Work', alertCount: 3, lastUsed: 'Yesterday' },
-    { id: 2, name: 'Market Run', alertCount: 1, lastUsed: '3 days ago' },
-];
-
 function StatusPill({ status }: { status: string }) {
     const map: Record<string, string> = {
         pending: styles.pillPending,
         active: styles.pillActive,
         delivered: styles.pillDelivered,
+        completed: styles.pillDelivered, 
         cancelled: styles.pillCancelled,
         disputed: styles.pillDisputed,
     };
@@ -49,18 +39,63 @@ export default function DashboardOverview({
     profile,
     contributions,
     alertContributions,
+    initialOrders = [],
+    initialRoutes = []
 }: {
     profile: any;
     contributions: number;
     alertContributions: number;
+    initialOrders: any[];
+    initialRoutes: any[];
 }) {
+    const [orders, setOrders] = useState(initialOrders);
+    const [routes, setRoutes] = useState(initialRoutes);
+    const supabase = createClient();
+
     const firstName = profile?.full_name?.split(' ')[0] || 'there';
     const totalContributions = contributions + alertContributions;
 
+    useEffect(() => {
+        if (!profile?.id) return;
+
+        // Realmember Realtime: Subscribe to orders and routes for this user
+        const channel = supabase
+            .channel(`user-dashboard-${profile.id}`)
+            .on('postgres_changes', { 
+                event: '*', 
+                schema: 'public', 
+                table: 'orders', 
+                filter: `user_id=eq.${profile.id}` 
+            }, (payload: any) => {
+                if (payload.eventType === 'INSERT') {
+                    setOrders(prev => [payload.new, ...prev].slice(0, 5));
+                } else if (payload.eventType === 'UPDATE') {
+                    setOrders(prev => prev.map(o => o.id === payload.new.id ? payload.new : o));
+                }
+            })
+            .on('postgres_changes', { 
+                event: '*', 
+                schema: 'public', 
+                table: 'routes', 
+                filter: `submitted_by=eq.${profile.id}` 
+            }, (payload: any) => {
+                if (payload.eventType === 'INSERT') {
+                    setRoutes(prev => [payload.new, ...prev].slice(0, 5));
+                } else if (payload.eventType === 'UPDATE') {
+                    setRoutes(prev => prev.map(r => r.id === payload.new.id ? payload.new : r));
+                }
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [supabase, profile?.id]);
+
     const stats = [
         { icon: Star, label: 'Points Balance', value: (profile?.points_balance ?? 0).toLocaleString(), sub: 'DAL Points' },
-        { icon: Package, label: 'Active Orders', value: '2', sub: 'In progress' },
-        { icon: Map, label: 'Routes Saved', value: String(MOCK_ROUTES.length), sub: 'Quick navigate' },
+        { icon: Package, label: 'Recent Orders', value: String(orders.length), sub: 'Live status' },
+        { icon: Map, label: 'Your Routes', value: String(routes.length), sub: 'Contributions' },
         {
             icon: Crown,
             label: 'Subscription',
@@ -106,54 +141,69 @@ export default function DashboardOverview({
                 </Link>
             </div>
             <div className={styles.card} style={{ marginBottom: 28 }}>
-                <div className={styles.tableWrap}>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>Reference</th>
-                                <th>Type</th>
-                                <th>Status</th>
-                                <th>Route</th>
-                                <th>Amount</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {MOCK_ORDERS.map(o => (
-                                <tr key={o.id} className={styles.tableRow}>
-                                    <td style={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.8rem' }}>{o.id}</td>
-                                    <td>{o.type}</td>
-                                    <td><StatusPill status={o.status} /></td>
-                                    <td style={{ color: 'var(--text-secondary)' }}>{o.route}</td>
-                                    <td style={{ fontWeight: 700 }}>{o.amount}</td>
-                                    <td style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{o.date}</td>
+                {orders.length === 0 ? (
+                    <div className={styles.emptyState}>
+                        <div className={styles.emptyIcon}><Package size={22} /></div>
+                        <p className={styles.emptyTitle}>No orders yet</p>
+                        <p className={styles.emptyText}>Request a delivery or errand to see it here.</p>
+                    </div>
+                ) : (
+                    <div className={styles.tableWrap}>
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>Reference</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Dest.</th>
+                                    <th>Fee</th>
+                                    <th>Time</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {orders.map(o => (
+                                    <tr key={o.id} className={styles.tableRow}>
+                                        <td style={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.8rem' }}>{o.reference || '...'}</td>
+                                        <td>{o.type}</td>
+                                        <td><StatusPill status={o.status} /></td>
+                                        <td style={{ color: 'var(--text-secondary)', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {o.dropoff_address || 'N/A'}
+                                        </td>
+                                        <td style={{ fontWeight: 700 }}>₦{((o.fee_amount || 0) / 100).toLocaleString()}</td>
+                                        <td style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                                            {new Date(o.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
 
-            {/* Saved Routes */}
+            {/* Your Routes */}
             <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>Saved Routes</h2>
+                <h2 className={styles.sectionTitle}>Your Route Suggestions</h2>
                 <Link href="/dashboard/routes" className={styles.sectionLink}>
                     Manage <ArrowRight size={13} style={{ display: 'inline', verticalAlign: 'middle' }} />
                 </Link>
             </div>
             <div className={styles.card} style={{ marginBottom: 28 }}>
-                {MOCK_ROUTES.length === 0 ? (
-                    <div className={styles.emptyState}>
+                {routes.length === 0 ? (
+                    <div className={styles.emptyState} style={{ padding: '40px 20px' }}>
                         <div className={styles.emptyIcon}><Map size={22} /></div>
-                        <p className={styles.emptyTitle}>No saved routes yet</p>
-                        <p className={styles.emptyText}>Search for a route and save it for quick access.</p>
+                        <p className={styles.emptyTitle}>No routes yet</p>
+                        <p className={styles.emptyText}>Suggest a route to help the community and earn points!</p>
+                        <Link href="/suggest-route" className={styles.btnGold} style={{ marginTop: '16px', display: 'inline-flex' }}>
+                            Suggest Route
+                        </Link>
                     </div>
                 ) : (
-                    MOCK_ROUTES.map((r, i) => (
+                    routes.map((r, i) => (
                         <div key={r.id} style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                             padding: '14px 18px',
-                            borderBottom: i < MOCK_ROUTES.length - 1 ? '1px solid var(--border)' : 'none',
+                            borderBottom: i < routes.length - 1 ? '1px solid var(--border)' : 'none',
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                 <div style={{
@@ -166,26 +216,18 @@ export default function DashboardOverview({
                                 </div>
                                 <div>
                                     <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{r.name}</div>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                        Last used {r.lastUsed}
-                                        {r.alertCount > 0 && (
-                                            <span style={{
-                                                marginLeft: 8,
-                                                background: 'rgba(239,68,68,0.1)',
-                                                color: '#EF4444',
-                                                padding: '1px 7px',
-                                                borderRadius: 99,
-                                                fontSize: '0.7rem',
-                                                fontWeight: 700,
-                                            }}>
-                                                {r.alertCount} alerts
-                                            </span>
-                                        )}
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <Clock size={10} /> {new Date(r.created_at).toLocaleDateString()}
+                                        </span>
+                                        <span className={`${styles.pill} ${r.status === 'approved' ? styles.pillDelivered : r.status === 'pending' ? styles.pillPending : styles.pillCancelled}`}>
+                                            {r.status}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                             <Link href={`/search?route=${encodeURIComponent(r.name)}`} className={styles.btnGold} style={{ padding: '6px 14px', fontSize: '0.8rem' }}>
-                                <Navigation size={13} /> Navigate
+                                <Navigation size={13} /> View
                             </Link>
                         </div>
                     ))
@@ -223,7 +265,7 @@ export default function DashboardOverview({
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3B82F6', flexShrink: 0 }} />
                             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                                <strong style={{ color: 'var(--text-primary)' }}>0</strong> route verifications
+                                <strong style={{ color: 'var(--text-primary)' }}>{profile?.total_routes_verified || 0}</strong> route verifications
                             </span>
                         </div>
                     </div>

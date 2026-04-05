@@ -5,9 +5,18 @@ import { createClient } from '@/utils/supabase/server'
 export async function fetchAdminStats() {
     const supabase = await createClient()
 
-    const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
-    const { count: alertCount } = await supabase.from('alerts').select('*', { count: 'exact', head: true })
-    const { count: routeCount } = await supabase.from('routes').select('*', { count: 'exact', head: true })
+    // Parallelize aggregate counts
+    const [userRes, alertRes, routeRes, verifiedRes] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('alerts').select('*', { count: 'exact', head: true }),
+        supabase.from('routes').select('*', { count: 'exact', head: true }),
+        supabase.from('routes').select('*', { count: 'exact', head: true }).eq('status', 'approved')
+    ]);
 
-    return { userCount: userCount || 0, alertCount: alertCount || 0, routeCount: routeCount || 0 }
+    return { 
+        userCount: userRes.count || 0, 
+        alertCount: alertRes.count || 0, 
+        routeCount: routeRes.count || 0,
+        verifiedCount: verifiedRes.count || 0
+    }
 }
