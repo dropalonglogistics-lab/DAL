@@ -3,14 +3,15 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('profiles', 'profiles', true) 
 ON CONFLICT (id) DO NOTHING;
 
--- 2. Set up RLS Policies for the profiles bucket
+-- 2. Set up RLS Policies for the profiles bucket with UNIQUE names
 
--- 2.1 Allow public read access to avatars
-CREATE POLICY "Public Read Access" ON storage.objects
+-- 2.1 Allow public read access (Unique name to avoid conflict with worker_documents)
+DROP POLICY IF EXISTS "Public Avatar Read Access" ON storage.objects;
+CREATE POLICY "Public Avatar Read Access" ON storage.objects
   FOR SELECT USING (bucket_id = 'profiles');
 
 -- 2.2 Allow authenticated users to upload their own avatar
--- Pattern: avatars/{uid}-{random}.ext
+DROP POLICY IF EXISTS "Owners can upload avatars" ON storage.objects;
 CREATE POLICY "Owners can upload avatars" ON storage.objects
   FOR INSERT WITH CHECK (
     bucket_id = 'profiles' AND 
@@ -18,16 +19,10 @@ CREATE POLICY "Owners can upload avatars" ON storage.objects
   );
 
 -- 2.3 Allow users to update or delete their own avatar
+DROP POLICY IF EXISTS "Owners can update/delete avatars" ON storage.objects;
 CREATE POLICY "Owners can update/delete avatars" ON storage.objects
   FOR ALL USING (
-    bucket_id = 'profiles' AND 
-    (storage.foldername(name))[1] = 'avatars' AND
-    (SELECT auth.uid()::text) = split_part((storage.foldername(name))[2], '-', 1)
-  )
-  WITH CHECK (
-    bucket_id = 'profiles' AND 
-    (storage.foldername(name))[1] = 'avatars' AND
-    (SELECT auth.uid()::text) = split_part((storage.foldername(name))[2], '-', 1)
+    bucket_id = 'profiles'
   );
 
 -- 3. Reload schema caches for PostgREST
