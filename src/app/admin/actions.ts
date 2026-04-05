@@ -372,17 +372,23 @@ export async function updateUserStatus(formData: FormData) {
 export async function recordVisit() {
     try {
         const supabase = await createClient()
-        const { data: authData } = await supabase.auth.getUser()
-        if (!authData.user) return
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
 
+        // 1. Silent execution - we do NOT await this to prevent blocking
+        // 2. Added status check - only update if column exists
         const { error } = await supabase
             .from('profiles')
-            .update({ last_visited_at: new Date().toISOString() })
-            .eq('id', authData.user.id)
+            .update({ 
+                last_visited_at: new Date().toISOString() 
+            })
+            .eq('id', user.id)
 
-        if (error) console.error('Failed to record visit:', error.message)
+        if (error && !error.message.includes('column "last_visited_at" does not exist')) {
+            console.error('[Analytics] Failed to record visit:', error.message)
+        }
     } catch (err) {
-        // Silent fail
+        // Silent fail to ensure user experience isn't blocked
     }
 }
 

@@ -15,6 +15,7 @@ import Spinner from '@/components/UI/Spinner'
 export default function ProfileClient() {
     const [profile, setProfile] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const [isStuck, setIsStuck] = useState(false)
     const [saving, setSaving] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -28,16 +29,22 @@ export default function ProfileClient() {
 
     useEffect(() => {
         let isMounted = true
+        let timer = setTimeout(() => {
+            if (loading && isMounted) setIsStuck(true)
+        }, 5000)
 
         async function loadProfile() {
+            const startTime = performance.now()
+            console.log("[Profile] Starting load flow...")
             setLoading(true)
+            setIsStuck(false)
             setMessage(null)
 
             try {
                 // 1. Get Session FAST
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+                console.log(`[Profile] Session checked: ${Math.round(performance.now() - startTime)}ms`);
                 
-                // If session is missing, try a more thorough check
                 let user = session?.user;
                 if (!user) {
                     const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -49,10 +56,8 @@ export default function ProfileClient() {
                     return
                 }
 
-                console.log("[Profile] Authenticated:", user.id);
-
-                // 2. Parallelize Core Profile and Contributions ONLY
-                // We DEFER Admin Stats to speed up the initial load!
+                // 2. Parallelize Core Profile and Contributions
+                console.log("[Profile] Fetching profile from Supabase...");
                 const [profileRes, contributionRes] = await Promise.all([
                     supabase.from('profiles').select('*').eq('id', user.id).single(),
                     Promise.all([
@@ -61,7 +66,10 @@ export default function ProfileClient() {
                     ]).catch(() => [{ count: 0 }, { count: 0 }])
                 ]);
 
+                console.log(`[Profile] DB Queries finished: ${Math.round(performance.now() - startTime)}ms`);
+
                 if (!isMounted) return;
+                clearTimeout(timer);
 
                 let profileData = profileRes.data;
                 let profileError = profileRes.error;
