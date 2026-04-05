@@ -93,23 +93,28 @@ export default function SignupPage() {
             return;
         }
 
-        // Create profile
-        const { error: profileError } = await supabase
-            .from('profiles')
-            .upsert({
-                id: data.user.id,
-                email: data.user.email,
-                role: userType,
-                created_at: new Date().toISOString()
-            });
+        // Create or update profile
+        try {
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .upsert({
+                    id: data.user.id,
+                    email: data.user.email,
+                    role: userType,
+                    onboarding_completed: false, // Default to false for new signups
+                    created_at: new Date().toISOString()
+                }, { onConflict: 'id' });
 
-        if (profileError) {
-            console.error('Profile creation error:', profileError);
-            // Even if profile fails, user is authenticated. 
-            // But we should probably show an error or try again.
+            if (profileError) {
+                console.error('Profile creation error:', profileError);
+                // We'll proceed to dashboard anyway, as the dashboard now auto-creates if missing.
+            }
+
+            router.push('/dashboard');
+        } catch (err) {
+            console.error('Signup error:', err);
+            router.push('/dashboard');
         }
-
-        router.push('/dashboard');
     };
 
     if (checkingAuth) {
