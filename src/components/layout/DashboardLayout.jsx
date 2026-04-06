@@ -1,5 +1,6 @@
 'use client';
 
+import Navbar from '@/components/Navbar/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -41,26 +42,29 @@ export default function DashboardLayout({ children }) {
     }, [pathname]);
 
     return (
-        <div className={styles.dashboardRoot}>
-            <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-            <div className={styles.dashboardMain}>
-                {/* Top bar */}
-                <header className={styles.topBar}>
-                    <div className={styles.topBarLeft}>
-                        <button className={styles.mobileMenuBtn} onClick={() => setIsSidebarOpen(true)}>
-                            <Menu size={20} />
-                        </button>
-                        <Breadcrumb pathname={pathname} />
-                    </div>
-                    <div className={styles.topBarActions}>
-                        <NotificationBell />
-                    </div>
-                </header>
+        <div className={styles.layoutWrapper}>
+            <Navbar />
+            <div className={styles.dashboardRoot}>
+                <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+                <div className={styles.dashboardMain}>
+                    {/* Top bar (Sub-header) */}
+                    <header className={styles.topBar}>
+                        <div className={styles.topBarLeft}>
+                            <button className={styles.mobileMenuBtn} onClick={() => setIsSidebarOpen(true)}>
+                                <Menu size={20} />
+                            </button>
+                            <Breadcrumb pathname={pathname} />
+                        </div>
+                        <div className={styles.topBarActions}>
+                            <NotificationBell />
+                        </div>
+                    </header>
 
-                {/* Page content */}
-                <main className={styles.dashboardContent}>
-                    {children}
-                </main>
+                    {/* Page content */}
+                    <main className={styles.dashboardContent}>
+                        {children}
+                    </main>
+                </div>
             </div>
         </div>
     );

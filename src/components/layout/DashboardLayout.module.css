@@ -1,6 +1,12 @@
+.layoutWrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
 .dashboardRoot {
     display: flex;
-    min-height: 100vh;
+    flex: 1;
     background: var(--background);
 }
 
@@ -12,7 +18,7 @@
     overflow: hidden;
 }
 
-/* Top bar */
+/* Top bar (Sub-header) */
 .topBar {
     display: flex;
     align-items: center;
@@ -23,7 +29,7 @@
     background: var(--card-bg);
     flex-shrink: 0;
     position: sticky;
-    top: 0;
+    top: 64px; /* Sticks below Navbar (64px) */
     z-index: 10;
 }
 
