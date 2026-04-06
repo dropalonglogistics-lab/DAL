@@ -22,9 +22,14 @@ import {
     CheckCircle2
 } from 'lucide-react'
 
-export default function ProfileClient() {
-    const [profile, setProfile] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
+interface ProfileClientProps {
+    initialUser: any;
+    initialProfile: any;
+}
+
+export default function ProfileClient({ initialUser, initialProfile }: ProfileClientProps) {
+    const [profile, setProfile] = useState<any>(initialProfile)
+    const [loading, setLoading] = useState(!initialProfile) // Only load if profile is missing
     const [saving, setSaving] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
     const [counts, setCounts] = useState({ routes: 0, reports: 0 })
@@ -34,58 +39,49 @@ export default function ProfileClient() {
 
     useEffect(() => {
         let isMounted = true
-        async function loadProfile() {
-            setLoading(true)
+        async function refreshData() {
             try {
-                const { data: { session } } = await supabase.auth.getSession()
-                let user = session?.user;
-                if (!user) {
-                    const { data: { user: authUser } } = await supabase.auth.getUser()
-                    user = authUser;
-                }
-
-                if (!user) {
-                    if (isMounted) router.push('/auth/login')
-                    return
-                }
-
-                let { data: profileData } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .maybeSingle();
-
-                if (!profileData) {
-                    // Auto-create profile if missing
-                    const { data: newProfile } = await supabase
+                // 1. Handle missing profile if server-side fetch was null
+                if (!profile && initialUser) {
+                    setLoading(true)
+                    const { data: profileData } = await supabase
                         .from('profiles')
-                        .upsert({
-                            id: user.id,
-                            email: user.email,
-                            full_name: user.user_metadata?.full_name || 'Member',
-                            onboarding_completed: false
-                        })
-                        .select()
+                        .select('*')
+                        .eq('id', initialUser.id)
                         .maybeSingle();
-                    profileData = newProfile || { id: user.id, email: user.email, full_name: 'Member', points: 0 };
+
+                    if (!profileData) {
+                        // Auto-create profile if missing
+                        const { data: newProfile } = await supabase
+                            .from('profiles')
+                            .upsert({
+                                id: initialUser.id,
+                                email: initialUser.email,
+                                full_name: initialUser.user_metadata?.full_name || 'Member',
+                                onboarding_completed: false
+                            })
+                            .select()
+                            .maybeSingle();
+                        if (isMounted) setProfile(newProfile || { id: initialUser.id, email: initialUser.email, full_name: 'Member', points: 0 });
+                    } else {
+                        if (isMounted) setProfile(profileData)
+                    }
+                    if (isMounted) setLoading(false)
                 }
 
-                if (isMounted) {
-                    setProfile(profileData)
-                    setLoading(false)
-                }
+                // 2. Parallel Background Fetch for metrics
+                if (initialUser) {
+                    const [routeRes, alertRes] = await Promise.all([
+                        supabase.from('routes').select('*', { count: 'exact', head: true }).eq('submitted_by', initialUser.id),
+                        supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('reported_by', initialUser.id)
+                    ])
 
-                // Background fetch for metrics
-                const [routeRes, alertRes] = await Promise.all([
-                    supabase.from('routes').select('*', { count: 'exact', head: true }).eq('submitted_by', user.id),
-                    supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('reported_by', user.id)
-                ])
-
-                if (isMounted) {
-                    setCounts({
-                        routes: (routeRes as any).count || 0,
-                        reports: (alertRes as any).count || 0
-                    })
+                    if (isMounted) {
+                        setCounts({
+                            routes: (routeRes as any).count || 0,
+                            reports: (alertRes as any).count || 0
+                        })
+                    }
                 }
             } catch (error: any) {
                 console.error('[Profile] Loading Error:', error.message)
@@ -94,8 +90,8 @@ export default function ProfileClient() {
             }
         }
 
-        loadProfile()
-    }, [supabase, router])
+        refreshData()
+    }, [supabase, initialUser])
 
     const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -115,7 +111,7 @@ export default function ProfileClient() {
         setSaving(false)
     }
 
-    if (loading) {
+    if (loading && !profile) {
         return (
             <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Spinner size="large" />
@@ -123,7 +119,7 @@ export default function ProfileClient() {
         )
     }
 
-    if (!profile) return null;
+    if (!profile && !initialUser) return null;
 
     const getInitials = (name: string) => {
         if (!name) return 'DL';
@@ -138,18 +134,18 @@ export default function ProfileClient() {
                 <div className={styles.profileHeader}>
                     <div className={styles.avatarWrapper}>
                         <div className={styles.avatar}>
-                            {getInitials(profile.full_name)}
+                            {getInitials(profile?.full_name || initialUser?.user_metadata?.full_name)}
                         </div>
                         <button className={styles.cameraBtn} title="Change Profile Picture">
                             <Camera size={18} />
                         </button>
                     </div>
                     <div className={styles.userInfo}>
-                        <h1 className={styles.userName}>{profile.full_name || 'DAL Member'}</h1>
-                        <p className={styles.userEmail}>{profile.email}</p>
+                        <h1 className={styles.userName}>{profile?.full_name || initialUser?.user_metadata?.full_name || 'DAL Member'}</h1>
+                        <p className={styles.userEmail}>{profile?.email || initialUser?.email}</p>
                         <div className={styles.badgeGroup}>
                             <span className={`${styles.badge} ${styles.tealBadge}`}>
-                                <Zap size={14} /> {profile.points || 0} Journey Points
+                                <Zap size={14} /> {profile?.points || 0} Journey Points
                             </span>
                             <span className={`${styles.badge} ${styles.blueBadge}`}>
                                 <Award size={14} /> Elite Navigator
@@ -167,7 +163,7 @@ export default function ProfileClient() {
                             <Activity size={24} />
                         </div>
                         <div className={styles.metricInfo}>
-                            <span className={styles.metricValue}>{profile.points || 0}</span>
+                            <span className={styles.metricValue}>{profile?.points || 0}</span>
                             <span className={styles.metricLabel}>Journey Points</span>
                         </div>
                     </div>
@@ -204,7 +200,7 @@ export default function ProfileClient() {
                                 <div style={{ position: 'relative' }}>
                                     <input 
                                         name="full_name" 
-                                        defaultValue={profile.full_name} 
+                                        defaultValue={profile?.full_name || initialUser?.user_metadata?.full_name} 
                                         placeholder="Your full name" 
                                     />
                                 </div>
@@ -213,7 +209,7 @@ export default function ProfileClient() {
                                 <label>Bio & Interests</label>
                                 <textarea 
                                     name="bio" 
-                                    defaultValue={profile.bio} 
+                                    defaultValue={profile?.bio} 
                                     placeholder="Tell the community about your typical routes or travel preferences..." 
                                 />
                             </div>
@@ -261,7 +257,7 @@ export default function ProfileClient() {
                             <div className={styles.influenceLabel}>
                                 <Zap size={16} /> Global Points
                             </div>
-                            <div className={styles.influenceValue}>{profile.points || 0}</div>
+                            <div className={styles.influenceValue}>{profile?.points || 0}</div>
                         </div>
                         <div className={styles.influenceRow}>
                             <div className={styles.influenceLabel}>
@@ -283,7 +279,7 @@ export default function ProfileClient() {
                         <LogOut size={18} /> Sign Out of Platform
                     </button>
                     <div style={{ fontSize: '0.75rem', color: 'var(--profile-text-muted)' }}>
-                        User ID: {profile.id?.substring(0, 8)}...
+                        User ID: {profile?.id?.substring(0, 8) || initialUser?.id?.substring(0, 8)}...
                     </div>
                 </div>
             </main>
