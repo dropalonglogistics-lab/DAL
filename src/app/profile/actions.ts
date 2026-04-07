@@ -7,10 +7,8 @@ export async function updateProfile(formData: FormData) {
     const supabase = await createClient()
 
     const data = {
-        full_name: formData.get('fullName') as string,
-        address: formData.get('address') as string,
-        date_of_birth: formData.get('dob') as string || null,
-        avatar_url: formData.get('avatarUrl') as string,
+        full_name: formData.get('full_name') as string,
+        bio: formData.get('bio') as string,
     }
 
     const { data: authData } = await supabase.auth.getUser()
@@ -24,10 +22,32 @@ export async function updateProfile(formData: FormData) {
         .from('profiles')
         .update({
             full_name: data.full_name,
-            address: data.address,
-            date_of_birth: data.date_of_birth,
-            avatar_url: data.avatar_url,
+            bio: data.bio,
             updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id)
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    revalidatePath('/profile')
+    return { success: true }
+}
+
+export async function updateAvatarUrl(url: string) {
+    const supabase = await createClient()
+    
+    // Get authorized user
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Not authenticated' }
+
+    // Update avatar field
+    const { error } = await supabase
+        .from('profiles')
+        .update({ 
+            avatar_url: url, 
+            updated_at: new Date().toISOString() 
         })
         .eq('id', user.id)
 

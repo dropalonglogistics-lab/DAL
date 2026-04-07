@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { updateProfile } from './actions'
+import { updateProfile, updateAvatarUrl } from './actions'
 import { signOut } from '../login/actions'
 import styles from './profile.module.css'
 import Spinner from '@/components/UI/Spinner'
@@ -19,7 +19,8 @@ import {
     Globe, 
     Zap,
     Trophy,
-    CheckCircle2
+    CheckCircle2,
+    Loader2
 } from 'lucide-react'
 
 interface ProfileClientProps {
@@ -29,11 +30,13 @@ interface ProfileClientProps {
 
 export default function ProfileClient({ initialUser, initialProfile }: ProfileClientProps) {
     const [profile, setProfile] = useState<any>(initialProfile)
-    const [loading, setLoading] = useState(!initialProfile) // Only load if profile is missing
+    const [loading, setLoading] = useState(!initialProfile)
     const [saving, setSaving] = useState(false)
+    const [uploadingAvatar, setUploadingAvatar] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
     const [counts, setCounts] = useState({ routes: 0, reports: 0 })
 
+    const fileInputRef = useRef<HTMLInputElement>(null)
     const supabase = useState(() => createClient())[0]
     const router = useRouter()
 
@@ -41,7 +44,6 @@ export default function ProfileClient({ initialUser, initialProfile }: ProfileCl
         let isMounted = true
         async function refreshData() {
             try {
-                // 1. Handle missing profile if server-side fetch was null
                 if (!profile && initialUser) {
                     setLoading(true)
                     const { data: profileData } = await supabase
@@ -51,7 +53,6 @@ export default function ProfileClient({ initialUser, initialProfile }: ProfileCl
                         .maybeSingle();
 
                     if (!profileData) {
-                        // Auto-create profile if missing
                         const { data: newProfile } = await supabase
                             .from('profiles')
                             .upsert({
@@ -69,7 +70,6 @@ export default function ProfileClient({ initialUser, initialProfile }: ProfileCl
                     if (isMounted) setLoading(false)
                 }
 
-                // 2. Parallel Background Fetch for metrics
                 if (initialUser) {
                     const [routeRes, alertRes] = await Promise.all([
                         supabase.from('routes').select('*', { count: 'exact', head: true }).eq('submitted_by', initialUser.id),
@@ -93,6 +93,62 @@ export default function ProfileClient({ initialUser, initialProfile }: ProfileCl
         refreshData()
     }, [supabase, initialUser])
 
+    // --- Avatar Upload Logic ---
+    const handleAvatarClick = () => {
+        fileInputRef.current?.click()
+    }
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        // 1. Validation
+        if (file.size > 2 * 1024 * 1024) {
+            setMessage({ type: 'error', text: 'File size should be under 2MB' })
+            return
+        }
+
+        setUploadingAvatar(true)
+        setMessage(null)
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('Not authenticated')
+
+            const fileExt = file.name.split('.').pop()
+            const fileName = `avatar-${Date.now()}.${fileExt}`
+            const filePath = `${user.id}/${fileName}`
+
+            // 2. Upload to storage
+            const { error: uploadError } = await supabase.storage
+                .from('profiles')
+                .upload(filePath, file)
+
+            if (uploadError) throw uploadError
+
+            // 3. Get Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('profiles')
+                .getPublicUrl(filePath)
+
+            // 4. Update Database
+            const res = await updateAvatarUrl(publicUrl)
+            if (res.error) throw new Error(res.error)
+
+            // 5. Update Local State
+            setProfile((prev: any) => ({ ...prev, avatar_url: publicUrl }))
+            setMessage({ type: 'success', text: 'Profile picture updated!' })
+            
+            // Cleanup: Clear formal state after a while
+            setTimeout(() => setMessage(null), 3000)
+        } catch (error: any) {
+            console.error('[Upload] Error:', error.message)
+            setMessage({ type: 'error', text: error.message || 'Failed to upload image' })
+        } finally {
+            setUploadingAvatar(false)
+        }
+    }
+
     const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setSaving(true)
@@ -102,7 +158,7 @@ export default function ProfileClient({ initialUser, initialProfile }: ProfileCl
         const result = await updateProfile(formData)
 
         if (result.success) {
-            setMessage({ type: 'success', text: 'Profile updated successfully!' })
+            setMessage({ type: 'success', text: 'Profile updated!' })
             setProfile({ ...profile, full_name: formData.get('full_name'), bio: formData.get('bio') })
             setTimeout(() => setMessage(null), 3000)
         } else {
@@ -134,11 +190,29 @@ export default function ProfileClient({ initialUser, initialProfile }: ProfileCl
                 <div className={styles.profileHeader}>
                     <div className={styles.avatarWrapper}>
                         <div className={styles.avatar}>
-                            {getInitials(profile?.full_name || initialUser?.user_metadata?.full_name)}
+                            {uploadingAvatar ? (
+                                <Loader2 className="animate-spin" size={30} color="var(--brand-gold)" />
+                            ) : profile.avatar_url ? (
+                                <img src={profile.avatar_url} alt="Profile" className={styles.avatarImg} />
+                            ) : (
+                                getInitials(profile?.full_name || initialUser?.user_metadata?.full_name)
+                            )}
                         </div>
-                        <button className={styles.cameraBtn} title="Change Profile Picture">
+                        <button 
+                            className={`${styles.cameraBtn} ${uploadingAvatar ? styles.btnDisabled : ''}`} 
+                            onClick={handleAvatarClick}
+                            disabled={uploadingAvatar}
+                            title="Change Profile Picture"
+                        >
                             <Camera size={18} />
                         </button>
+                        <input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            style={{ display: 'none' }} 
+                            accept="image/*"
+                            onChange={handleFileChange}
+                        />
                     </div>
                     <div className={styles.userInfo}>
                         <h1 className={styles.userName}>{profile?.full_name || initialUser?.user_metadata?.full_name || 'DAL Member'}</h1>
@@ -187,9 +261,7 @@ export default function ProfileClient({ initialUser, initialProfile }: ProfileCl
                     </div>
                 </section>
 
-                {/* 3. Dashboard Grid */}
                 <div className={styles.dashboardGrid}>
-                    {/* Left Column: Form Settings */}
                     <section className={styles.card}>
                         <h3 className={styles.cardTitle}>
                             <Settings size={20} /> Profile Details
@@ -197,20 +269,18 @@ export default function ProfileClient({ initialUser, initialProfile }: ProfileCl
                         <form onSubmit={handleUpdateProfile} className={styles.formGrid}>
                             <div className={styles.formField}>
                                 <label>Full Name</label>
-                                <div style={{ position: 'relative' }}>
-                                    <input 
-                                        name="full_name" 
-                                        defaultValue={profile?.full_name || initialUser?.user_metadata?.full_name} 
-                                        placeholder="Your full name" 
-                                    />
-                                </div>
+                                <input 
+                                    name="full_name" 
+                                    defaultValue={profile?.full_name || initialUser?.user_metadata?.full_name} 
+                                    placeholder="Your full name" 
+                                />
                             </div>
                             <div className={styles.formField}>
                                 <label>Bio & Interests</label>
                                 <textarea 
                                     name="bio" 
                                     defaultValue={profile?.bio} 
-                                    placeholder="Tell the community about your typical routes or travel preferences..." 
+                                    placeholder="Tell the community about your travel preferences..." 
                                 />
                             </div>
                             
@@ -224,17 +294,7 @@ export default function ProfileClient({ initialUser, initialProfile }: ProfileCl
                             </div>
                             
                             {message && (
-                                <div style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: '8px',
-                                    color: message.type === 'success' ? '#10B981' : '#EF4444', 
-                                    fontSize: '0.9rem', 
-                                    marginTop: '10px',
-                                    padding: '12px',
-                                    borderRadius: '8px',
-                                    background: message.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'
-                                }}>
+                                <div className={message.type === 'success' ? styles.successMessage : styles.errorMessage} style={{ marginTop: '1.5rem' }}>
                                     {message.type === 'success' && <CheckCircle2 size={16} />}
                                     {message.text}
                                 </div>
@@ -242,7 +302,6 @@ export default function ProfileClient({ initialUser, initialProfile }: ProfileCl
                         </form>
                     </section>
 
-                    {/* Right Column: Your Influence */}
                     <aside className={`${styles.card} ${styles.influenceCard}`}>
                         <h3 className={styles.cardTitle}>
                             <Globe size={20} /> Your Influence
@@ -259,27 +318,21 @@ export default function ProfileClient({ initialUser, initialProfile }: ProfileCl
                             </div>
                             <div className={styles.influenceValue}>{profile?.points || 0}</div>
                         </div>
-                        <div className={styles.influenceRow}>
+                        <div className={styles.influenceRow} style={{ borderBottom: 'none' }}>
                             <div className={styles.influenceLabel}>
                                 <Activity size={16} /> Reported Incidents
                             </div>
                             <div className={styles.influenceValue}>{counts.reports}</div>
                         </div>
-                        <div className={styles.influenceRow} style={{ marginTop: '20px', borderBottom: 'none' }}>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--profile-text-muted)', lineHeight: '1.5' }}>
-                                Your contributions help thousands of commuters in the DAL network find safer and faster routes.
-                            </div>
-                        </div>
                     </aside>
                 </div>
 
-                {/* 4. Footer Actions */}
                 <div className={styles.profileFooter}>
                     <button onClick={() => signOut()} className={styles.signOutBtn}>
                         <LogOut size={18} /> Sign Out of Platform
                     </button>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--profile-text-muted)' }}>
-                        User ID: {profile?.id?.substring(0, 8) || initialUser?.id?.substring(0, 8)}...
+                    <div style={{ fontSize: '12px', color: 'var(--profile-text-muted)' }}>
+                        User ID: {profile?.id?.substring(0, 8)}...
                     </div>
                 </div>
             </main>
