@@ -23,36 +23,18 @@ export function createClient() {
                 flowType: 'pkce',
                 storage: {
                     getItem: (key) => {
-                        if (typeof window === 'undefined') return null
-                        try {
-                            const cookies = document.cookie.split('; ')
-                            for (const cookie of cookies) {
-                                if (!cookie.includes('=')) continue
-                                const [name, ...valueParts] = cookie.split('=')
-                                const value = valueParts.join('=')
-                                if (name.trim() === key) return decodeURIComponent(value)
-                            }
-                        } catch (e) {
-                            console.error('Cookie parse error:', e)
+                        const cookies = document.cookie.split('; ')
+                        for (const cookie of cookies) {
+                            const [name, ...valueParts] = cookie.split('=')
+                            if (name.trim() === key) return decodeURIComponent(valueParts.join('='))
                         }
                         return null
                     },
                     setItem: (key, value) => {
-                        if (typeof window === 'undefined') return
-                        try {
-                            // Secure, SameSite=Lax, and Path=/
-                            document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=31536000; SameSite=Lax; Secure`
-                        } catch (e) {
-                            console.error('Cookie set error:', e)
-                        }
+                        document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=31536000; SameSite=Lax; Secure`
                     },
                     removeItem: (key) => {
-                        if (typeof window === 'undefined') return
-                        try {
-                            document.cookie = `${key}=; path=/; max-age=0; SameSite=Lax; Secure`
-                        } catch (e) {
-                            console.error('Cookie remove error:', e)
-                        }
+                        document.cookie = `${key}=; path=/; max-age=0; SameSite=Lax; Secure`
                     }
                 }
             }

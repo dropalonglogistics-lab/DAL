@@ -41,15 +41,22 @@ export default function Navbar() {
 
         // Auth initialization
         const loadInitialData = async () => {
-            const { data: { user: authUser } } = await supabase.auth.getUser();
-            setUser(authUser);
-            if (authUser) {
+            // 1. Check for locally cached session immediately
+            const { data: { session } } = await supabase.auth.getSession();
+            const currentUser = session?.user ?? null;
+            if (currentUser) {
+                setUser(currentUser);
+                // Also fetch profile
                 const { data: userProfile } = await supabase
                     .from('profiles')
                     .select('is_admin, role, full_name, is_premium')
-                    .eq('id', authUser.id)
-                    .single();
-                setProfile(userProfile);
+                    .eq('id', currentUser.id)
+                    .maybeSingle();
+                if (userProfile) setProfile(userProfile);
+                
+                // 2. Re-validate on network (secure)
+                const { data: { user: authUser } } = await supabase.auth.getUser();
+                if (authUser) setUser(authUser);
             }
         };
         loadInitialData();
@@ -57,12 +64,13 @@ export default function Navbar() {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
             const currentUser = session?.user ?? null;
             setUser(currentUser);
+            
             if (currentUser) {
                 const { data: userProfile } = await supabase
                     .from('profiles')
                     .select('is_admin, role, full_name, is_premium')
                     .eq('id', currentUser.id)
-                    .single();
+                    .maybeSingle();
                 setProfile(userProfile);
                 if (_event === 'SIGNED_IN') router.refresh();
             } else {
