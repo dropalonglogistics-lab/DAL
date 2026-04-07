@@ -49,7 +49,7 @@ export default function Navbar() {
                 // Also fetch profile
                 const { data: userProfile } = await supabase
                     .from('profiles')
-                    .select('is_admin, role, full_name, is_premium')
+                    .select('is_admin, role, full_name, is_premium, avatar_url')
                     .eq('id', currentUser.id)
                     .maybeSingle();
                 if (userProfile) setProfile(userProfile);
@@ -68,7 +68,7 @@ export default function Navbar() {
             if (currentUser) {
                 const { data: userProfile } = await supabase
                     .from('profiles')
-                    .select('is_admin, role, full_name, is_premium')
+                    .select('is_admin, role, full_name, is_premium, avatar_url')
                     .eq('id', currentUser.id)
                     .maybeSingle();
                 setProfile(userProfile);
@@ -188,8 +188,8 @@ export default function Navbar() {
                                 onClick={() => setIsAvatarDropdownOpen(p => !p)}
                                 aria-label="User menu"
                             >
-                                {user.user_metadata?.avatar_url ? (
-                                    <img src={user.user_metadata.avatar_url} alt="Avatar" className={styles.avatarImg} />
+                                {profile?.avatar_url ? (
+                                    <img src={profile.avatar_url} alt="Avatar" className={styles.avatarImg} />
                                 ) : (
                                     <span className={styles.avatarInitials}>{getInitials()}</span>
                                 )}
